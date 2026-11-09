@@ -1,0 +1,376 @@
+import {
+  UserProfile,
+  MoodEntry,
+  MoodDayStat,
+  Counselor,
+  BookingSession,
+  Article,
+  GameScenario,
+  CommunityGroup,
+  YouthEvent,
+} from '../types';
+
+export const initialUser: UserProfile = {
+  id: 'usr_001',
+  name: 'Anya Sebaya',
+  pseudonym: 'Anya Sebaya (Anonim)',
+  email: 'anya.sebaya@teman.id',
+  avatarInitials: 'AS',
+  joinedDate: 'Nov 2026',
+  isAnonymous: true,
+  schoolOrOrg: 'PIK-R SMAN 1 Karawang',
+  interests: ['Manajemen Stres', 'Komunikasi Sehat', 'Masa Depan'],
+  activeStreakDays: 14,
+  moodEntriesCount: 12,
+  challengesCompleted: 5,
+  allowAiMoodAccess: false,
+  dailyReminderEnabled: true,
+  dailyReminderTime: '20:00 WIB',
+};
+
+export const initialMoodEntries: MoodEntry[] = [
+  {
+    id: 'mood_001',
+    timestamp: '2026-11-09T08:30:00.000Z',
+    dateString: '09 Nov 2026',
+    timeString: '08:30 WIB',
+    primaryEmotion: 'Tenang',
+    secondaryEmotions: ['Damai', 'Percaya diri', 'Lega'],
+    note: 'Merasa lega setelah menyelesaikan tugas kelompok dan beristirahat sejenak.',
+    contextTags: ['Sekolah', 'Teman', 'Diri Sendiri'],
+    intensity: 4,
+  },
+  {
+    id: 'mood_002',
+    timestamp: '2026-11-08T19:00:00.000Z',
+    dateString: '08 Nov 2026',
+    timeString: '19:00 WIB',
+    primaryEmotion: 'Bahagia',
+    secondaryEmotions: ['Ceria', 'Bangga', 'Bersyukur'],
+    note: 'Berbagi cerita menyenangkan bersama teman sebaya di sekolah.',
+    contextTags: ['Teman', 'Sekolah'],
+    intensity: 5,
+  },
+  {
+    id: 'mood_003',
+    timestamp: '2026-11-07T14:15:00.000Z',
+    dateString: '07 Nov 2026',
+    timeString: '14:15 WIB',
+    primaryEmotion: 'Lelah',
+    secondaryEmotions: ['Letih', 'Butuh jeda'],
+    note: 'Jadwal ekstrakurikuler padat, rasanya ingin tidur lebih awal malam ini.',
+    contextTags: ['Sekolah', 'Tidur'],
+    intensity: 3,
+  },
+];
+
+export const weeklyMoodStats: MoodDayStat[] = [
+  { dayName: 'Sen', primaryEmotion: 'Tenang', percentage: 70 },
+  { dayName: 'Sel', primaryEmotion: 'Bahagia', percentage: 85 },
+  { dayName: 'Rab', primaryEmotion: 'Cemas', percentage: 60 },
+  { dayName: 'Kam', primaryEmotion: 'Lelah', percentage: 55 },
+  { dayName: 'Jum', primaryEmotion: 'Bahagia', percentage: 90 },
+  { dayName: 'Sab', primaryEmotion: 'Tenang', percentage: 75 },
+  { dayName: 'Min', primaryEmotion: 'Tenang', percentage: 80 },
+];
+
+export const counselorsList: Counselor[] = [
+  {
+    id: 'cns_001',
+    name: 'Kak Dimas Pratama, S.Psi',
+    role: 'Konselor Sebaya PIK-R',
+    institution: 'PIK-R Garuda Muda Karawang',
+    rating: 4.9,
+    reviewCount: 124,
+    tags: ['Stres Belajar', 'Pertemanan', 'Ekspektasi Keluarga'],
+    about: 'Konselor sebaya bersertifikasi BKKBN. Siap mendengarkan tanpa menghakimi dan menemanimu mengurai rasa bingung seputar dunia remaja.',
+    isAvailableToday: true,
+    availableSlots: ['14:00 WIB', '16:00 WIB', '19:30 WIB'],
+  },
+  {
+    id: 'cns_002',
+    name: 'Kak Sarah Amalia, M.Psi',
+    role: 'Psikolog Klinis Mitra',
+    institution: 'Klinik Ramah Remaja Karawang',
+    rating: 5.0,
+    reviewCount: 88,
+    tags: ['Kecemasan Akut', 'Regulasi Emosi', 'Trauma & Hubungan'],
+    about: 'Psikolog klinis yang berfokus pada pendampingan psikologis remaja dan dewasa awal. Menyediakan ruang konsultasi profesional yang aman dan konfidensial.',
+    isAvailableToday: true,
+    availableSlots: ['15:00 WIB', '17:00 WIB'],
+  },
+  {
+    id: 'cns_003',
+    name: 'Kak Rizky Ramadhan',
+    role: 'Konselor Sebaya PIK-R',
+    institution: 'Forum GenRe Karawang',
+    rating: 4.8,
+    reviewCount: 62,
+    tags: ['Perencanaan Masa Depan', 'TRIAD KRR', 'Literasi Diri'],
+    about: 'Pendidik Sebaya GenRe Karawang yang aktif mengedukasi generasi berencana. Senang mendiskusikan cita-cita, relasi sehat, dan pengembangan potensi.',
+    isAvailableToday: false,
+    availableSlots: ['Besok 10:00 WIB', 'Besok 13:00 WIB'],
+  },
+];
+
+export const initialBooking: BookingSession = {
+  id: 'bk_001',
+  counselorId: 'cns_001',
+  counselorName: 'Kak Dimas Pratama, S.Psi',
+  counselorRole: 'Konselor Sebaya PIK-R',
+  date: 'Kamis, 12 Nov 2026',
+  timeSlot: '16:00 WIB',
+  mode: 'Chat',
+  status: 'Menunggu',
+  notes: 'Ingin berdiskusi seputar cara membagi waktu antara tugas sekolah dan organisasi.',
+};
+
+export const educationalArticles: Article[] = [
+  {
+    id: 'art_001',
+    title: 'Mengenal Burnout Sekolah dan Tanda Tubuhmu Butuh Istirahat',
+    category: 'Kesehatan Mental',
+    readingMinutes: 3,
+    publishedDate: '08 Nov 2026',
+    author: 'Tim Teman Sebaya & Psikolog Remaja',
+    summary: 'Rasa lelah berkepanjangan bukan berarti kamu pemalas. Kenali sinyal emosi dan fisik ketika beban belajar sudah melebihi kapasitasmu.',
+    keyTakeaways: [
+      'Lelah mental berbeda dari lelah fisik biasa: minat menurun drastis dan mudah tersinggung.',
+      'Mengambil jeda 10-15 menit di tengah belajar sangat membantu pemulihan fokus otak.',
+      'Meminta bantuan teman atau guru BK adalah langkah bijak, bukan tanda kelemahan.',
+    ],
+    content: [
+      'Pernahkah kamu merasa baru bangun tidur tapi sudah merasa sangat letih membayangkan tumpukan tugas? Atau tugas yang biasanya kamu nikmati mendadak terasa luar biasa berat?',
+      'Kondisi ini sering disebut burnout sekolah. Burnout terjadi ketika stres akademik berlangsung lama tanpa adanya waktu istirahat yang cukup untuk mengembalikan energi mentalmu.',
+      'Tubuhmu adalah alarm terbaik. Gejala fisik seperti sakit kepala tegang, sulit tidur, atau perut terasa tidak nyaman menjelang sekolah adalah cara tubuh memberi tahu: "Hei, kita butuh jeda sebentar."',
+      'Langkah pertama bukan memaksakan diri bekerja lebih keras, melainkan memberi izin pada diri sendiri untuk bernapas. Buat prioritas: apa yang wajib selesai hari ini, dan apa yang bisa ditunda tanpa bencana.',
+    ],
+    quiz: {
+      id: 'qz_001',
+      title: 'Uji Pemahaman: Menghadapi Burnout Sekolah',
+      questions: [
+        {
+          id: 'q1',
+          question: 'Apa respons paling sehat saat merasakan tanda-tanda burnout akademik?',
+          options: [
+            'Memaksa diri belajar semalaman agar cepat selesai',
+            'Mengakui rasa lelah dan mengambil jeda terencana untuk memulihkan energi',
+            'Menyalahkan diri sendiri karena merasa kurang kompeten',
+            'Menghindari sekolah sepenuhnya tanpa komunikasi',
+          ],
+          correctIndex: 1,
+          explanation: 'Tepat sekali! Mengakui batas kapasitas diri dan beristirahat terencana adalah bentuk tanggung jawab terhadap kesehatan mentalmu.',
+        },
+        {
+          id: 'q2',
+          question: 'Mengapa tubuh sering memunculkan gejala fisik saat stres tinggi?',
+          options: [
+            'Karena tubuh ingin mencari perhatian orang lain',
+            'Karena sistem saraf mendeteksi beban berlebih sebagai sinyal bahaya dan butuh pemulihan',
+            'Karena kita malas beraktivitas fisik',
+            'Tidak ada hubungan antara stres pikiran dan tubuh',
+          ],
+          correctIndex: 1,
+          explanation: 'Sistem saraf dan tubuh saling terhubung erat. Ketika pikiran tertekan, tubuh merespons dengan ketegangan fisik.',
+        },
+        {
+          id: 'q3',
+          question: 'Kapan saat yang tepat untuk berkonsultasi dengan konselor sebaya atau guru BK?',
+          options: [
+            'Hanya ketika masalah sudah tidak bisa diperbaiki lagi',
+            'Kapan saja ketika merasa butuh sudut pandang kedua dan ruang aman untuk bercerita',
+            'Jika dipaksa oleh pihak sekolah',
+            'Tidak perlu berkonsultasi pada siapa pun',
+          ],
+          correctIndex: 1,
+          explanation: 'Benar! Kamu tidak perlu menunggu krisis parah untuk mencari teman bicara yang terpercaya.',
+        },
+      ],
+    },
+    isSaved: true,
+    imageKey: 'genre_workshop',
+  },
+  {
+    id: 'art_002',
+    title: 'Cara Menolak Ajakan Teman Tanpa Merasa Bersalah (Asertif Sehat)',
+    category: 'Relasi Sehat',
+    readingMinutes: 2,
+    publishedDate: '06 Nov 2026',
+    author: 'Pendidik Sebaya GenRe',
+    summary: 'Menjaga batasan pribadi bukan berarti kamu egois atau tidak setia kawan. Pelajari seni berkata "tidak" dengan tenang dan penuh respek.',
+    keyTakeaways: [
+      'Batasan yang jelas melindungi hubungan agar tetap sehat jangka panjang.',
+      'Gunakan formula "Apresiasi + Alasan Singkat + Tawaran Alternatif".',
+      'Teman yang tulus akan menghargai keputusanmu.',
+    ],
+    content: [
+      'Menolak ajakan nongkrong saat kamu harus belajar untuk ujian esok hari sering kali menimbulkan rasa bersalah yang berat. Kita takut dianggap sombong atau dijauhi teman.',
+      'Namun, bersikap asertif adalah keterampilan penting. Kamu bisa menolak dengan formula ramah: "Makasih banyak udah ngajak aku ya! Hari ini aku harus fokus nyelesaiin tugas dulu, gimana kalau kita ketemu akhir pekan nanti?"',
+      'Dengan cara ini, kamu menolak tindakannya tanpa menolak persahabatannya.',
+    ],
+    isSaved: false,
+    imageKey: 'genre_activity_1',
+  },
+  {
+    id: 'art_003',
+    title: 'Membedakan Antara Ambisi Positif vs Tekanan Ekspektasi',
+    category: 'Masa Depan',
+    readingMinutes: 3,
+    publishedDate: '04 Nov 2026',
+    author: 'Konselor Remaja Karawang',
+    summary: 'Ketahui apakah mimpi yang kamu kejar benar-benar berasal dari keinginan hatimu atau sekadar ekspektasi orang di sekitarmu.',
+    keyTakeaways: [
+      'Ambisi positif memberi energi dan rasa bermakna, ekspektasi luar menimbulkan kecemasan konstan.',
+      'Bicarakan ekspektasi secara terbuka dengan orang tua saat suasana rileks.',
+      'Perjalanan setiap orang memiliki garis waktu yang berbeda.',
+    ],
+    content: [
+      'Masa remaja penuh dengan pertanyaan: Mau kuliah di mana? Mau kerja apa? Kenapa nilaimu tidak seperti anak tetangga?',
+      'Sering kali kita bingung membedakan antara mimpi pribadi dengan beban ekspektasi keluarga. Mengenali apa yang membuatmu bersemangat secara tulus adalah awal dari pembentukan identitas yang kuat.',
+    ],
+    isSaved: false,
+    imageKey: 'genre_activity_2',
+  },
+  {
+    id: 'art_004',
+    title: 'Memahami TRIAD KRR: Tiga Risiko Utama Kesehatan Reproduksi Remaja',
+    category: 'TRIAD KRR',
+    readingMinutes: 4,
+    publishedDate: '01 Nov 2026',
+    author: 'Forum GenRe Indonesia & BKKBN',
+    summary: 'Edukasi komprehensif mengenai bahaya pernikahan usia anak, seksualitas berisiko, serta penyalahgunaan napza bagi masa depan remaja.',
+    keyTakeaways: [
+      'Pernikahan dini berisiko tinggi terhadap kesehatan reproduksi dan kemandirian ekonomi.',
+      'Literasi kesehatan reproduksi membekali remaja untuk menjaga diri dengan bijak.',
+      'Katakan tidak pada penyalahgunaan zat berbahaya sejak dini.',
+    ],
+    content: [
+      'Program Generasi Berencana (GenRe) memfasilitasi remaja agar terhindar dari TRIAD KRR: Pernikahan Dini, Seks Pranikah, dan Napza.',
+      'Masa remaja adalah masa emas untuk bereksplorasi, belajar, dan meraih cita-cita setinggi mungkin tanpa terhambat oleh keputusan yang berisiko fatal.',
+    ],
+    isSaved: true,
+    imageKey: 'pikr_group',
+  },
+];
+
+export const gameScenarios: GameScenario[] = [
+  {
+    id: 'gm_001',
+    title: 'Butterfly Effect: Pilihan Sebelum Ujian',
+    situation: 'Malam sebelum ujian akhir semester, seorang sahabat dekatmu mengajak mabar game online hingga larut malam. Padahal kamu masih belum memahami satu bab materi penting.',
+    category: 'Butterfly Effect',
+    choices: [
+      {
+        text: 'Menolak dengan jujur dan menawarkan mabar saat ujian sudah selesai.',
+        feedback: 'Pilihan yang matang! Kamu mendahulukan masa depanmu sekaligus menjaga komunikasi persahabatan secara terbuka.',
+        reflectionPoint: 'Menetapkan batasan sehat membuktikan bahwa kamu menghargai dirimu sendiri.',
+      },
+      {
+        text: 'Ikut bermain sebentar tanpa batasan waktu hingga larut malam.',
+        feedback: 'Besok paginya kamu bangun kesiangan dan kepala terasa pusing saat melihat soal ujian. Kamu merasa menyesal.',
+        reflectionPoint: 'Satu keputusan kecil di malam hari dapat membawa dampak berantai pada performamu keesokan hari.',
+      },
+      {
+        text: 'Mengabaikan pesan sahabat tanpa membalas sama sekali.',
+        feedback: 'Sahabatmu merasa tersinggung karena menduga kamu sengaja menghindarinya tanpa kejelasan.',
+        reflectionPoint: 'Komunikasi yang jelas dan sopan selalu lebih baik daripada mendiamkan orang lain.',
+      },
+    ],
+    takeaway: 'Keputusan kecil yang kamu ambil setiap hari membentuk kebiasaan dan masa depanmu.',
+  },
+  {
+    id: 'gm_002',
+    title: 'Name That Feeling: Dinamika Ruang Kelas',
+    situation: 'Saat pembagian kelompok tugas, kamu melihat teman-temanmu langsung berpasangan dan tidak ada yang mengajakmu sampai guru yang menempatkanmu ke kelompok sisa.',
+    category: 'Name That Feeling',
+    choices: [
+      {
+        text: 'Merasa "Terasingkan" dan "Kecewa".',
+        feedback: 'Tepat sekali. Perasaan tersisihkan adalah respons emosional manusiawi saat kebutuhan akan penerimaan sosial belum terpenuhi.',
+        reflectionPoint: 'Mengakui nama emosi ini membantumu agar tidak menyalurkannya menjadi kemarahan liar.',
+      },
+      {
+        text: 'Merasa "Puas" dan tidak peduli.',
+        feedback: 'Terkadang kita berpura-pura tidak peduli untuk melindungi diri dari rasa sakit, namun sebenarnya hati kita merasa sedih.',
+        reflectionPoint: 'Kejujuran pada diri sendiri adalah langkah pertama untuk menenangkan perasaan.',
+      },
+    ],
+    takeaway: 'Semakin kaya kosakatamu dalam menamai emosi, semakin mudah kamu mengendalikannya.',
+  },
+  {
+    id: 'gm_003',
+    title: 'Digital Dilemma: Komentar di Grup Percakapan',
+    situation: 'Di grup chat kelas, beberapa teman mulai mengunggah foto candid memalukan dari salah satu siswa yang pendiam dan menjadikannya bahan lelucon kasar.',
+    category: 'Digital Dilemma',
+    choices: [
+      {
+        text: 'Mengirim pesan privat memberi dukungan kepada teman yang dirundung dan mengingatkan grup dengan santun.',
+        feedback: 'Tindakan yang sangat berani dan berempati tinggi! Kamu menjadi ruang aman bagi seseorang yang membutuhkan.',
+        reflectionPoint: 'Dukungan satu orang saja sudah cukup untuk menyelamatkan mental temanmu dari keputusasaan.',
+      },
+      {
+        text: 'Ikut mengirim stiker tertawa agar tidak dibilang kaku oleh teman-teman.',
+        feedback: 'Tindakan ini tanpa sadar memperparah luka emosional teman yang dijadikan bahan olokan.',
+        reflectionPoint: 'Tekanan kelompok (*peer pressure*) sering kali menguji integritas moral kita.',
+      },
+    ],
+    takeaway: 'Jadilah kawan yang menyalakan lilin perlindungan di ruang digital, bukan yang ikut meniup api perundungan.',
+  },
+];
+
+export const communityGroups: CommunityGroup[] = [
+  {
+    id: 'com_001',
+    name: 'PIK-R Garuda Muda Karawang',
+    type: 'PIK-R',
+    badge: 'Terverifikasi BKKBN',
+    description: 'Pusat Informasi dan Konseling Remaja tingkat SMA/SMK di Karawang. Ruang sharing seputar kesehatan reproduksi, stres ujian, dan peer support.',
+    memberCount: 142,
+    meetingSchedule: 'Setiap Jumat sore, 15:30 WIB',
+    isJoined: true,
+  },
+  {
+    id: 'com_002',
+    name: 'Forum GenRe Indonesia Karawang',
+    type: 'Forum GenRe',
+    badge: 'Mitra Resmi',
+    description: 'Wadah kolaborasi generasi berencana: advokasi anti-stigma mental, pelatihan konselor sebaya, dan kegiatan kreatif pemuda.',
+    memberCount: 230,
+    meetingSchedule: 'Dua minggu sekali, Minggu 10:00 WIB',
+    isJoined: false,
+  },
+  {
+    id: 'com_003',
+    name: 'Ruang Sahabat Inklusif',
+    type: 'Aksi Remaja',
+    badge: 'Didampingi Konselor',
+    description: 'Kelompok dukungan sebaya mingguan membahas self-love, batasan sehat, dan penerimaan diri dalam suasana hangat tanpa diskriminasi.',
+    memberCount: 88,
+    meetingSchedule: 'Setiap Sabtu malam (Online)',
+    isJoined: false,
+  },
+];
+
+export const youthEvents: YouthEvent[] = [
+  {
+    id: 'ev_001',
+    title: 'Workshop Regulasi Emosi: Temukan Titik Tenangmu',
+    date: '15 Nov 2026',
+    time: '09:00 - 11:30 WIB',
+    location: 'Zoom Virtual Room & Aula BKKBN Karawang',
+    organizer: 'Teman Sebaya x Forum GenRe Karawang',
+    quota: 'Tersisa 18 Kursi',
+    description: 'Pelajari teknik pernapasan terpandu, journaling emosi, dan cara membangun batasan sehat dalam pertemanan bersama psikolog klinis remaja.',
+  },
+  {
+    id: 'ev_002',
+    title: 'Pelatihan Pendidik Sebaya Ramah Remaja Angkatan IV',
+    date: '22 Nov 2026',
+    time: '08:00 - 15:00 WIB',
+    location: 'Pusat Kreatif Pemuda Karawang',
+    organizer: 'Dinas Pemberdayaan Perempuan & Perlindungan Anak',
+    quota: 'Seleksi Terbuka',
+    description: 'Pelatihan keterampilan active listening dan pertolongan pertama psikologis bagi ketua OSIS dan pengurus PIK-R se-Kabupaten Karawang.',
+  },
+];
+

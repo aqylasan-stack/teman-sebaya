@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "figcraft": {
+      "command": "C:\\Users\\Fhazar\\AppData\\Local\\Programs\\ArtCraft\\FigCraft\\figcraft-cli.exe",
+      "args": [
+        "mcp",
+        "--attach",
+        "7979"
+      ]
+    }
+  }
+}

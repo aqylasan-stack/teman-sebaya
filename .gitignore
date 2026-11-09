@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+mobile/node_modules/
+
+# Expo & Mobile Build
+.expo/
+mobile/.expo/
+dist/
+mobile/dist/
+web-build/
+mobile/web-build/
+expo-env.d.ts
+mobile/expo-env.d.ts
+
+# Native build artifacts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro & Bundler
+.metro-health-check*
+
+# Debug & Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS & Temp
+.DS_Store
+Thumbs.db
+*.pem
+
+# Local env files
+.env*.local
+.env
+
+# TypeScript
+*.tsbuildinfo
+
+# Generated native folders
+mobile/ios/
+mobile/android/
+
+# Backup & Scratch files
+*.bak
+*.bak_*
+*-backup-*.figcraft
+*-test-*.figcraft
+scratch/
