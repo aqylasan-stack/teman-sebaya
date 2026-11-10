@@ -361,22 +361,22 @@ export const DailyMoodCheckinScreen: React.FC = () => {
       <View style={styles.stage1Container}>
         <StatusBar barStyle="dark-content" />
 
-        {/* Top Header Row */}
+        {/* Top Header Row: Judul di tengah, tombol back dihapus, teks "Lewati" di kanan */}
         <View style={styles.topHeader}>
-          <TouchableOpacity
-            style={styles.circleIconButton}
-            activeOpacity={0.7}
-            onPress={handleSkipToHome}
-          >
-            <ArrowLeft size={18} color={colors.textPrimary} />
-          </TouchableOpacity>
+          {/* Spacer penyeimbang di sebelah kiri */}
+          <View style={styles.headerSpacer} />
 
-          <Text style={styles.headerTitle}>Mood Check-in</Text>
+          {/* Judul teks "Mood Check-in" persis di tengah */}
+          <View style={styles.headerTitleContainer} pointerEvents="none">
+            <Text style={styles.headerTitle}>Mood Check-in</Text>
+          </View>
 
+          {/* Teks "Lewati" di sebelah kanan */}
           <TouchableOpacity
             style={styles.skipButton}
             activeOpacity={0.7}
             onPress={handleSkipToHome}
+            accessibilityLabel="Lewati check-in emosi"
           >
             <Text style={styles.skipButtonText}>Lewati</Text>
           </TouchableOpacity>
@@ -389,8 +389,20 @@ export const DailyMoodCheckinScreen: React.FC = () => {
           {/* Main Title Heading */}
           <View style={styles.headingSection}>
             <Text style={styles.heroHeading}>
-              Bagaimana suasana{'\n'}
-              <Text style={{ color: colors.brandBlue[600] }}>hatimu</Text> hari ini?
+              {screenParams?.isFirstCheckin ? (
+                <>
+                  Salam kenal,{' '}
+                  <Text style={{ color: colors.brandBlue[600] }}>
+                    {user?.nickname || screenParams?.nickname || 'Teman'}
+                  </Text>
+                  !{'\n'}Bagaimana suasana hatimu?
+                </>
+              ) : (
+                <>
+                  Bagaimana suasana{'\n'}
+                  <Text style={{ color: colors.brandBlue[600] }}>hatimu</Text> hari ini?
+                </>
+              )}
             </Text>
             <Text style={styles.heroSubheading}>
               Pilih satu emoji yang paling menggambarkan energimu sekarang.
@@ -929,14 +941,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.canvas,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
+    position: 'relative',
   },
-  circleIconButton: {
-    width: 38,
-    height: 38,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
+  headerSpacer: {
+    width: 48,
+  },
+  headerTitleContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -944,16 +959,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.textPrimary,
+    textAlign: 'center',
   },
   skipButton: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: borderRadius.full,
+    paddingHorizontal: 8,
+    zIndex: 10,
   },
   skipButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textMuted,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   stage1ScrollContent: {
     paddingHorizontal: spacing.layout.screenPaddingHorizontal,

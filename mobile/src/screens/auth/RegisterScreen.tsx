@@ -10,27 +10,25 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { User, Mail, Lock, CheckSquare, Square } from 'lucide-react-native';
+import { Mail, Lock, CheckSquare, Square } from 'lucide-react-native';
 import { colors, spacing } from '../../theme';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { GoogleIcon } from '../../components/common/GoogleIcon';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import { useApp } from '../../state/AppContext';
-import { validateNickname } from '../../utils/validation';
 
 export const RegisterScreen: React.FC = () => {
-  const { navigateTo, register } = useApp();
+  const { navigateTo, register, loginWithGoogle } = useApp();
 
-  // All inputs strictly start empty per specification
-  const [name, setName] = useState('');
+  // FLOW 2 — REGISTER: Field yang diperlukan hanya Email, Password, Konfirmasi Password.
+  // Field "Nama Lengkap / Samaran" dihapus karena akan diisi pada tahap onboarding "What Should We Call You?".
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
 
   // Validation Errors
-  const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmError, setConfirmError] = useState('');
@@ -40,14 +38,6 @@ export const RegisterScreen: React.FC = () => {
 
   const handleRegister = () => {
     let isValid = true;
-
-    const nameValidation = validateNickname(name);
-    if (!nameValidation.isValid) {
-      setNameError(nameValidation.error || 'Nama lengkap atau nama samaran wajib diisi.');
-      isValid = false;
-    } else {
-      setNameError('');
-    }
 
     if (!email.trim() || !email.includes('@')) {
       setEmailError('Alamat email valid wajib diisi.');
@@ -85,8 +75,8 @@ export const RegisterScreen: React.FC = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      // Navigate to OTP verification per architecture flow
-      navigateTo('otp_verification', { name, email, password });
+      // PENTING: Mendaftarkan akun baru dan lanjut ke Onboarding (OTP / Perkenalan Maskot)
+      navigateTo('otp_verification', { email, password });
     }, 600);
   };
 
@@ -94,8 +84,11 @@ export const RegisterScreen: React.FC = () => {
     setIsGoogleLoading(true);
     setTimeout(() => {
       setIsGoogleLoading(false);
-      register(name.trim() || 'Teman Baru', 'google.newuser@teman.id', 'google_session_pass');
-    }, 700);
+      loginWithGoogle({
+        email: 'teman.baru@gmail.com',
+        name: '',
+      });
+    }, 600);
   };
 
   return (
@@ -129,24 +122,6 @@ export const RegisterScreen: React.FC = () => {
 
         {/* 2. Form Sheet: Rounded Top Corners overlapping Header */}
         <View style={styles.formSheet}>
-          {/* Name Field */}
-          <Input
-            label="Nama Lengkap / Samaran"
-            placeholder="Misal: Anya Sebaya"
-            value={name}
-            maxLength={30}
-            onChangeText={(val) => {
-              setName(val);
-              if (nameError) {
-                const validation = validateNickname(val);
-                if (validation.isValid) setNameError('');
-              }
-            }}
-            error={nameError}
-            leftIcon={<User size={18} color={colors.textMuted} />}
-            inputWrapperStyle={styles.roundedInputWrapper}
-          />
-
           {/* Email Field */}
           <Input
             label="Alamat Email"

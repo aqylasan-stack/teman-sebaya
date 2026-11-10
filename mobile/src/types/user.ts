@@ -20,6 +20,9 @@ export interface UserProfile {
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
   initialEmotion?: string;
+  isOnboarded?: boolean;
+  provider?: 'email' | 'google';
+  avatarUrl?: string;
 }
 
 export interface AuthState {

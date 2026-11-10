@@ -113,7 +113,7 @@ export const MoodStatsScreen: React.FC = () => {
   const streakDays = user?.activeStreakDays ?? 1;
 
   // Total catatan tersimpan
-  const totalEntries = user?.moodEntriesCount || moodEntries.length;
+  const totalEntries = user?.moodEntriesCount ?? moodEntries.length;
 
   // Keteraturan aktual: rasio hari check-in dibanding hari yang sudah berjalan bulan ini
   const activeDaysThisMonth = Math.min(currentDayOfMonth, totalEntries);

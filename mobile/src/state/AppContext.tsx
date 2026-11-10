@@ -38,7 +38,8 @@ interface AppContextProps {
   isAuthenticated: boolean;
   user: UserProfile | null;
   login: (email: string, pass: string) => boolean;
-  register: (name: string, email: string, pass: string) => boolean;
+  loginWithGoogle: (googleData?: { email?: string; name?: string; photoUrl?: string }) => { status: 'success' | 'onboarding_needed' };
+  register: (email: string, pass: string, name?: string) => boolean;
   logout: () => void;
   updateProfile: (partial: Partial<UserProfile>) => void;
 
@@ -84,6 +85,14 @@ interface AppContextProps {
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
 
+interface RegisteredAccount {
+  email: string;
+  password?: string;
+  profile: UserProfile;
+  moodEntries: MoodEntry[];
+  moodCheckinSkippedDate: string | null;
+}
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Navigation state - starts at splash per PRD & User Flow
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('splash');
@@ -91,12 +100,39 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [screenStack, setScreenStack] = useState<ScreenType[]>(['splash']);
   const [screenParams, setScreenParams] = useState<Record<string, any>>({});
 
-  // Auth & User starts unauthenticated
+  // Auth & User State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserProfile | null>(null);
 
-  // Mood
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(initialMoodEntries);
+  // Registered user accounts database for persistent login/register separation
+  const [registeredAccounts, setRegisteredAccounts] = useState<RegisteredAccount[]>([
+    {
+      email: 'anya.sebaya@teman.id',
+      password: 'password123',
+      profile: {
+        ...initialUser,
+        isOnboarded: true,
+      },
+      moodEntries: initialMoodEntries,
+      moodCheckinSkippedDate: null,
+    },
+    {
+      email: 'anya.sebaya@gmail.com',
+      password: '',
+      profile: {
+        ...initialUser,
+        email: 'anya.sebaya@gmail.com',
+        provider: 'google',
+        isOnboarded: true,
+      },
+      moodEntries: initialMoodEntries,
+      moodCheckinSkippedDate: null,
+    },
+  ]);
+
+  // Mood State (Hanya diisi data riil dari akun yang sedang aktif, kosong secara default)
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
+  const [moodCheckinSkippedDate, setMoodCheckinSkippedDate] = useState<string | null>(null);
 
   // Story & Chat
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -150,28 +186,166 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Auth Actions
+  // ==============================================================
+  // AUTH ACTIONS: FLOW 1 (LOGIN) & FLOW 2 (REGISTER)
+  // ==============================================================
+
+  // FLOW 1 — LOGIN (B. Email & Password)
   const login = (email: string, _pass: string) => {
+    const cleanEmail = (email || initialUser.email).trim().toLowerCase();
+
+    // Ambil akun pengguna yang sudah tersimpan
+    const existing = registeredAccounts.find(
+      (a) => a.email.toLowerCase() === cleanEmail
+    );
+
+    const userProfile: UserProfile = existing
+      ? existing.profile
+      : {
+          ...initialUser,
+          email: cleanEmail,
+          isOnboarded: true,
+        };
+
+    const userMoods: MoodEntry[] = existing
+      ? existing.moodEntries
+      : cleanEmail.includes('anya')
+      ? initialMoodEntries
+      : [];
+
+    const userSkippedDate = existing ? existing.moodCheckinSkippedDate : null;
+
     setIsAuthenticated(true);
-    setUser({
-      ...initialUser,
-      email: email || initialUser.email,
-    });
-    // Alur khusus pengguna yang berhasil login: Daily Mood Check-in 3 tahap
+    setUser(userProfile);
+    setMoodEntries(userMoods);
+    setMoodCheckinSkippedDate(userSkippedDate);
+
+    // KETENTUAN PENTING:
+    // Login TIDAK BOLEH mengulang onboarding untuk pengguna lama.
+    // Lanjutkan ke Mood Check-in sebelum Beranda.
     setCurrentScreen('daily_mood_checkin');
     setCurrentTab('beranda');
     setScreenStack(['daily_mood_checkin']);
     return true;
   };
 
-  const register = (name: string, email: string, _pass: string) => {
+  // FLOW 1 — LOGIN (A. Login with Google)
+  const loginWithGoogle = (googleData?: { email?: string; name?: string; photoUrl?: string }) => {
+    const email = (googleData?.email || 'anya.sebaya@gmail.com').trim().toLowerCase();
+    const name = googleData?.name || (email.includes('anya') ? 'Anya Sebaya' : '');
+
+    const existing = registeredAccounts.find(
+      (a) => a.email.toLowerCase() === email
+    );
+
+    if (existing && existing.profile.isOnboarded) {
+      // Pengguna lama Google dengan profil lengkap:
+      // Jangan meminta mengisi ulang informasi. Langsung ke Mood Check-in sebelum Beranda!
+      setIsAuthenticated(true);
+      setUser(existing.profile);
+      setMoodEntries(existing.moodEntries || []);
+      setMoodCheckinSkippedDate(existing.moodCheckinSkippedDate || null);
+
+      setCurrentScreen('daily_mood_checkin');
+      setCurrentTab('beranda');
+      setScreenStack(['daily_mood_checkin']);
+      return { status: 'success' as const };
+    }
+
+    // Jika pengguna baru atau profil wajib belum lengkap (misal usia/birthDate belum ada):
+    // Hanya minta data yang benar-benar belum dimiliki!
+    const newGoogleUser: UserProfile = existing?.profile || {
+      id: `usr_g_${Date.now()}`,
+      name: name,
+      nickname: name ? name.split(' ')[0] : '',
+      pseudonym: name ? `${name.split(' ')[0]} (Anonim)` : 'Teman Baru (Anonim)',
+      email: email,
+      avatarInitials: name
+        ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+        : 'G',
+      joinedDate: 'Nov 2026',
+      isAnonymous: true,
+      schoolOrOrg: 'PIK-R Binaan',
+      interests: ['Kelola Stres', 'Emosi'],
+      activeStreakDays: 1,
+      moodEntriesCount: 0,
+      challengesCompleted: 0,
+      allowAiMoodAccess: false,
+      dailyReminderEnabled: true,
+      dailyReminderTime: '20:00 WIB',
+      isOnboarded: false,
+      provider: 'google',
+    };
+
+    setRegisteredAccounts((prev) => [
+      ...prev.filter((a) => a.email.toLowerCase() !== email),
+      {
+        email,
+        profile: newGoogleUser,
+        moodEntries: [],
+        moodCheckinSkippedDate: null,
+      },
+    ]);
+
     setIsAuthenticated(true);
-    setUser({
-      ...initialUser,
-      name: name || 'Teman Baru',
-      pseudonym: `${name || 'Teman Baru'} (Anonim)`,
-      email: email || 'teman@baru.id',
-    });
+    setUser(newGoogleUser);
+    setMoodEntries([]);
+    setMoodCheckinSkippedDate(null);
+
+    // Bawa ke onboarding (Step 1 Age Verification jika nama sudah didapat dari Google)
+    // Jangan meminta pengguna mengisi nama dua kali!
+    setCurrentScreen('thoriq_onboarding');
+    setScreenStack(['thoriq_onboarding']);
+    return { status: 'onboarding_needed' as const };
+  };
+
+  // FLOW 2 — REGISTER (Form Register: Email & Password)
+  const register = (email: string, pass: string, _optionalName?: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Buat profil pengguna baru yang belum di-onboard
+    // Field nama diisi nanti pada tahap onboarding "What Should We Call You?"
+    const newUser: UserProfile = {
+      id: `usr_${Date.now()}`,
+      name: '',
+      nickname: '',
+      pseudonym: 'Teman Baru (Anonim)',
+      email: cleanEmail || 'teman@baru.id',
+      avatarInitials: cleanEmail ? cleanEmail.slice(0, 2).toUpperCase() : 'TB',
+      joinedDate: 'Nov 2026',
+      isAnonymous: true,
+      schoolOrOrg: 'PIK-R Binaan',
+      interests: ['Kelola Stres', 'Emosi'],
+      activeStreakDays: 1,
+      moodEntriesCount: 0,
+      challengesCompleted: 0,
+      allowAiMoodAccess: false,
+      dailyReminderEnabled: true,
+      dailyReminderTime: '20:00 WIB',
+      isOnboarded: false,
+      provider: 'email',
+    };
+
+    setRegisteredAccounts((prev) => [
+      ...prev.filter((a) => a.email.toLowerCase() !== cleanEmail),
+      {
+        email: cleanEmail,
+        password: pass,
+        profile: newUser,
+        moodEntries: [],
+        moodCheckinSkippedDate: null,
+      },
+    ]);
+
+    setIsAuthenticated(true);
+    setUser(newUser);
+    // PENTING: Pengguna baru yang mendaftar TIDAK memiliki catatan mood sebelumnya!
+    setMoodEntries([]);
+    setMoodCheckinSkippedDate(null);
+
+    // KETENTUAN PENTING:
+    // Register harus menyelesaikan onboarding sebelum masuk Beranda.
+    // Mulai dari Perkenalan Maskot (Step 0)
     setCurrentScreen('thoriq_onboarding');
     setScreenStack(['thoriq_onboarding']);
     return true;
@@ -180,18 +354,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    setMoodEntries([]);
+    setMoodCheckinSkippedDate(null);
     setIsLogoutDialogOpen(false);
     setCurrentScreen('login');
     setScreenStack(['login']);
   };
 
   const updateProfile = (partial: Partial<UserProfile>) => {
-    setUser((prev) => (prev ? { ...prev, ...partial } : null));
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...partial };
+
+      // Simpan perubahan profil agar tersimpan persisten di registeredAccounts
+      setRegisteredAccounts((accs) =>
+        accs.map((a) =>
+          a.email.toLowerCase() === updated.email.toLowerCase()
+            ? { ...a, profile: updated }
+            : a
+        )
+      );
+
+      return updated;
+    });
   };
 
   // Mood State & Helpers
-  const [moodCheckinSkippedDate, setMoodCheckinSkippedDate] = useState<string | null>(null);
-
   const isToday = (dateIsoOrStr: string): boolean => {
     try {
       const entryDate = new Date(dateIsoOrStr);
@@ -215,12 +403,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const todayMood = moodEntries.find((entry) => isToday(entry.timestamp)) || null;
 
   const skipMoodCheckinToday = () => {
-    setMoodCheckinSkippedDate(getTodayDateKey());
+    const todayKey = getTodayDateKey();
+    setMoodCheckinSkippedDate(todayKey);
+
+    if (user?.email) {
+      setRegisteredAccounts((accs) =>
+        accs.map((a) =>
+          a.email.toLowerCase() === user.email.toLowerCase()
+            ? {
+                ...a,
+                moodCheckinSkippedDate: todayKey,
+              }
+            : a
+        )
+      );
+    }
   };
 
   const resetMoodCheckinToday = () => {
     setMoodCheckinSkippedDate(null);
-    setMoodEntries((prev) => prev.filter((entry) => !isToday(entry.timestamp)));
+    setMoodEntries((prev) => {
+      const updated = prev.filter((entry) => !isToday(entry.timestamp));
+      if (user?.email) {
+        setRegisteredAccounts((accs) =>
+          accs.map((a) =>
+            a.email.toLowerCase() === user.email.toLowerCase()
+              ? {
+                  ...a,
+                  moodEntries: updated,
+                  moodCheckinSkippedDate: null,
+                  profile: {
+                    ...a.profile,
+                    moodEntriesCount: updated.length,
+                  },
+                }
+              : a
+          )
+        );
+      }
+      return updated;
+    });
   };
 
   const isMoodCheckinSkippedToday =
@@ -266,14 +488,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Filter out any existing today entry so user only records once per day (or updates existing)
-    setMoodEntries((prev) => [newEntry, ...prev.filter((e) => !isToday(e.timestamp))]);
+    setMoodEntries((prev) => {
+      const updated = [newEntry, ...prev.filter((e) => !isToday(e.timestamp))];
+      if (user?.email) {
+        setRegisteredAccounts((accs) =>
+          accs.map((a) =>
+            a.email.toLowerCase() === user.email.toLowerCase()
+              ? {
+                  ...a,
+                  moodEntries: updated,
+                  moodCheckinSkippedDate: null,
+                  profile: {
+                    ...a.profile,
+                    moodEntriesCount: updated.length,
+                  },
+                }
+              : a
+          )
+        );
+      }
+      return updated;
+    });
 
-    // Update streak if needed
+    setMoodCheckinSkippedDate(null);
+
+    // Update streak & count
     if (user) {
-      setUser({
-        ...user,
-        moodEntriesCount: user.moodEntriesCount + 1,
-      });
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              moodEntriesCount: prev.moodEntriesCount + 1,
+            }
+          : null
+      );
     }
   };
 
@@ -387,6 +635,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         user,
         login,
+        loginWithGoogle,
         register,
         logout,
         updateProfile,

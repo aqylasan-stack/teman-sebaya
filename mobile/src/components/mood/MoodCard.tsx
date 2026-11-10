@@ -76,9 +76,9 @@ export const MoodCard: React.FC = () => {
 
   /* -------------------------------------------------------------
    * KONDISI 1: MOOD CHECK-IN COMPLETED
-   * Pengguna sudah menyelesaikan dan menyimpan mood hari ini
+   * Pengguna sudah menyelesaikan dan menyimpan mood hari ini secara riil
    * ------------------------------------------------------------- */
-  if (dailyMoodStatus === 'completed' && todayMood) {
+  if (dailyMoodStatus === 'completed' && todayMood && todayMood.primaryEmotion) {
     const theme = getEmotionTheme(todayMood.primaryEmotion);
     const subEmotion =
       todayMood.secondaryEmotions && todayMood.secondaryEmotions.length > 0
@@ -206,14 +206,14 @@ export const MoodCard: React.FC = () => {
               Hai {firstName}! Thoriq tetap di sini 👋
             </Text>
             <Text style={styles.skippedPromptText}>
-              Tidak apa-apa jika tadi belum sempat cerita. Luangkan 1 menit jika hatimu sudah siap.
+              Belum ada catatan mood yang tersimpan karena kamu melewati tahap check-in. Luangkan 1 menit jika hatimu sudah siap untuk mulai mencatat kabarmu.
             </Text>
           </View>
         </View>
 
         {/* CTA: Akses untuk memulai check-in */}
         <Button
-          title="Mulai Check-in Sekarang"
+          title="Mulai Catat Mood"
           variant="primary"
           size="md"
           fullWidth
@@ -238,11 +238,11 @@ export const MoodCard: React.FC = () => {
             Daily Mood Check-in
           </Text>
         </View>
-        <Badge label="Harian" variant="blue" />
+        <Badge label="Belum Diisi" variant="blue" />
       </View>
 
       <Text style={styles.notStartedHeading}>
-        Bagaimana perasaanmu hari ini?
+        Belum ada catatan mood hari ini
       </Text>
 
       <Text style={styles.notStartedDesc}>
@@ -290,7 +290,7 @@ export const MoodCard: React.FC = () => {
 
       {/* CTA Button: Memulai Daily Mood Check-in */}
       <Button
-        title="Mulai Check-in Emosi"
+        title="Mulai Catat Mood"
         variant="primary"
         size="md"
         fullWidth

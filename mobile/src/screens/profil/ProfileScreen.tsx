@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import {
   User,
@@ -13,19 +14,16 @@ import {
   Bookmark,
   Bell,
   ShieldCheck,
-  Lock,
   HelpCircle,
   Info,
   LogOut,
   ChevronRight,
   Flame,
   Award,
-  CheckCircle2,
-  Pencil,
   X,
-  ExternalLink,
+  Lock,
 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { Modal } from '../../components/common/Modal';
 import { Button } from '../../components/common/Button';
@@ -48,8 +46,6 @@ export const ProfileScreen: React.FC = () => {
 
   const displayName = user?.nickname || user?.name || 'Anya Sebaya';
   const roleOrSchool = user?.schoolOrOrg || 'PIK-R SMAN 1 Karawang';
-  const verifiedEmail = user?.email || 'anya.sebaya@teman.id';
-  const joinedDate = user?.joinedDate || 'Nov 2026';
 
   // Section Group 1: Akun Saya
   const accountMenuItems = [
@@ -58,17 +54,13 @@ export const ProfileScreen: React.FC = () => {
       title: 'Edit Profil',
       subtitle: 'Nama samaran, info sekolah PIK-R, dan minat',
       icon: User,
-      iconColor: colors.brandBlue[600],
-      iconBg: colors.softBlue,
       action: () => navigateTo('edit_profile'),
     },
     {
       id: 'mood_history',
       title: 'Riwayat Teman Mood',
-      subtitle: `${user?.moodEntriesCount || 12} catatan emosi & refleksi harian`,
+      subtitle: `${user?.moodEntriesCount ?? 0} catatan emosi & refleksi harian`,
       icon: Heart,
-      iconColor: colors.brandBlue[600],
-      iconBg: colors.brandBlue[50],
       action: () => switchTab('mood'),
     },
     {
@@ -76,8 +68,6 @@ export const ProfileScreen: React.FC = () => {
       title: 'Riwayat Teman Cerita',
       subtitle: 'Sesi obrolan & konseling sebaya terenkripsi',
       icon: MessageCircle,
-      iconColor: colors.accentViolet[600],
-      iconBg: colors.accentViolet[50],
       action: () => switchTab('cerita'),
     },
     {
@@ -85,8 +75,6 @@ export const ProfileScreen: React.FC = () => {
       title: 'Konten Tersimpan',
       subtitle: `${savedCount} materi & panduan favorit`,
       icon: Bookmark,
-      iconColor: colors.accentAmber[600],
-      iconBg: colors.accentAmber[50],
       action: () => switchTab('belajar', { initialTab: 'saved' }),
     },
   ];
@@ -98,8 +86,6 @@ export const ProfileScreen: React.FC = () => {
       title: 'Pengaturan Notifikasi',
       subtitle: `Pengingat check-in harian ${user?.dailyReminderTime || '20:00 WIB'}`,
       icon: Bell,
-      iconColor: colors.accentPeach[600],
-      iconBg: colors.accentPeach[50],
       action: () => navigateTo('privacy_settings'),
     },
     {
@@ -107,8 +93,6 @@ export const ProfileScreen: React.FC = () => {
       title: 'Privasi dan Keamanan',
       subtitle: 'Mode anonim penuh & kontrol data emosi AI',
       icon: ShieldCheck,
-      iconColor: colors.brandGreen[600],
-      iconBg: colors.brandGreen[50],
       action: () => navigateTo('privacy_settings'),
     },
   ];
@@ -120,8 +104,6 @@ export const ProfileScreen: React.FC = () => {
       title: 'Pusat Bantuan',
       subtitle: 'Hotline Krisis SEJIWA 119 & panduan darurat',
       icon: HelpCircle,
-      iconColor: colors.brandBlue[600],
-      iconBg: colors.brandBlue[50],
       action: () => openCrisisModal(),
     },
     {
@@ -129,13 +111,11 @@ export const ProfileScreen: React.FC = () => {
       title: 'Tentang TEMAN SEBAYA',
       subtitle: 'Platform kesehatan mental & PIK-R Remaja',
       icon: Info,
-      iconColor: colors.textMuted,
-      iconBg: colors.surfaceAlt,
       action: () => setIsAboutModalOpen(true),
     },
   ];
 
-  // Render a grouped settings section with a pill header and divider-separated items
+  // Render a grouped settings section with unified styling and thin dividers
   const renderMenuGroup = (
     sectionTitle: string,
     items: Array<{
@@ -143,17 +123,15 @@ export const ProfileScreen: React.FC = () => {
       title: string;
       subtitle: string;
       icon: any;
-      iconColor: string;
-      iconBg: string;
       action: () => void;
       isDanger?: boolean;
     }>
   ) => {
     return (
       <View style={styles.menuGroup}>
-        {/* Section Pill Header */}
-        <View style={styles.sectionPill}>
-          <Text style={styles.sectionPillText}>{sectionTitle}</Text>
+        {/* Section Heading — Pola styling seragam untuk seluruh kategori */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>{sectionTitle}</Text>
         </View>
 
         {/* Group Items List */}
@@ -173,17 +151,21 @@ export const ProfileScreen: React.FC = () => {
                   !isLast && styles.menuRowBorder,
                 ]}
               >
-                {/* Icon Container */}
+                {/* Icon Container — Seragam menggunakan Brand Blue Surface */}
                 <View
                   style={[
                     styles.menuIconContainer,
-                    { backgroundColor: item.iconBg },
+                    isDanger && styles.menuDangerIconContainer,
                   ]}
                 >
-                  <Icon size={18} color={item.iconColor} />
+                  <Icon
+                    size={18}
+                    color={isDanger ? colors.crisis.dangerText : colors.brandBlue[600]}
+                    strokeWidth={2.0}
+                  />
                 </View>
 
-                {/* Text Labels */}
+                {/* Text Labels: Judul (Text Primary), Deskripsi (Text Secondary) */}
                 <View style={styles.menuTextCol}>
                   <Text
                     style={[
@@ -203,10 +185,10 @@ export const ProfileScreen: React.FC = () => {
                   </Text>
                 </View>
 
-                {/* Chevron */}
+                {/* Trailing Chevron */}
                 <ChevronRight
                   size={18}
-                  color={isDanger ? colors.crisis.dangerBorder : colors.borderMedium}
+                  color={isDanger ? colors.crisis.dangerText : colors.textPlaceholder}
                 />
               </TouchableOpacity>
             );
@@ -222,102 +204,84 @@ export const ProfileScreen: React.FC = () => {
       style={styles.screenBg}
       contentContainerStyle={styles.scrollContent}
     >
-
       {/* ============================================================== */}
-      {/* 1. COLORED PROFILE HEADER (Baby Blue #B8DDF5)                  */}
+      {/* 1. CENTERED PROFILE HEADER (Baby Blue #B8DDF5)                 */}
       {/* ============================================================== */}
       <View style={styles.headerArea}>
-        {/* User Identity Row */}
-        <View style={styles.identityRow}>
-          {/* Avatar with White Ring & Quick Edit Badge */}
-          <View style={styles.avatarWrapper}>
-            <View style={styles.avatarCircle}>
-              {!imageError ? (
-                <Image
-                  source={require('../../../assets/branding/mascot_avatar.png')}
-                  style={styles.avatarImg}
-                  resizeMode="cover"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <Text style={styles.avatarInitials}>
-                  {user?.avatarInitials || 'AS'}
-                </Text>
-              )}
-            </View>
-
-            {/* Edit Profile Shortcut Badge */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => navigateTo('edit_profile')}
-              style={styles.editAvatarBadge}
-              accessibilityLabel="Edit Profil Pengguna"
-            >
-              <Pencil size={11} color="#FFFFFF" strokeWidth={2.5} />
-            </TouchableOpacity>
+        {/* Centered Identity Layout: Foto -> Nama -> Sekolah/Komunitas */}
+        <View style={styles.centeredIdentityContainer}>
+          {/* Avatar Utama Proporsional */}
+          <View style={styles.avatarCircle}>
+            {!imageError ? (
+              <Image
+                source={require('../../../assets/branding/mascot_avatar.png')}
+                style={styles.avatarImg}
+                resizeMode="cover"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <Text style={styles.avatarInitials}>
+                {user?.avatarInitials || 'AS'}
+              </Text>
+            )}
           </View>
 
-          {/* User Details */}
-          <View style={styles.identityTextCol}>
-            <Text style={styles.profileName} numberOfLines={1}>
-              {displayName}
-            </Text>
-            <Text style={styles.profileRole} numberOfLines={1}>
-              {roleOrSchool}
-            </Text>
+          {/* Nama Pengguna */}
+          <Text style={styles.profileName} numberOfLines={1}>
+            {displayName}
+          </Text>
 
-            {/* Verified Email Badge */}
-            <View style={styles.verifiedBadge}>
-              <CheckCircle2 size={12} color={colors.brandGreen[600]} />
-              <Text style={styles.verifiedText} numberOfLines={1}>
-                {verifiedEmail} · Terverifikasi
+          {/* Informasi Sekolah / Komunitas */}
+          <Text style={styles.profileRole} numberOfLines={1}>
+            {roleOrSchool}
+          </Text>
+        </View>
+
+        {/* ============================================================== */}
+        {/* 2. STATISTIK PROFIL: Satu kelompok horizontal seimbang          */}
+        {/* ============================================================== */}
+        <View style={styles.statsBar}>
+          {/* 1. Hari Beruntun */}
+          <View style={styles.statItem}>
+            <View style={styles.statValueRow}>
+              <Flame size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Text style={styles.statNumber}>
+                {user?.activeStreakDays ?? 1}
               </Text>
             </View>
-          </View>
-        </View>
-
-        {/* Stats Row (Activity & Streaks) */}
-        <View style={styles.statsBar}>
-          <View style={styles.statItem}>
-            <Flame size={15} color={colors.accentPeach[500]} />
-            <Text style={styles.statValue}>
-              {user?.activeStreakDays || 14} Hari Runtun
-            </Text>
+            <Text style={styles.statLabel}>Hari Beruntun</Text>
           </View>
 
           <View style={styles.statDivider} />
 
+          {/* 2. Total Refleksi */}
           <View style={styles.statItem}>
-            <Heart size={15} color={colors.brandBlue[600]} />
-            <Text style={styles.statValue}>
-              {user?.moodEntriesCount || 12} Refleksi
-            </Text>
+            <View style={styles.statValueRow}>
+              <Heart size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Text style={styles.statNumber}>
+                {user?.moodEntriesCount ?? 0}
+              </Text>
+            </View>
+            <Text style={styles.statLabel}>Total Refleksi</Text>
           </View>
 
           <View style={styles.statDivider} />
 
+          {/* 3. Tantangan */}
           <View style={styles.statItem}>
-            <Award size={15} color={colors.brandGreen[600]} />
-            <Text style={styles.statValue}>
-              {user?.challengesCompleted || 5} Tantangan
-            </Text>
+            <View style={styles.statValueRow}>
+              <Award size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Text style={styles.statNumber}>
+                {user?.challengesCompleted ?? 5}
+              </Text>
+            </View>
+            <Text style={styles.statLabel}>Tantangan</Text>
           </View>
-        </View>
-
-        {/* Membership Info */}
-        <Text style={styles.joinedText}>Bergabung Sejak, {joinedDate}</Text>
-
-        {/* Security & Privacy Assurance Strip */}
-        <View style={styles.securityStrip}>
-          <Lock size={12} color={colors.brandBlue[700]} />
-          <Text style={styles.securityStripText}>
-            Mode Anonim Aktif · Data Terenkripsi Aman
-          </Text>
         </View>
       </View>
 
       {/* ============================================================== */}
-      {/* 2. WHITE SHEET CONTENT (Grouped Navigation & Settings)         */}
+      {/* 3. WHITE SHEET CONTENT (Grouped Settings Navigation)           */}
       {/* ============================================================== */}
       <View style={styles.sheetContainer}>
         {/* Group 1: Akun Saya */}
@@ -334,10 +298,8 @@ export const ProfileScreen: React.FC = () => {
           {
             id: 'logout',
             title: 'Keluar dari Akun',
-            subtitle: 'Sesi anonim akan ditutup dengan aman',
+            subtitle: 'Sesi akun ini akan ditutup dengan aman',
             icon: LogOut,
-            iconColor: colors.crisis.dangerText,
-            iconBg: colors.crisis.dangerBg,
             action: openLogoutDialog,
             isDanger: true,
           },
@@ -355,7 +317,7 @@ export const ProfileScreen: React.FC = () => {
       </View>
 
       {/* ============================================================== */}
-      {/* 3. MODAL: TENTANG TEMAN SEBAYA                                  */}
+      {/* 4. MODAL: TENTANG TEMAN SEBAYA                                 */}
       {/* ============================================================== */}
       <Modal visible={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)}>
         <View style={styles.aboutModalContent}>
@@ -440,36 +402,33 @@ const styles = StyleSheet.create({
   },
 
   /* ============================================================== */
-  /* PROFILE HEADER STYLES (BABY BLUE)                              */
+  /* PROFILE HEADER STYLES (CENTERED VERTICAL LAYOUT)               */
   /* ============================================================== */
   headerArea: {
     backgroundColor: colors.babyBlue,
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 28,
-  },
-  identityRow: {
-    flexDirection: 'row',
+    paddingTop: Platform.OS === 'ios' ? 12 : 16,
+    paddingBottom: 24,
     alignItems: 'center',
-    gap: 16,
   },
-  avatarWrapper: {
-    position: 'relative',
+  centeredIdentityContainer: {
+    alignItems: 'center',
+    width: '100%',
   },
   avatarCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: '#FFFFFF',
     borderWidth: 3,
     borderColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowRadius: 5,
     elevation: 3,
   },
   avatarImg: {
@@ -477,108 +436,73 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   avatarInitials: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: colors.brandBlue[700],
-  },
-  editAvatarBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.brandBlue[600],
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  identityTextCol: {
-    flex: 1,
   },
   profileName: {
     fontSize: 18,
     fontWeight: '700',
     color: colors.textPrimary,
     letterSpacing: -0.2,
+    marginTop: 10,
+    textAlign: 'center',
   },
   profileRole: {
     fontSize: 13,
     fontWeight: '500',
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: 3,
+    textAlign: 'center',
   },
-  verifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: borderRadius.full,
-    alignSelf: 'flex-start',
-    marginTop: 6,
-    gap: 5,
-  },
-  verifiedText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.brandGreen[700],
-  },
+
+  /* ============================================================== */
+  /* STATS BAR (BALANCED HORIZONTAL GROUP)                          */
+  /* ============================================================== */
   statsBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginTop: 16,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
   statItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
-  statValue: {
-    fontSize: 12,
-    fontWeight: '600',
+  statNumber: {
+    fontSize: 15,
+    fontWeight: '700',
     color: colors.textPrimary,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.textMuted,
+    marginTop: 2,
+    textAlign: 'center',
   },
   statDivider: {
     width: 1,
-    height: 18,
-    backgroundColor: 'rgba(15, 23, 42, 0.1)',
-  },
-  joinedText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  securityStrip: {
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    borderRadius: 10,
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  securityStripText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.brandBlue[700],
+    height: 26,
+    backgroundColor: colors.borderLight,
   },
 
   /* ============================================================== */
@@ -586,31 +510,27 @@ const styles = StyleSheet.create({
   /* ============================================================== */
   sheetContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -16,
-    paddingHorizontal: 18,
-    paddingTop: 20,
-    paddingBottom: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -10,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 28,
     minHeight: 520,
   },
   menuGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  sectionPill: {
-    backgroundColor: colors.babyBlue,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+  sectionHeaderRow: {
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+    marginBottom: 2,
   },
-  sectionPillText: {
-    fontSize: 13,
+  sectionTitle: {
+    fontSize: 13.5,
     fontWeight: '700',
     color: colors.textPrimary,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   groupItemsContainer: {
     paddingHorizontal: 2,
@@ -618,20 +538,23 @@ const styles = StyleSheet.create({
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 13,
-    paddingHorizontal: 4,
+    paddingVertical: 12,
   },
   menuRowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.surfaceAlt,
+    borderBottomColor: colors.borderLight,
   },
   menuIconContainer: {
     width: 38,
     height: 38,
     borderRadius: 10,
+    backgroundColor: colors.brandBlue[50],
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
+  },
+  menuDangerIconContainer: {
+    backgroundColor: colors.crisis.dangerBg,
   },
   menuTextCol: {
     flex: 1,
@@ -645,8 +568,9 @@ const styles = StyleSheet.create({
     color: colors.crisis.dangerText,
   },
   menuSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '400',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   menuDangerSubtitle: {
@@ -660,7 +584,7 @@ const styles = StyleSheet.create({
   footerContainer: {
     alignItems: 'center',
     paddingVertical: spacing.md,
-    marginTop: 4,
+    marginTop: 6,
   },
   versionTitle: {
     fontSize: 11,

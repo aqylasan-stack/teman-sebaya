@@ -50,11 +50,11 @@ export const OtpVerificationScreen: React.FC = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      // Register user in state
-      if (screenParams.name && screenParams.email) {
-        register(screenParams.name, screenParams.email, screenParams.password || '');
+      // FLOW 2: Daftarkan akun baru dan lanjutkan ke Perkenalan Maskot (Step 0)
+      if (screenParams?.email) {
+        register(screenParams.email, screenParams.password || '');
       }
-      navigateTo('thoriq_onboarding', { name: screenParams.name });
+      navigateTo('thoriq_onboarding');
     }, 600);
   };
 

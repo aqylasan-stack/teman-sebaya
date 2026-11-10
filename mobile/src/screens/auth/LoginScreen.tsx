@@ -18,7 +18,7 @@ import { GoogleIcon } from '../../components/common/GoogleIcon';
 import { useApp } from '../../state/AppContext';
 
 export const LoginScreen: React.FC = () => {
-  const { login, navigateTo } = useApp();
+  const { login, loginWithGoogle, navigateTo } = useApp();
 
   // Initial Form State: empty per specification
   const [email, setEmail] = useState('');
@@ -65,8 +65,15 @@ export const LoginScreen: React.FC = () => {
     setIsGoogleLoading(true);
     setTimeout(() => {
       setIsGoogleLoading(false);
-      login('google.user@teman.id', 'google_session_pass');
-    }, 700);
+      // FLOW 1 — LOGIN with Google:
+      // Memanfaatkan data profil yang diberikan Google (email, nama)
+      // Jika profil sudah lengkap -> langsung lanjut ke Mood Check-in sebelum Beranda.
+      // Jika profil belum lengkap -> hanya minta data yang belum dimiliki.
+      loginWithGoogle({
+        email: 'anya.sebaya@gmail.com',
+        name: 'Anya Sebaya',
+      });
+    }, 600);
   };
 
   return (

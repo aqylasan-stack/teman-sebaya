@@ -126,21 +126,34 @@ const MOOD_OPTIONS: {
 ];
 
 export const ThoriqOnboardingScreen: React.FC = () => {
-  const { user, updateProfile, saveMood, navigateTo, switchTab, screenParams } = useApp();
+  const {
+    user,
+    updateProfile,
+    saveMood,
+    skipMoodCheckinToday,
+    navigateTo,
+    switchTab,
+    screenParams,
+  } = useApp();
 
-  // Current Step (0: Intro Wysa-style, 1: Age & Consent, 2: Profile Setup, 3: First Mood Check-in)
-  const [step, setStep] = useState<number>(0);
+  // Pengguna Google yang sudah memiliki nama dari profil langsung diarahkan ke Verifikasi Usia (Step 1)
+  // Jangan meminta pengguna mengisi informasi yang sudah ada dari Google.
+  const initialStep =
+    screenParams?.initialStep ??
+    (user?.provider === 'google' && (user?.name || user?.nickname) ? 1 : 0);
+  const [step, setStep] = useState<number>(initialStep);
 
-  // Form State: Step 1 (Age & Consent) - Kosong secara default
+  // Form State: Step 1 (Age & Consent)
   const [birthDay, setBirthDay] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [ageConsentAgreed, setAgeConsentAgreed] = useState(false);
   const [step1Error, setStep1Error] = useState('');
 
-  // Form State: Step 2 (Profile Setup) - Kosong secara default
-  const [nickname, setNickname] = useState('');
-  const [city, setCity] = useState('');
+  // Form State: Step 2 (Profile Setup: What Should We Call You?)
+  // Diisi otomatis dengan nama dari Google jika tersedia
+  const [nickname, setNickname] = useState(user?.nickname || user?.name || '');
+  const [city, setCity] = useState(user?.city || '');
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([
@@ -149,6 +162,16 @@ export const ThoriqOnboardingScreen: React.FC = () => {
   ]);
   const [step2Error, setStep2Error] = useState('');
   const [cityError, setCityError] = useState('');
+
+  // Sinkronisasi data user jika tersedia (misal dari Google Profile)
+  useEffect(() => {
+    if (!nickname && (user?.nickname || user?.name)) {
+      setNickname(user.nickname || user.name || '');
+    }
+    if (!city && user?.city) {
+      setCity(user.city);
+    }
+  }, [user]);
 
   // Form State: Step 3 (Mood Check-in)
   const [selectedMood, setSelectedMood] = useState<PrimaryEmotion | null>(null);
@@ -359,20 +382,34 @@ export const ThoriqOnboardingScreen: React.FC = () => {
   };
 
   const handleFinishOnboarding = (skipMood = false) => {
-    // 1. Simpan preferensi profil pengguna baru tanpa menandai Daily Mood Check-in sudah selesai
-    // Catatan: Daily Mood Check-in 3-tahap (Eksplorasi & Afirmasi) baru dilakukan di Beranda / setelah Login
+    const cleanNick = nickname.trim() || 'Teman';
     updateProfile({
-      nickname: nickname.trim(),
-      name: user?.name || nickname.trim(),
+      nickname: cleanNick,
+      name: user?.name || cleanNick,
+      pseudonym: `${cleanNick} (Anonim)`,
       city: city.trim(),
       interests: selectedInterests,
       age: computedAge,
       ageCategory: isTeen ? 'teen' : computedAge <= 24 ? 'young_adult' : 'adult',
       birthDate: `${birthDay}-${birthMonth}-${birthYear}`,
       initialEmotion: !skipMood && selectedMood ? selectedMood : undefined,
+      isOnboarded: true,
     });
 
-    // 2. Langsung arahkan ke Beranda dengan status Daily Mood Check-in: Not Started
+    if (!skipMood && selectedMood) {
+      saveMood(
+        selectedMood,
+        ['Awal Perjalanan'],
+        'Refleksi orientasi bersama Thoriq',
+        ['Orientasi']
+      );
+    } else {
+      // PENTING: Pengguna melewati tahap pengisian mood saat onboarding Register!
+      // Simpan status bahwa tahap pengisian mood telah dilewati hari ini, TETAPI JANGAN BUAT CATATAN MOOD!
+      skipMoodCheckinToday();
+    }
+
+    // Selesai Onboarding -> Masuk ke Beranda
     switchTab('beranda');
     navigateTo('main');
   };
@@ -869,7 +906,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
                 variant="primary"
                 fullWidth
                 size="lg"
-                onPress={() => handleFinishOnboarding(false)}
+                onPress={() => handleFinishOnboarding(!selectedMood)}
                 style={styles.continueBtn}
               />
 

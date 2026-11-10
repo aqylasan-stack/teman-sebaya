@@ -13,6 +13,7 @@ import {
 export const initialUser: UserProfile = {
   id: 'usr_001',
   name: 'Anya Sebaya',
+  nickname: 'Anya',
   pseudonym: 'Anya Sebaya (Anonim)',
   email: 'anya.sebaya@teman.id',
   avatarInitials: 'AS',
@@ -26,6 +27,8 @@ export const initialUser: UserProfile = {
   allowAiMoodAccess: false,
   dailyReminderEnabled: true,
   dailyReminderTime: '20:00 WIB',
+  isOnboarded: true,
+  provider: 'email',
 };
 
 export const initialMoodEntries: MoodEntry[] = [
