@@ -840,7 +840,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
 
               {/* Submit Button */}
               <Button
-                title={selectedMood ? 'Simpan & Masuk ke Beranda' : 'Mulai Petualangan'}
+                title={selectedMood ? 'Selesai' : 'Mulai Sekarang'}
                 variant="primary"
                 fullWidth
                 size="lg"

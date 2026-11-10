@@ -249,7 +249,7 @@ export const MoodCard: React.FC = () => {
         Kenali dan sadari emosimu satu hari dalam satu waktu. Setiap perasaanmu berharga dan layak didengarkan.
       </Text>
 
-      {/* 4 Emojis Quick Preview Row */}
+      {/* 4 Emojis Quick Preview Row (Bahagia, Sedih, Marah, Biasa Saja) */}
       <View style={styles.emojiPreviewRow}>
         <View style={styles.previewEmojiItem}>
           <Image
@@ -258,15 +258,6 @@ export const MoodCard: React.FC = () => {
             resizeMode="contain"
           />
           <Text style={styles.miniEmojiLabel}>Bahagia</Text>
-        </View>
-
-        <View style={styles.previewEmojiItem}>
-          <Image
-            source={require('../../../assets/emojis/emoji_biasa.png')}
-            style={styles.miniEmojiImage}
-            resizeMode="contain"
-          />
-          <Text style={styles.miniEmojiLabel}>Biasa Saja</Text>
         </View>
 
         <View style={styles.previewEmojiItem}>
@@ -285,6 +276,15 @@ export const MoodCard: React.FC = () => {
             resizeMode="contain"
           />
           <Text style={styles.miniEmojiLabel}>Marah</Text>
+        </View>
+
+        <View style={styles.previewEmojiItem}>
+          <Image
+            source={require('../../../assets/emojis/emoji_biasa.png')}
+            style={styles.miniEmojiImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.miniEmojiLabel}>Biasa Saja</Text>
         </View>
       </View>
 

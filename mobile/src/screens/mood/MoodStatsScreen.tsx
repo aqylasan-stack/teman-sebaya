@@ -40,7 +40,7 @@ export const MoodStatsScreen: React.FC = () => {
       </Card>
 
       {/* 7-Day Bar Chart */}
-      <MoodWeeklyChart stats={weeklyStats} dominantEmotion="Tenang (52%)" />
+      <MoodWeeklyChart stats={weeklyStats} dominantEmotion="Bahagia (43%)" />
 
       {/* Insightful Feedback Card */}
       <Card variant="tintBlue" style={styles.insightCard}>
@@ -49,8 +49,8 @@ export const MoodStatsScreen: React.FC = () => {
           <Text style={styles.insightTitle}>Refleksi Minggu Ini</Text>
         </View>
         <Text style={styles.insightBody}>
-          Emosimu didominasi oleh rasa Tenang dan Bahagia di akhir pekan, namun sempat
-          mengalami sedikit kecemasan di pertengahan minggu sekolah. Membuka jeda
+          Emosimu didominasi oleh rasa Bahagia dan Biasa Saja di akhir pekan, namun sempat
+          mengalami hari yang cukup melelahkan di pertengahan minggu sekolah. Membuka jeda
           singkat terbukti membantumu mengembalikan kestabilan emosi.
         </Text>
       </Card>

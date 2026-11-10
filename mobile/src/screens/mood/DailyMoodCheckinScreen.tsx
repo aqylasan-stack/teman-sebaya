@@ -368,23 +368,20 @@ export const DailyMoodCheckinScreen: React.FC = () => {
 
           {/* Central Hero Emotion Display */}
           <View style={styles.heroCardContainer}>
-            {/* Soft Glowing Aura */}
-            <View
-              style={[
-                styles.emojiHaloGlow,
-                { backgroundColor: currentConfig.glowColor },
-              ]}
-            >
-              <Image
-                source={currentConfig.image}
-                style={styles.heroEmojiImage}
-                resizeMode="contain"
-              />
-            </View>
+            <Image
+              source={currentConfig.image}
+              style={styles.heroEmojiImage}
+              resizeMode="contain"
+            />
 
             {/* Emotion Title & Description */}
             <View style={styles.heroLabelWrap}>
-              <Text style={styles.emotionHeadlineText}>
+              <Text
+                style={[
+                  styles.emotionHeadlineText,
+                  { color: currentConfig.accentColor },
+                ]}
+              >
                 {currentConfig.headlineText}
               </Text>
               <Text style={styles.emotionDescriptionText}>
@@ -397,7 +394,7 @@ export const DailyMoodCheckinScreen: React.FC = () => {
           <View style={styles.bottomSelectorDock}>
             <Text style={styles.dockTitle}>PILIH SUASANA HATIMU</Text>
             <View style={styles.moodDockRow}>
-              {(['Bahagia', 'Biasa Saja', 'Sedih', 'Marah'] as const).map((key) => {
+              {(['Bahagia', 'Sedih', 'Marah', 'Biasa Saja'] as const).map((key) => {
                 const item = EMOTION_CONFIGS[key];
                 const isSelected = selectedEmotionKey === key;
 
@@ -415,12 +412,7 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                       isSelected && { borderColor: item.accentColor },
                     ]}
                   >
-                    <View
-                      style={[
-                        styles.dockThumbWrapper,
-                        isSelected && { backgroundColor: item.glowColor },
-                      ]}
-                    >
+                    <View style={styles.dockThumbWrapper}>
                       <Image
                         source={item.image}
                         style={styles.dockEmojiThumb}
@@ -431,7 +423,7 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                       style={[
                         styles.dockItemLabel,
                         isSelected && {
-                          color: colors.textPrimary,
+                          color: item.accentColor,
                           fontWeight: '700',
                         },
                       ]}
@@ -503,21 +495,21 @@ export const DailyMoodCheckinScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Emotion Circular Badge & Title */}
+          {/* Standalone Mood Emoji Hero */}
           <View style={styles.stage2HeroSection}>
-            <View
+            <Image
+              source={currentConfig.image}
+              style={styles.stage2EmojiStandalone}
+              resizeMode="contain"
+            />
+            <Text
               style={[
-                styles.stage2EmojiCircle,
-                { backgroundColor: currentConfig.glowColor },
+                styles.stage2EmotionTitle,
+                { color: currentConfig.accentColor },
               ]}
             >
-              <Image
-                source={currentConfig.image}
-                style={styles.stage2EmojiImage}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={styles.stage2EmotionTitle}>{currentConfig.name}</Text>
+              {currentConfig.name}
+            </Text>
             <Text style={styles.stage2EmotionDesc}>
               {currentConfig.description}
             </Text>
@@ -790,7 +782,7 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             activeOpacity={0.85}
             onPress={handleFinishCheckin}
           >
-            <Text style={styles.finishCtaText}>Selesai & Masuk ke Beranda</Text>
+            <Text style={styles.finishCtaText}>Selesai</Text>
             <ArrowRight size={18} color={colors.surface} />
           </TouchableOpacity>
         </ScrollView>
@@ -901,8 +893,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   heroEmojiImage: {
-    width: 100,
-    height: 100,
+    width: 136,
+    height: 136,
+    marginBottom: spacing.md,
   },
   heroLabelWrap: {
     alignItems: 'center',
@@ -1041,24 +1034,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
-  stage2EmojiCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+  stage2EmojiStandalone: {
+    width: 136,
+    height: 136,
     marginBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  stage2EmojiImage: {
-    width: 64,
-    height: 64,
   },
   stage2EmotionTitle: {
     fontSize: 26,

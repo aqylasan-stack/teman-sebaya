@@ -34,8 +34,8 @@ export const initialMoodEntries: MoodEntry[] = [
     timestamp: '2026-11-09T08:30:00.000Z',
     dateString: '09 Nov 2026',
     timeString: '08:30 WIB',
-    primaryEmotion: 'Tenang',
-    secondaryEmotions: ['Damai', 'Percaya diri', 'Lega'],
+    primaryEmotion: 'Biasa Saja',
+    secondaryEmotions: ['Damai', 'Percaya Diri', 'Lega'],
     note: 'Merasa lega setelah menyelesaikan tugas kelompok dan beristirahat sejenak.',
     contextTags: ['Sekolah', 'Teman', 'Diri Sendiri'],
     intensity: 4,
@@ -56,22 +56,22 @@ export const initialMoodEntries: MoodEntry[] = [
     timestamp: '2026-11-07T14:15:00.000Z',
     dateString: '07 Nov 2026',
     timeString: '14:15 WIB',
-    primaryEmotion: 'Lelah',
-    secondaryEmotions: ['Letih', 'Butuh jeda'],
-    note: 'Jadwal ekstrakurikuler padat, rasanya ingin tidur lebih awal malam ini.',
+    primaryEmotion: 'Sedih',
+    secondaryEmotions: ['Lelah Mental', 'Butuh jeda'],
+    note: 'Jadwal kegiatan padat, rasanya ingin beristirahat lebih awal malam ini.',
     contextTags: ['Sekolah', 'Tidur'],
     intensity: 3,
   },
 ];
 
 export const weeklyMoodStats: MoodDayStat[] = [
-  { dayName: 'Sen', primaryEmotion: 'Tenang', percentage: 70 },
+  { dayName: 'Sen', primaryEmotion: 'Biasa Saja', percentage: 70 },
   { dayName: 'Sel', primaryEmotion: 'Bahagia', percentage: 85 },
-  { dayName: 'Rab', primaryEmotion: 'Cemas', percentage: 60 },
-  { dayName: 'Kam', primaryEmotion: 'Lelah', percentage: 55 },
+  { dayName: 'Rab', primaryEmotion: 'Sedih', percentage: 60 },
+  { dayName: 'Kam', primaryEmotion: 'Marah', percentage: 50 },
   { dayName: 'Jum', primaryEmotion: 'Bahagia', percentage: 90 },
-  { dayName: 'Sab', primaryEmotion: 'Tenang', percentage: 75 },
-  { dayName: 'Min', primaryEmotion: 'Tenang', percentage: 80 },
+  { dayName: 'Sab', primaryEmotion: 'Biasa Saja', percentage: 75 },
+  { dayName: 'Min', primaryEmotion: 'Bahagia', percentage: 85 },
 ];
 
 export const counselorsList: Counselor[] = [
