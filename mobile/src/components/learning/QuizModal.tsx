@@ -166,49 +166,35 @@ export const QuizModal: React.FC<QuizModalProps> = ({
             })}
           </View>
 
-          {/* Dynamic Feedback Banner + Pembahasan Edukatif */}
+          {/* Pembahasan Edukatif Terpadu (Single Unified Card) */}
           {isAnswered && (
-            <View style={styles.feedbackContainer}>
-              {/* Banner Status: Menyesuaikan apakah jawaban pengguna benar atau salah */}
-              <View
-                style={[
-                  styles.statusBanner,
-                  isUserCorrect
-                    ? styles.statusBannerSuccess
-                    : styles.statusBannerDanger,
-                ]}
-              >
+            <View
+              style={[
+                styles.unifiedFeedbackCard,
+                isUserCorrect
+                  ? styles.unifiedFeedbackSuccess
+                  : styles.unifiedFeedbackDanger,
+              ]}
+            >
+              <View style={styles.feedbackHeaderRow}>
                 {isUserCorrect ? (
-                  <CheckCircle2 size={18} color="#16A34A" />
+                  <CheckCircle2 size={17} color="#16A34A" />
                 ) : (
-                  <XCircle size={18} color="#DC2626" />
+                  <XCircle size={17} color="#DC2626" />
                 )}
-
-                <View style={styles.statusTextWrap}>
-                  <Text
-                    style={[
-                      styles.statusTitle,
-                      { color: isUserCorrect ? '#15803D' : '#B91C1C' },
-                    ]}
-                  >
-                    {isUserCorrect ? 'Jawabanmu Tepat! 🎉' : 'Jawabanmu Kurang Tepat'}
-                  </Text>
-                  {!isUserCorrect && (
-                    <Text style={styles.statusSub}>
-                      Kunci yang benar adalah{' '}
-                      <Text style={styles.correctHighlight}>
-                        "{currentQ.options[currentQ.correctIndex]}"
-                      </Text>
-                    </Text>
-                  )}
-                </View>
+                <Text
+                  style={[
+                    styles.feedbackHeaderTitle,
+                    { color: isUserCorrect ? '#15803D' : '#B91C1C' },
+                  ]}
+                >
+                  {isUserCorrect ? 'Jawabanmu Benar' : 'Jawabanmu Kurang Tepat'}
+                </Text>
               </View>
 
-              {/* Box Pembahasan Netral & Berwawasan */}
-              <View style={styles.explanationBox}>
-                <Text style={styles.explanationTitle}>Pembahasan Edukatif</Text>
-                <Text style={styles.explanationText}>{cleanExplanation}</Text>
-              </View>
+              <Text style={styles.feedbackExplanationText}>
+                {cleanExplanation}
+              </Text>
             </View>
           )}
 
@@ -337,61 +323,35 @@ const styles = StyleSheet.create({
     color: '#B91C1C',
   },
 
-  /* Feedback Container */
-  feedbackContainer: {
-    gap: 8,
-    marginTop: spacing.xs,
-  },
-  statusBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: 10,
+  /* Unified Feedback Card: Menggabungkan status dan pembahasan edukatif dalam satu kartu */
+  unifiedFeedbackCard: {
     borderRadius: borderRadius.md,
     borderWidth: 1,
+    padding: 12,
+    marginTop: spacing.xs,
+    gap: 6,
   },
-  statusBannerSuccess: {
+  unifiedFeedbackSuccess: {
     backgroundColor: '#F0FDF4',
     borderColor: '#BBF7D0',
   },
-  statusBannerDanger: {
+  unifiedFeedbackDanger: {
     backgroundColor: '#FEF2F2',
     borderColor: '#FECACA',
   },
-  statusTextWrap: {
-    flex: 1,
+  feedbackHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  statusTitle: {
-    fontSize: 13,
+  feedbackHeaderTitle: {
+    fontSize: 13.5,
     fontWeight: '700',
   },
-  statusSub: {
-    fontSize: 11.5,
-    color: '#7F1D1D',
-    lineHeight: 16,
-    marginTop: 2,
-  },
-  correctHighlight: {
-    fontWeight: '700',
-    color: '#991B1B',
-  },
-  explanationBox: {
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    borderRadius: borderRadius.md,
-    padding: 10,
-  },
-  explanationTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 3,
-  },
-  explanationText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 18,
+  feedbackExplanationText: {
+    fontSize: 12.5,
+    lineHeight: 19,
+    color: '#334155',
   },
   nextButton: {
     marginTop: spacing.xs,
