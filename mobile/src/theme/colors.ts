@@ -1,4 +1,8 @@
 export const colors = {
+  // Baby Blue & Soft Blue (Teman Sebaya Identity)
+  babyBlue: '#B8DDF5',
+  softBlue: '#EAF5FC',
+
   // Brand Blue
   brandBlue: {
     50: '#EFF6FF',

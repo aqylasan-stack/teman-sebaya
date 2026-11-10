@@ -10,15 +10,21 @@ import { FloatingToast } from '../../components/common/FloatingToast';
 import { useApp } from '../../state/AppContext';
 
 const articleImages: Record<string, any> = {
+  article_overthinking: require('../../../assets/articles/article_overthinking.jpg'),
+  article_burnout: require('../../../assets/articles/article_burnout.jpg'),
+  article_konflik: require('../../../assets/articles/article_konflik.jpg'),
+  article_asertif: require('../../../assets/articles/article_asertif.jpg'),
+  article_detoks: require('../../../assets/articles/article_detoks.jpg'),
+  article_mengenal_diri: require('../../../assets/articles/article_mengenal_diri.jpg'),
+  article_regulasi_emosi: require('../../../assets/articles/article_regulasi_emosi.jpg'),
+  article_komunikasi: require('../../../assets/articles/article_komunikasi.jpg'),
+  article_tidur_sehat: require('../../../assets/articles/article_tidur_sehat.jpg'),
+
+  // Fallback to real community documentation photos
   genre_workshop: require('../../../assets/community/genre_workshop.jpg'),
   genre_activity_1: require('../../../assets/community/genre_activity_1.jpg'),
   genre_activity_2: require('../../../assets/community/genre_activity_2.jpg'),
   pikr_group: require('../../../assets/community/pikr_group.jpg'),
-  onboarding_mood: require('../../../assets/onboarding/onboarding_mood.jpg'),
-  onboarding_growth: require('../../../assets/onboarding/onboarding_growth.jpg'),
-  onboarding_counseling: require('../../../assets/onboarding/onboarding_counseling.jpg'),
-  personality_cover: require('../../../assets/tests/personality_cover.jpg'),
-  result_desk: require('../../../assets/tests/result_desk.jpg'),
 };
 
 export const ArticleDetailScreen: React.FC = () => {

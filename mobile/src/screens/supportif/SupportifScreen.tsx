@@ -47,6 +47,20 @@ export const SupportifScreen: React.FC = () => {
       image: require('../../../assets/community/genre_activity_2.jpg'),
       tag: 'Aksi Remaja',
     },
+    {
+      id: 'g5',
+      title: 'Temu Akbar GenRe Karawang',
+      date: '10 Juli 2026',
+      image: require('../../../assets/community/genre_gathering.jpg'),
+      tag: 'Forum GenRe',
+    },
+    {
+      id: 'g6',
+      title: 'Sesi Berbagi Bersama Konselor',
+      date: '28 Juni 2026',
+      image: require('../../../assets/community/foto_thoriq_counseling.jpg'),
+      tag: 'Konseling Sebaya',
+    },
   ];
 
   return (

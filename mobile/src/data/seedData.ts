@@ -326,7 +326,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: true,
-    imageKey: 'genre_workshop',
+    imageKey: 'article_overthinking',
   },
   {
     id: 'art_002',
@@ -389,7 +389,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'genre_activity_1',
+    imageKey: 'article_burnout',
   },
   {
     id: 'art_003',
@@ -452,7 +452,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'onboarding_growth',
+    imageKey: 'article_konflik',
   },
   {
     id: 'art_004',
@@ -515,7 +515,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: true,
-    imageKey: 'pikr_group',
+    imageKey: 'article_asertif',
   },
   {
     id: 'art_005',
@@ -578,7 +578,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'onboarding_mood',
+    imageKey: 'article_detoks',
   },
   {
     id: 'art_006',
@@ -641,7 +641,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'genre_activity_2',
+    imageKey: 'article_mengenal_diri',
   },
   {
     id: 'art_007',
@@ -704,7 +704,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'result_desk',
+    imageKey: 'article_regulasi_emosi',
   },
   {
     id: 'art_008',
@@ -767,7 +767,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'onboarding_counseling',
+    imageKey: 'article_komunikasi',
   },
   {
     id: 'art_009',
@@ -830,7 +830,7 @@ export const educationalArticles: Article[] = [
       ],
     },
     isSaved: false,
-    imageKey: 'personality_cover',
+    imageKey: 'article_tidur_sehat',
   },
 ];
 
