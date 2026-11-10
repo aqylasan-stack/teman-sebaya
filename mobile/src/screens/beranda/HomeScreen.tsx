@@ -21,7 +21,15 @@ import { Badge } from '../../components/common/Badge';
 import { useApp } from '../../state/AppContext';
 
 export const HomeScreen: React.FC = () => {
-  const { user, switchTab, navigateTo, openCrisisModal, bookings, articles } = useApp();
+  const {
+    user,
+    switchTab,
+    navigateTo,
+    openCrisisModal,
+    bookings,
+    articles,
+    dailyMoodStatus,
+  } = useApp();
 
   const nextBooking = bookings.length > 0 ? bookings[0] : null;
 
@@ -97,7 +105,11 @@ export const HomeScreen: React.FC = () => {
           Halo, {user?.nickname || (user?.name ? user.name.split(' ')[0] : 'Sobat Sebaya')}!
         </Text>
         <Text style={styles.greetingSubtitle}>
-          Apa kabar kamu hari ini?
+          {dailyMoodStatus === 'completed'
+            ? 'Kabar hatimu hari ini sudah tercatat. Semoga harimu berjalan dengan tenang dan bermakna.'
+            : dailyMoodStatus === 'skipped'
+            ? 'Thoriq selalu siap mendengarkan kapan pun kamu ingin bercerita.'
+            : 'Apa kabar kamu hari ini? Yuk luangkan waktu sejenak untuk mengecek kabarmu.'}
         </Text>
       </View>
 

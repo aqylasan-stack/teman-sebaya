@@ -28,6 +28,7 @@ import { ProfileScreen } from '../screens/profil/ProfileScreen';
 
 // Sub-screens
 import { MoodSelectionScreen } from '../screens/mood/MoodSelectionScreen';
+import { DailyMoodCheckinScreen } from '../screens/mood/DailyMoodCheckinScreen';
 import { MoodStatsScreen } from '../screens/mood/MoodStatsScreen';
 import { AIChatScreen } from '../screens/cerita/AIChatScreen';
 import { BookingScreen } from '../screens/cerita/BookingScreen';
@@ -80,6 +81,8 @@ export const RootNavigator: React.FC = () => {
       // Sub-screens
       case 'mood_selection':
         return <MoodSelectionScreen />;
+      case 'daily_mood_checkin':
+        return <DailyMoodCheckinScreen />;
       case 'mood_stats':
         return <MoodStatsScreen />;
       case 'ai_chat':

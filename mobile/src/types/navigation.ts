@@ -19,6 +19,7 @@ export type ScreenType =
   | 'main'
   // Sub-screens
   | 'mood_selection'
+  | 'daily_mood_checkin'
   | 'mood_stats'
   | 'ai_chat'
   | 'teman_akses'

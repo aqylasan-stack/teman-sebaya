@@ -27,7 +27,7 @@ export const MoodScreen: React.FC = () => {
           title="Catat Mood"
           size="sm"
           iconLeft={<Plus size={16} color={colors.surface} />}
-          onPress={() => navigateTo('mood_selection')}
+          onPress={() => navigateTo('daily_mood_checkin')}
         />
       </View>
 

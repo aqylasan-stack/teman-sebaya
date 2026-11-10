@@ -12,6 +12,7 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   TextInput,
+  Dimensions,
 } from 'react-native';
 import {
   ArrowLeft,
@@ -19,15 +20,13 @@ import {
   Square,
   Sparkles,
   MapPin,
-  Smile,
-  Frown,
-  Flame,
-  Meh,
   ChevronRight,
   ChevronDown,
   Check,
   Search,
   X,
+  Heart,
+  Star,
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { Input } from '../../components/common/Input';
@@ -67,22 +66,74 @@ const WEST_JAVA_CITIES = [
   'Kota Tasikmalaya',
 ];
 
+// 4 Emosi Utama untuk Mood Check-in Pertama (Menggunakan Karakter Emoji Asli)
+const MOOD_OPTIONS: {
+  type: PrimaryEmotion;
+  label: string;
+  hint: string;
+  image: any;
+  activeColor: string;
+  activeBg: string;
+  activeTitleColor: string;
+  activeHintColor: string;
+}[] = [
+  {
+    type: 'Bahagia',
+    label: 'Bahagia',
+    hint: 'Ceria',
+    image: require('../../../assets/emojis/emoji_bahagia.png'),
+    activeColor: '#EAB308',
+    activeBg: '#FEFCE8',
+    activeTitleColor: '#A16207',
+    activeHintColor: '#CA8A04',
+  },
+  {
+    type: 'Sedih',
+    label: 'Sedih',
+    hint: 'Murung',
+    image: require('../../../assets/emojis/emoji_sedih.png'),
+    activeColor: '#3B82F6',
+    activeBg: '#EFF6FF',
+    activeTitleColor: '#1D4ED8',
+    activeHintColor: '#2563EB',
+  },
+  {
+    type: 'Marah',
+    label: 'Marah',
+    hint: 'Kesal',
+    image: require('../../../assets/emojis/emoji_marah.png'),
+    activeColor: '#EF4444',
+    activeBg: '#FEF2F2',
+    activeTitleColor: '#B91C1C',
+    activeHintColor: '#DC2626',
+  },
+  {
+    type: 'Biasa Saja',
+    label: 'Biasa Saja',
+    hint: 'Tenang',
+    image: require('../../../assets/emojis/emoji_biasa.png'),
+    activeColor: '#A8A29E',
+    activeBg: '#F5F5F4',
+    activeTitleColor: '#44403C',
+    activeHintColor: '#78716C',
+  },
+];
+
 export const ThoriqOnboardingScreen: React.FC = () => {
   const { user, updateProfile, saveMood, navigateTo, switchTab, screenParams } = useApp();
 
   // Current Step (0: Intro Wysa-style, 1: Age & Consent, 2: Profile Setup, 3: First Mood Check-in)
   const [step, setStep] = useState<number>(0);
 
-  // Form State: Step 1 (Age & Consent)
-  const [birthDay, setBirthDay] = useState('15');
-  const [birthMonth, setBirthMonth] = useState('7');
-  const [birthYear, setBirthYear] = useState('2008');
+  // Form State: Step 1 (Age & Consent) - Kosong secara default
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [ageConsentAgreed, setAgeConsentAgreed] = useState(false);
   const [step1Error, setStep1Error] = useState('');
 
-  // Form State: Step 2 (Profile Setup)
-  const initialName = screenParams?.name || user?.name || '';
-  const [nickname, setNickname] = useState(initialName ? initialName.split(' ')[0] : '');
+  // Form State: Step 2 (Profile Setup) - Kosong secara default
+  const [nickname, setNickname] = useState('');
   const [city, setCity] = useState('');
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [citySearchQuery, setCitySearchQuery] = useState('');
@@ -95,7 +146,6 @@ export const ThoriqOnboardingScreen: React.FC = () => {
 
   // Form State: Step 3 (Mood Check-in)
   const [selectedMood, setSelectedMood] = useState<PrimaryEmotion | null>(null);
-  const [moodNote, setMoodNote] = useState('');
 
   // Animation values
   const isNativeDriver = Platform.OS !== 'web';
@@ -298,12 +348,8 @@ export const ThoriqOnboardingScreen: React.FC = () => {
   };
 
   const handleFinishOnboarding = (skipMood = false) => {
-    // 1. Save Mood if selected and not skipped
-    if (!skipMood && selectedMood) {
-      saveMood(selectedMood, [], moodNote || 'Catatan saat pertama kali bergabung', ['Onboarding']);
-    }
-
-    // 2. Update Profile in App State
+    // 1. Simpan preferensi profil pengguna baru tanpa menandai Daily Mood Check-in sudah selesai
+    // Catatan: Daily Mood Check-in 3-tahap (Eksplorasi & Afirmasi) baru dilakukan di Beranda / setelah Login
     updateProfile({
       nickname: nickname.trim(),
       name: user?.name || nickname.trim(),
@@ -312,9 +358,10 @@ export const ThoriqOnboardingScreen: React.FC = () => {
       age: computedAge,
       ageCategory: isTeen ? 'teen' : computedAge <= 24 ? 'young_adult' : 'adult',
       birthDate: `${birthDay}-${birthMonth}-${birthYear}`,
+      initialEmotion: !skipMood && selectedMood ? selectedMood : undefined,
     });
 
-    // 3. Switch to Home Dashboard
+    // 2. Langsung arahkan ke Beranda dengan status Daily Mood Check-in: Not Started
     switchTab('beranda');
     navigateTo('main');
   };
@@ -345,10 +392,12 @@ export const ThoriqOnboardingScreen: React.FC = () => {
       case 1:
         return require('../../../assets/mascot/mascot_thinking_clean.png');
       case 2:
-        return require('../../../assets/mascot/mascot_waving_clean.png');
+        // Saat nanya nama ("Keren! Terus, bagaimana kami bisa memanggilmu?") -> Pose Jempol
+        return require('../../../assets/mascot/mascot_thumbsup_clean.png');
       case 3:
       default:
-        return require('../../../assets/mascot/mascot_thumbsup_clean.png');
+        // Saat salam kenal ("Salam kenal {nickname}!") -> Pose Waving (Melambaikan tangan)
+        return require('../../../assets/mascot/mascot_waving_clean.png');
     }
   };
 
@@ -383,51 +432,74 @@ export const ThoriqOnboardingScreen: React.FC = () => {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, step === 0 && styles.scrollContentIntro]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {/* ========================================================
-            STEP 0: INTRO WYSA-STYLE ("Hai! Aku Thoriq")
+            STEP 0: INTRO HERO (Logo Top -> Mascot Center -> Text Bottom -> CTA)
         ======================================================== */}
         {step === 0 && (
           <View style={styles.introContainer}>
-            {/* Soft Ambient Radial Background Aura */}
-            <View style={styles.introAuraBackground} />
-
-            {/* Mascot Character (Static) */}
-            <View style={styles.introMascotWrap}>
+            {/* 1. TOP: Logo Teman Sebaya */}
+            <View style={styles.introLogoSection}>
               <Image
-                source={getMascotSource()}
-                style={styles.introMascotImage}
+                source={require('../../../assets/logo/teman_sebaya_logo_clean.png')}
+                style={styles.introLogoImage}
                 resizeMode="contain"
               />
             </View>
 
-            {/* Text Greeting ala Wysa */}
-            <View style={styles.introTextCard}>
-              <View style={styles.nameBadge}>
-                <Sparkles size={14} color={colors.brandBlue[600]} />
-                <Text style={styles.nameBadgeText}>TEMAN SEBAYA</Text>
-              </View>
+            {/* 2. CENTER: Hero Mascot with Aura and Playful Accents (Close to mascot) */}
+            <View style={styles.introMascotCenterArea}>
+              {/* Mascot Character with Concentric Background Aura and Accents */}
+              <View style={styles.introMascotWrap}>
+                {/* Soft Ambient Radial Background Aura */}
+                <View style={styles.introAuraBackground} />
 
-              <Text style={styles.introHeading}>Hai! Aku Thoriq 👋</Text>
+                {/* Playful Floating Accent 1: Heart on top right (close to hair) */}
+                <View style={styles.playfulDecorHeart}>
+                  <Heart size={22} color={colors.brandBlue[500]} fill={colors.brandBlue[200]} />
+                </View>
+
+                {/* Playful Floating Accent 2: Warm Playful Star on left (close to hand) */}
+                <View style={styles.playfulDecorStarLeft}>
+                  <Star size={18} color="#F59E0B" fill="#FEF3C7" />
+                </View>
+
+                {/* Playful Floating Accent 3: Subtle Sparkle on bottom right (close to arm) */}
+                <View style={styles.playfulDecorSparkleRight}>
+                  <Sparkles size={16} color={colors.brandBlue[600]} />
+                </View>
+
+                <Image
+                  source={getMascotSource()}
+                  style={styles.introMascotImage}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
+
+            {/* 3. BELOW MASCOT: Text Content (Heading -> Subtitle) */}
+            <View style={styles.introTextSection}>
+              <Text style={styles.introHeading}>Hai! Aku Thoriq</Text>
               <Text style={styles.introSubtitle}>
-                Teman sebaya yang siap mendengarkan tanpa menghakimi, membantumu merasa lebih tenang,
-                dan tumbuh bersama di ruang yang aman ini.
+                Teman yang siap mendengarkan ceritamu tanpa menghakimi, membantumu merasa lebih tenang, dan bertumbuh bersama.
               </Text>
             </View>
 
-            {/* CTA Button */}
-            <Button
-              title="Hai Thoriq, Salam Kenal!"
-              variant="primary"
-              fullWidth
-              size="lg"
-              onPress={handleProceedFromIntro}
-              style={styles.introCtaBtn}
-              textStyle={styles.introCtaBtnText}
-            />
+            {/* 4. BOTTOM: CTA Button */}
+            <View style={styles.introBottomSection}>
+              <Button
+                title="Hai Thoriq, Salam Kenal!"
+                variant="primary"
+                fullWidth
+                size="lg"
+                onPress={handleProceedFromIntro}
+                style={styles.introCtaBtn}
+                textStyle={styles.introCtaBtnText}
+              />
+            </View>
           </View>
         )}
 
@@ -703,7 +775,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
               >
                 <View style={styles.speechTail} />
                 <Text style={styles.speechText}>
-                  Sebelum kita mulai keliling, gimana perasaanmu hari ini, {nickname || 'Teman'}? 👍✨
+                  Salam kenal {nickname ? nickname.trim() : 'Teman'}! Btw, hari ini kabar hatimu lagi gimana nih? 😊
                 </Text>
               </Animated.View>
             </View>
@@ -711,90 +783,60 @@ export const ThoriqOnboardingScreen: React.FC = () => {
             {/* 4 Mood Cards Selection */}
             <View style={styles.formCard}>
               <Text style={styles.moodPromptSubtitle}>
-                Pilih emosi yang paling mewakili hatimu sekarang:
+                Pilih emosimu saat ini:
               </Text>
 
               <View style={styles.moodGrid}>
-                {/* Bahagia */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedMood('Bahagia')}
-                  style={[
-                    styles.moodCardOption,
-                    selectedMood === 'Bahagia' && {
-                      borderColor: colors.brandGreen[600],
-                      backgroundColor: colors.brandGreen[50],
-                    },
-                  ]}
-                >
-                  <Smile size={32} color={colors.brandGreen[600]} />
-                  <Text style={styles.moodCardTitle}>Bahagia</Text>
-                  <Text style={styles.moodCardHint}>Senang & Bersemangat</Text>
-                </TouchableOpacity>
-
-                {/* Sedih */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedMood('Sedih')}
-                  style={[
-                    styles.moodCardOption,
-                    selectedMood === 'Sedih' && {
-                      borderColor: colors.brandBlue[600],
-                      backgroundColor: colors.brandBlue[50],
-                    },
-                  ]}
-                >
-                  <Frown size={32} color={colors.brandBlue[600]} />
-                  <Text style={styles.moodCardTitle}>Sedih</Text>
-                  <Text style={styles.moodCardHint}>Perlu didengarkan</Text>
-                </TouchableOpacity>
-
-                {/* Marah */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedMood('Marah')}
-                  style={[
-                    styles.moodCardOption,
-                    selectedMood === 'Marah' && {
-                      borderColor: colors.crisis.dangerText,
-                      backgroundColor: '#FEF2F2',
-                    },
-                  ]}
-                >
-                  <Flame size={32} color={colors.crisis.dangerText} />
-                  <Text style={styles.moodCardTitle}>Marah</Text>
-                  <Text style={styles.moodCardHint}>Sedang kesal / lelah</Text>
-                </TouchableOpacity>
-
-                {/* Biasa Saja */}
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedMood('Biasa Saja')}
-                  style={[
-                    styles.moodCardOption,
-                    selectedMood === 'Biasa Saja' && {
-                      borderColor: colors.accentAmber[600],
-                      backgroundColor: colors.accentAmber[50],
-                    },
-                  ]}
-                >
-                  <Meh size={32} color={colors.accentAmber[600]} />
-                  <Text style={styles.moodCardTitle}>Biasa Saja</Text>
-                  <Text style={styles.moodCardHint}>Tenang & netral</Text>
-                </TouchableOpacity>
+                {MOOD_OPTIONS.map((mood) => {
+                  const isSelected = selectedMood === mood.type;
+                  return (
+                    <TouchableOpacity
+                      key={mood.type}
+                      activeOpacity={0.8}
+                      onPress={() => setSelectedMood(mood.type)}
+                      style={[
+                        styles.moodCardOption,
+                        isSelected && {
+                          borderColor: mood.activeColor,
+                          backgroundColor: mood.activeBg,
+                          shadowColor: mood.activeColor,
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.22,
+                          shadowRadius: 8,
+                          elevation: 3,
+                        },
+                      ]}
+                    >
+                      <Image
+                        source={mood.image}
+                        style={[
+                          styles.moodEmojiImage,
+                          !isSelected && styles.moodEmojiImageUnselected,
+                        ]}
+                        resizeMode="contain"
+                      />
+                      <Text
+                        style={[
+                          styles.moodCardTitle,
+                          isSelected && { color: mood.activeTitleColor },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {mood.label}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.moodCardHint,
+                          isSelected && { color: mood.activeHintColor },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {mood.hint}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-
-              {/* Optional Mood Note */}
-              {selectedMood && (
-                <Input
-                  label="Cerita Singkat (Opsional)"
-                  placeholder="Mau cerita sedikit tentang apa yang terjadi?"
-                  value={moodNote}
-                  onChangeText={setMoodNote}
-                  inputWrapperStyle={styles.roundedInputWrapper}
-                  containerStyle={{ marginTop: spacing.sm }}
-                />
-              )}
 
               {/* Submit Button */}
               <Button
@@ -925,6 +967,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 40,
   },
+  scrollContentIntro: {
+    paddingBottom: 0,
+    flexGrow: 1,
+  },
 
   /* Top Bar & Stepper */
   topBar: {
@@ -963,76 +1009,107 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
-  /* ==================== STEP 0: INTRO WYSA STYLES ==================== */
+  /* ==================== STEP 0: INTRO HERO STYLES ==================== */
   introContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 44 : 24,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    minHeight: Dimensions.get('window').height > 660 ? Dimensions.get('window').height - (Platform.OS === 'ios' ? 70 : 44) : 580,
+  },
+  introLogoSection: {
+    alignItems: 'center',
+    width: '100%',
+    paddingTop: 4,
+    marginBottom: 2,
+    zIndex: 2,
+  },
+  introLogoImage: {
+    width: 135,
+    height: 74,
+  },
+  introTextSection: {
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 4,
+    marginBottom: 14,
+    zIndex: 2,
+  },
+  introHeading: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    marginBottom: 6,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  introSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    maxWidth: 320,
+    paddingHorizontal: 8,
+  },
+  introMascotCenterArea: {
+    width: '100%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 70 : 50,
-    paddingBottom: 36,
+    position: 'relative',
+    marginTop: 4,
+    marginBottom: 4,
+    minHeight: 250,
   },
   introAuraBackground: {
     position: 'absolute',
-    top: 60,
-    width: 320,
-    height: 320,
-    borderRadius: 160,
+    width: 225,
+    height: 225,
+    borderRadius: 112.5,
     backgroundColor: '#DBEAFE',
-    opacity: 0.45,
+    opacity: 0.5,
+    top: 18,
+    alignSelf: 'center',
+  },
+  playfulDecorHeart: {
+    position: 'absolute',
+    top: 8,
+    right: 18,
+    transform: [{ rotate: '14deg' }],
+    zIndex: 3,
+  },
+  playfulDecorStarLeft: {
+    position: 'absolute',
+    top: 86,
+    left: 6,
+    transform: [{ rotate: '-12deg' }],
+    zIndex: 3,
+  },
+  playfulDecorSparkleRight: {
+    position: 'absolute',
+    bottom: 40,
+    right: 16,
+    transform: [{ rotate: '8deg' }],
+    zIndex: 3,
   },
   introMascotWrap: {
-    width: 250,
-    height: 320,
+    width: 240,
+    height: 260,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    position: 'relative',
+    zIndex: 2,
   },
   introMascotImage: {
     width: '100%',
     height: '100%',
   },
-  introTextCard: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingHorizontal: 22,
-    paddingVertical: 24,
-    marginBottom: 28,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  nameBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: colors.brandBlue[50],
-    marginBottom: 10,
-  },
-  nameBadgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: colors.brandBlue[600],
-    letterSpacing: 0.6,
-  },
-  introHeading: {
-    fontSize: 27,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  introSubtitle: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: colors.textSecondary,
-    textAlign: 'center',
+  introBottomSection: {
+    width: '100%',
+    paddingTop: 8,
+    zIndex: 2,
   },
   introCtaBtn: {
     borderRadius: 24,
@@ -1237,17 +1314,28 @@ const styles = StyleSheet.create({
   moodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
+    rowGap: 12,
     marginBottom: 16,
   },
   moodCardOption: {
-    width: '48%',
+    width: '48.5%',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 16,
-    borderRadius: 18,
+    paddingHorizontal: 8,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: colors.borderLight,
     backgroundColor: '#F8FAFC',
+  },
+  moodEmojiImage: {
+    width: 48,
+    height: 48,
+    marginBottom: 6,
+  },
+  moodEmojiImageUnselected: {
+    opacity: 0.88,
   },
   moodCardTitle: {
     fontSize: 14,
@@ -1255,10 +1343,13 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginTop: 8,
     marginBottom: 2,
+    textAlign: 'center',
   },
   moodCardHint: {
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textMuted,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 
   /* Buttons */

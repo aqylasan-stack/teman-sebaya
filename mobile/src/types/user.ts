@@ -19,6 +19,7 @@ export interface UserProfile {
   allowAiMoodAccess: boolean;
   dailyReminderEnabled: boolean;
   dailyReminderTime: string;
+  initialEmotion?: string;
 }
 
 export interface AuthState {

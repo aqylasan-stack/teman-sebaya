@@ -44,6 +44,9 @@ interface AppContextProps {
   // Mood
   moodEntries: MoodEntry[];
   todayMood: MoodEntry | null;
+  dailyMoodStatus: 'completed' | 'skipped' | 'not_started';
+  skipMoodCheckinToday: () => void;
+  resetMoodCheckinToday: () => void;
   saveMood: (
     primaryEmotion: PrimaryEmotion,
     secondaryEmotions: string[],
@@ -100,7 +103,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     {
       id: 'msg_001',
       sender: 'ai',
-      senderName: 'Teman Sebaya (AI)',
+      senderName: 'Teman Akses',
       text: 'Halo, Teman! Terima kasih sudah mampir. Ruang ini adalah tempat aman untukmu bercerita atau meluapkan pikiran tanpa dihakimi. Apa yang sedang kamu rasakan hari ini?',
       timestamp: '08:30',
     },
@@ -154,9 +157,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ...initialUser,
       email: email || initialUser.email,
     });
-    setCurrentScreen('main');
+    // Alur khusus pengguna yang berhasil login: Daily Mood Check-in 3 tahap
+    setCurrentScreen('daily_mood_checkin');
     setCurrentTab('beranda');
-    setScreenStack(['main']);
+    setScreenStack(['daily_mood_checkin']);
     return true;
   };
 
@@ -185,8 +189,49 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setUser((prev) => (prev ? { ...prev, ...partial } : null));
   };
 
-  // Mood Actions
-  const todayMood = moodEntries.length > 0 ? moodEntries[0] : null;
+  // Mood State & Helpers
+  const [moodCheckinSkippedDate, setMoodCheckinSkippedDate] = useState<string | null>(null);
+
+  const isToday = (dateIsoOrStr: string): boolean => {
+    try {
+      const entryDate = new Date(dateIsoOrStr);
+      const now = new Date();
+      return (
+        entryDate.getFullYear() === now.getFullYear() &&
+        entryDate.getMonth() === now.getMonth() &&
+        entryDate.getDate() === now.getDate()
+      );
+    } catch {
+      return false;
+    }
+  };
+
+  const getTodayDateKey = (): string => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  };
+
+  // Actual today's mood entry based on user's local date
+  const todayMood = moodEntries.find((entry) => isToday(entry.timestamp)) || null;
+
+  const skipMoodCheckinToday = () => {
+    setMoodCheckinSkippedDate(getTodayDateKey());
+  };
+
+  const resetMoodCheckinToday = () => {
+    setMoodCheckinSkippedDate(null);
+    setMoodEntries((prev) => prev.filter((entry) => !isToday(entry.timestamp)));
+  };
+
+  const isMoodCheckinSkippedToday =
+    moodCheckinSkippedDate === getTodayDateKey() && !todayMood;
+
+  // Mutual exclusive 3 states: 'completed' | 'skipped' | 'not_started'
+  const dailyMoodStatus: 'completed' | 'skipped' | 'not_started' = todayMood
+    ? 'completed'
+    : isMoodCheckinSkippedToday
+    ? 'skipped'
+    : 'not_started';
 
   const saveMood = (
     primaryEmotion: PrimaryEmotion,
@@ -198,7 +243,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const timeFormatted = `${String(now.getHours()).padStart(2, '0')}:${String(
       now.getMinutes()
     ).padStart(2, '0')} WIB`;
-    const dateFormatted = `${now.getDate()} Nov 2026`;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const dateFormatted = `${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()}`;
 
     const newEntry: MoodEntry = {
       id: `mood_${Date.now()}`,
@@ -212,7 +258,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       intensity: 4,
     };
 
-    setMoodEntries((prev) => [newEntry, ...prev]);
+    // Filter out any existing today entry so user only records once per day (or updates existing)
+    setMoodEntries((prev) => [newEntry, ...prev.filter((e) => !isToday(e.timestamp))]);
 
     // Update streak if needed
     if (user) {
@@ -277,7 +324,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const aiMsg: ChatMessage = {
         id: `msg_${Date.now()}_a`,
         sender: 'ai',
-        senderName: 'Teman Cerita (AI)',
+        senderName: 'Teman Akses',
         text: aiReply,
         timestamp: timeFormatted,
         isBreathingPrompt: isBreathing,
@@ -338,6 +385,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         updateProfile,
         moodEntries,
         todayMood,
+        dailyMoodStatus,
+        skipMoodCheckinToday,
+        resetMoodCheckinToday,
         saveMood,
         weeklyStats,
         chatMessages,

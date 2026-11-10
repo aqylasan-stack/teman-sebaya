@@ -1,5 +1,15 @@
 # Proyek Teman Sebaya - Panduan Integrasi FigCraft
 
+## ⛔ ATURAN KETAT: DILARANG MENGEDIT FIGCRAFT KECUALI DIMINTA EKSPLISIT
+
+> [!CAUTION]
+> **DILARANG KERAS MENGUBAH / MENGEDIT FIGCRAFT KECUALI DIMINTA SECARA EKSPLISIT OLEH USER.**
+>
+> 1. AI Assistant **TIDAK BOLEH** memodifikasi file `.figcraft`, memanggil API FigCraft MCP/CLI (port 7979), mengubah node/layer/halaman, atau menambah/menghapus frame di FigCraft secara otomatis.
+> 2. Perubahan pada kanvas FigCraft **HANYA BOLEH DILAKUKAN JIKA DAN HANYA JIKA** user memberikan perintah langsung dan eksplisit (contoh: *"Update canvas FigCraft"*, *"Tolong ubah frame ini di FigCraft"*).
+> 3. Jika user sedang membahas fitur, alur logika, bug kode, atau UI mobile, fokuskan seluruh pekerjaan pada codebase React Native (`mobile/src/`), dan **biarkan FigCraft tetap apa adanya (untouched)**.
+> 4. Rujukan lengkap kebijakan ini ada di: [`FIGCRAFT_POLICY.md`](file:///c:/Users/Fhazar/Fhazar_Workspace/02_PROJECTS/teman-sebaya/FIGCRAFT_POLICY.md).
+
 Proyek ini terintegrasi penuh dengan **FigCraft** melalui Model Context Protocol (MCP) dan `figcraft-cli`.
 
 ## Status Integrasi
