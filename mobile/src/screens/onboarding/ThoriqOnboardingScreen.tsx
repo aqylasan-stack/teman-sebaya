@@ -386,7 +386,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
     updateProfile({
       nickname: cleanNick,
       name: user?.name || cleanNick,
-      pseudonym: `${cleanNick} (Anonim)`,
+      pseudonym: cleanNick,
       city: city.trim(),
       interests: selectedInterests,
       age: computedAge,

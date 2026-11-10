@@ -20,16 +20,15 @@ import {
   ChevronRight,
   Flame,
   Award,
-  X,
-  Lock,
 } from 'lucide-react-native';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { Modal } from '../../components/common/Modal';
-import { Button } from '../../components/common/Button';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../state/AppContext';
 
 export const ProfileScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const {
     user,
     navigateTo,
@@ -39,36 +38,73 @@ export const ProfileScreen: React.FC = () => {
     openCrisisModal,
   } = useApp();
 
-  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const savedCount = articles.filter((a) => a.isSaved).length;
 
-  const displayName = user?.nickname || user?.name || 'Anya Sebaya';
-  const roleOrSchool = user?.schoolOrOrg || 'PIK-R SMAN 1 Karawang';
+  const displayName =
+    (user?.nickname || user?.pseudonym || user?.name || 'Anya Sebaya')
+      .replace(/\s*\(Anonim\)/gi, '')
+      .trim();
+  const roleOrSchool = user?.schoolOrOrg || 'SMAN 1 Karawang';
+
+  // Custom filled icons with high-contrast white glyphs for composite shapes
+  const FilledShieldCheck = ({ size = 18, color = colors.brandBlue[600] }: { size?: number; color?: string }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+        fill={color}
+        stroke={color}
+        strokeWidth={1.5}
+      />
+      <Path
+        d="m9 12 2 2 4-4"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+
+  const FilledHelpCircle = ({ size = 18, color = colors.brandBlue[600] }: { size?: number; color?: string }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx="12" cy="12" r="10" fill={color} stroke={color} strokeWidth={1} />
+      <Path
+        d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx="12" cy="17" r="1.1" fill="#FFFFFF" />
+    </Svg>
+  );
+
+  const FilledInfo = ({ size = 18, color = colors.brandBlue[600] }: { size?: number; color?: string }) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx="12" cy="12" r="10" fill={color} stroke={color} strokeWidth={1} />
+      <Path
+        d="M12 16v-4"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+      />
+      <Circle cx="12" cy="8" r="1.2" fill="#FFFFFF" />
+    </Svg>
+  );
 
   // Section Group 1: Akun Saya
   const accountMenuItems = [
     {
       id: 'edit_profile',
       title: 'Edit Profil',
-      subtitle: 'Nama samaran, info sekolah PIK-R, dan minat',
+      subtitle: 'Nama samaran, info sekolah, dan minat',
       icon: User,
       action: () => navigateTo('edit_profile'),
-    },
-    {
-      id: 'mood_history',
-      title: 'Riwayat Teman Mood',
-      subtitle: `${user?.moodEntriesCount ?? 0} catatan emosi & refleksi harian`,
-      icon: Heart,
-      action: () => switchTab('mood'),
-    },
-    {
-      id: 'chat_history',
-      title: 'Riwayat Teman Cerita',
-      subtitle: 'Sesi obrolan & konseling sebaya terenkripsi',
-      icon: MessageCircle,
-      action: () => switchTab('cerita'),
     },
     {
       id: 'saved_content',
@@ -92,7 +128,7 @@ export const ProfileScreen: React.FC = () => {
       id: 'privacy_security',
       title: 'Privasi dan Keamanan',
       subtitle: 'Mode anonim penuh & kontrol data emosi AI',
-      icon: ShieldCheck,
+      icon: FilledShieldCheck,
       action: () => navigateTo('privacy_settings'),
     },
   ];
@@ -103,15 +139,15 @@ export const ProfileScreen: React.FC = () => {
       id: 'help_center',
       title: 'Pusat Bantuan',
       subtitle: 'Hotline Krisis SEJIWA 119 & panduan darurat',
-      icon: HelpCircle,
+      icon: FilledHelpCircle,
       action: () => openCrisisModal(),
     },
     {
       id: 'about_teman_sebaya',
       title: 'Tentang TEMAN SEBAYA',
       subtitle: 'Platform kesehatan mental & PIK-R Remaja',
-      icon: Info,
-      action: () => setIsAboutModalOpen(true),
+      icon: FilledInfo,
+      action: () => navigateTo('about_app'),
     },
   ];
 
@@ -140,6 +176,7 @@ export const ProfileScreen: React.FC = () => {
             const Icon = item.icon;
             const isLast = index === items.length - 1;
             const isDanger = item.isDanger;
+            const iconColor = isDanger ? colors.crisis.dangerText : colors.brandBlue[600];
 
             return (
               <TouchableOpacity
@@ -160,7 +197,8 @@ export const ProfileScreen: React.FC = () => {
                 >
                   <Icon
                     size={18}
-                    color={isDanger ? colors.crisis.dangerText : colors.brandBlue[600]}
+                    color={iconColor}
+                    fill={isDanger ? 'none' : iconColor}
                     strokeWidth={2.0}
                   />
                 </View>
@@ -200,7 +238,7 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      withBottomNav
+      withBottomNav={false}
       style={styles.screenBg}
       contentContainerStyle={styles.scrollContent}
     >
@@ -211,8 +249,20 @@ export const ProfileScreen: React.FC = () => {
         {/* Centered Identity Layout: Foto -> Nama -> Sekolah/Komunitas */}
         <View style={styles.centeredIdentityContainer}>
           {/* Avatar Utama Proporsional */}
-          <View style={styles.avatarCircle}>
-            {!imageError ? (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigateTo('edit_profile')}
+            style={styles.avatarCircle}
+            accessibilityLabel="Ubah Foto Profil"
+            accessibilityRole="button"
+          >
+            {user?.avatarUrl ? (
+              <Image
+                source={{ uri: user.avatarUrl }}
+                style={styles.avatarImg}
+                resizeMode="cover"
+              />
+            ) : !imageError ? (
               <Image
                 source={require('../../../assets/branding/mascot_avatar.png')}
                 style={styles.avatarImg}
@@ -224,7 +274,7 @@ export const ProfileScreen: React.FC = () => {
                 {user?.avatarInitials || 'AS'}
               </Text>
             )}
-          </View>
+          </TouchableOpacity>
 
           {/* Nama Pengguna */}
           <Text style={styles.profileName} numberOfLines={1}>
@@ -244,7 +294,12 @@ export const ProfileScreen: React.FC = () => {
           {/* 1. Hari Beruntun */}
           <View style={styles.statItem}>
             <View style={styles.statValueRow}>
-              <Flame size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Flame
+                size={16}
+                color={colors.accentPeach[500]}
+                fill={colors.accentPeach[500]}
+                strokeWidth={2.0}
+              />
               <Text style={styles.statNumber}>
                 {user?.activeStreakDays ?? 1}
               </Text>
@@ -257,7 +312,12 @@ export const ProfileScreen: React.FC = () => {
           {/* 2. Total Refleksi */}
           <View style={styles.statItem}>
             <View style={styles.statValueRow}>
-              <Heart size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Heart
+                size={16}
+                color={colors.crisis.dangerBorder}
+                fill={colors.crisis.dangerBorder}
+                strokeWidth={2.0}
+              />
               <Text style={styles.statNumber}>
                 {user?.moodEntriesCount ?? 0}
               </Text>
@@ -270,7 +330,12 @@ export const ProfileScreen: React.FC = () => {
           {/* 3. Tantangan */}
           <View style={styles.statItem}>
             <View style={styles.statValueRow}>
-              <Award size={15} color={colors.brandBlue[600]} strokeWidth={2.2} />
+              <Award
+                size={16}
+                color={colors.accentAmber[500]}
+                fill={colors.accentAmber[500]}
+                strokeWidth={2.0}
+              />
               <Text style={styles.statNumber}>
                 {user?.challengesCompleted ?? 5}
               </Text>
@@ -283,7 +348,7 @@ export const ProfileScreen: React.FC = () => {
       {/* ============================================================== */}
       {/* 3. WHITE SHEET CONTENT (Grouped Settings Navigation)           */}
       {/* ============================================================== */}
-      <View style={styles.sheetContainer}>
+      <View style={[styles.sheetContainer, { paddingBottom: 88 + insets.bottom }]}>
         {/* Group 1: Akun Saya */}
         {renderMenuGroup('Akun Saya', accountMenuItems)}
 
@@ -315,78 +380,6 @@ export const ProfileScreen: React.FC = () => {
           </Text>
         </View>
       </View>
-
-      {/* ============================================================== */}
-      {/* 4. MODAL: TENTANG TEMAN SEBAYA                                 */}
-      {/* ============================================================== */}
-      <Modal visible={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)}>
-        <View style={styles.aboutModalContent}>
-          {/* Header Close Button */}
-          <TouchableOpacity
-            style={styles.modalCloseBtn}
-            onPress={() => setIsAboutModalOpen(false)}
-            accessibilityLabel="Tutup Informasi"
-          >
-            <X size={20} color={colors.textMuted} />
-          </TouchableOpacity>
-
-          {/* App Branding */}
-          <View style={styles.aboutHeader}>
-            <Image
-              source={require('../../../assets/branding/logo.png')}
-              style={styles.aboutLogo}
-              resizeMode="contain"
-            />
-            <Text style={styles.aboutAppTitle}>TEMAN SEBAYA</Text>
-            <Text style={styles.aboutTagline}>
-              Ruang Konseling & Literasi Emosi Remaja
-            </Text>
-            <View style={styles.versionBadge}>
-              <Text style={styles.versionBadgeText}>Versi 1.0.0 (Release 2026)</Text>
-            </View>
-          </View>
-
-          {/* Description */}
-          <Text style={styles.aboutBodyText}>
-            Teman Sebaya adalah platform kesehatan mental digital yang dirancang
-            khusus untuk mendampingi remaja Indonesia. Kami berkolaborasi dengan
-            kelompok binaan PIK-R (Pusat Informasi dan Konseling Remaja) dan
-            BKKBN untuk menyediakan ruang bercerita yang aman, terenkripsi, serta
-            bebas dari penghakiman.
-          </Text>
-
-          {/* Commitments Box */}
-          <View style={styles.aboutCommitmentsBox}>
-            <View style={styles.commitmentRow}>
-              <ShieldCheck size={16} color={colors.brandGreen[600]} />
-              <Text style={styles.commitmentText}>
-                100% Bebas Stigma & Menjaga Kerahasiaan
-              </Text>
-            </View>
-            <View style={styles.commitmentRow}>
-              <Lock size={16} color={colors.brandBlue[600]} />
-              <Text style={styles.commitmentText}>
-                Data Terenkripsi & Mode Anonim Penuh
-              </Text>
-            </View>
-            <View style={styles.commitmentRow}>
-              <HelpCircle size={16} color={colors.accentPeach[600]} />
-              <Text style={styles.commitmentText}>
-                Terintegrasi Hotline Krisis SEJIWA 119 Ext 8
-              </Text>
-            </View>
-          </View>
-
-          {/* Action Button */}
-          <Button
-            title="Tutup Informasi"
-            variant="primary"
-            fullWidth
-            onPress={() => setIsAboutModalOpen(false)}
-            style={styles.modalActionBtn}
-          />
-        </View>
-      </Modal>
     </ScreenContainer>
   );
 };
@@ -398,6 +391,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 0,
     paddingTop: 0,
+    paddingBottom: 0,
     backgroundColor: colors.babyBlue,
   },
 
@@ -515,8 +509,6 @@ const styles = StyleSheet.create({
     marginTop: -10,
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 28,
-    minHeight: 520,
   },
   menuGroup: {
     marginBottom: 16,
@@ -595,81 +587,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.textPlaceholder,
     marginTop: 2,
-  },
-
-  /* ============================================================== */
-  /* ABOUT MODAL STYLES                                             */
-  /* ============================================================== */
-  aboutModalContent: {
-    position: 'relative',
-    paddingTop: 8,
-  },
-  modalCloseBtn: {
-    position: 'absolute',
-    top: -4,
-    right: 0,
-    padding: 6,
-    zIndex: 10,
-  },
-  aboutHeader: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  aboutLogo: {
-    width: 48,
-    height: 48,
-    marginBottom: 8,
-  },
-  aboutAppTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    letterSpacing: 0.5,
-  },
-  aboutTagline: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  versionBadge: {
-    backgroundColor: colors.brandBlue[50],
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: borderRadius.full,
-    marginTop: 6,
-  },
-  versionBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.brandBlue[700],
-  },
-  aboutBodyText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 18,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  aboutCommitmentsBox: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: borderRadius.md,
-    padding: 12,
-    gap: 8,
-    marginBottom: 18,
-  },
-  commitmentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  commitmentText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    flex: 1,
-  },
-  modalActionBtn: {
-    marginTop: 4,
   },
 });

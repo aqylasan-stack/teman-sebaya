@@ -45,7 +45,8 @@ export type ScreenType =
   | 'community_events'
   | 'teman_supportif'
   | 'edit_profile'
-  | 'privacy_settings';
+  | 'privacy_settings'
+  | 'about_app';
 
 export interface NavigationState {
   currentScreen: ScreenType;

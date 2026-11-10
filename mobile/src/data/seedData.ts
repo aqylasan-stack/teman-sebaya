@@ -14,7 +14,7 @@ export const initialUser: UserProfile = {
   id: 'usr_001',
   name: 'Anya Sebaya',
   nickname: 'Anya',
-  pseudonym: 'Anya Sebaya (Anonim)',
+  pseudonym: 'Anya Sebaya',
   email: 'anya.sebaya@teman.id',
   avatarInitials: 'AS',
   joinedDate: 'Nov 2026',

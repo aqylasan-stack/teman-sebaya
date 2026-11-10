@@ -83,6 +83,121 @@ const EXACT_OR_TOKEN_BLOCKED_WORDS = [
 ];
 
 /**
+ * Memeriksa apakah teks memuat kata kasar, vulgar, seksual, atau tidak pantas.
+ */
+export const containsProfanity = (
+  rawText: string
+): { hasProfanity: boolean; matchedWord?: string } => {
+  if (!rawText) return { hasProfanity: false };
+
+  let normalized = rawText.toLowerCase();
+  normalized = normalized
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's');
+
+  const condensed = normalized.replace(/[^a-z]/g, '');
+  const tokens: string[] = normalized.match(/[a-z]+/g) || [];
+
+  for (const word of SUBSTRING_BLOCKED_WORDS) {
+    if (condensed.includes(word)) {
+      return { hasProfanity: true, matchedWord: word };
+    }
+  }
+
+  for (const word of EXACT_OR_TOKEN_BLOCKED_WORDS) {
+    if (tokens.includes(word) || condensed === word) {
+      return { hasProfanity: true, matchedWord: word };
+    }
+  }
+
+  return { hasProfanity: false };
+};
+
+/**
+ * Validasi nama lengkap pengguna.
+ * - Minimal 2 karakter, maksimal 60 karakter.
+ * - Hanya memuat huruf alfabet, spasi, tanda hubung (-), titik (.), atau petik (').
+ * - Wajib memuat huruf vokal.
+ * - Mencegah pengulangan huruf berlebihan.
+ * - Menyaring kata kasar, vulgar, atau tidak etis (profanity filter).
+ */
+export const validateFullName = (rawName: string): ValidationResult => {
+  const trimmed = rawName.trim();
+
+  if (!trimmed) {
+    return {
+      isValid: false,
+      error: 'Nama lengkap tidak boleh kosong.',
+    };
+  }
+
+  if (trimmed.length < 2) {
+    return {
+      isValid: false,
+      error: 'Nama lengkap minimal 2 karakter.',
+    };
+  }
+
+  if (trimmed.length > 60) {
+    return {
+      isValid: false,
+      error: 'Nama lengkap maksimal 60 karakter.',
+    };
+  }
+
+  // 1. Karakter hanya boleh alfabet, spasi, tanda hubung (-), titik (.), dan petik (')
+  const validCharRegex = /^[a-zA-Z\s'.-]+$/;
+  if (!validCharRegex.test(trimmed)) {
+    return {
+      isValid: false,
+      error: 'Nama hanya boleh menggunakan huruf, spasi, titik, atau tanda hubung.',
+    };
+  }
+
+  // 2. Tanda baca tidak boleh di awal atau berurutan
+  if (/^['-.]|\s{2,}|['-.]{2,}/.test(trimmed)) {
+    return {
+      isValid: false,
+      error: 'Hindari tanda baca di awal atau spasi berlebih.',
+    };
+  }
+
+  // 3. Wajib memuat setidaknya satu huruf vokal
+  const hasVowel = /[aeiouyAEIOUY]/.test(trimmed);
+  if (!hasVowel) {
+    return {
+      isValid: false,
+      error: 'Nama harus memuat huruf vokal yang wajar.',
+    };
+  }
+
+  // 4. Mencegah pengulangan karakter yang sama lebih dari 3 kali berturut-turut
+  const repetitiveChar = /(.)\1{3,}/i;
+  if (repetitiveChar.test(trimmed)) {
+    return {
+      isValid: false,
+      error: 'Nama tidak wajar. Hindari pengulangan huruf berlebih.',
+    };
+  }
+
+  // 5. Menyaring kata kasar / profanity
+  const profanity = containsProfanity(trimmed);
+  if (profanity.hasProfanity) {
+    return {
+      isValid: false,
+      error: 'Nama tidak pantas atau memuat kata kasar. Mohon gunakan nama yang etis dan sopan.',
+    };
+  }
+
+  return { isValid: true };
+};
+
+/**
  * Validasi nama panggilan / nama samaran pengguna.
  * Menjamin nama manusiawi dan bermakna:
  * - Minimal 2 karakter, maksimal 25 karakter.
@@ -162,35 +277,12 @@ export const validateNickname = (rawName: string): ValidationResult => {
   }
 
   // 6. Menyaring kata-kata kasar / tidak etis (Profanity & Vulgarity Filter)
-  let normalized = trimmed.toLowerCase();
-  normalized = normalized
-    .replace(/0/g, 'o')
-    .replace(/1/g, 'i')
-    .replace(/3/g, 'e')
-    .replace(/4/g, 'a')
-    .replace(/5/g, 's')
-    .replace(/@/g, 'a')
-    .replace(/\$/g, 's');
-
-  const condensed = normalized.replace(/[^a-z]/g, '');
-  const tokens: string[] = normalized.match(/[a-z]+/g) || [];
-
-  for (const word of SUBSTRING_BLOCKED_WORDS) {
-    if (condensed.includes(word)) {
-      return {
-        isValid: false,
-        error: 'Nama tidak pantas atau memuat kata kasar. Mohon gunakan nama yang etis dan sopan.',
-      };
-    }
-  }
-
-  for (const word of EXACT_OR_TOKEN_BLOCKED_WORDS) {
-    if (tokens.includes(word) || condensed === word) {
-      return {
-        isValid: false,
-        error: 'Nama tidak pantas atau memuat kata kasar. Mohon gunakan nama yang etis dan sopan.',
-      };
-    }
+  const profanity = containsProfanity(trimmed);
+  if (profanity.hasProfanity) {
+    return {
+      isValid: false,
+      error: 'Nama tidak pantas atau memuat kata kasar. Mohon gunakan nama yang etis dan sopan.',
+    };
   }
 
   return { isValid: true };

@@ -258,7 +258,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       id: `usr_g_${Date.now()}`,
       name: name,
       nickname: name ? name.split(' ')[0] : '',
-      pseudonym: name ? `${name.split(' ')[0]} (Anonim)` : 'Teman Baru (Anonim)',
+      pseudonym: name ? name.split(' ')[0] : 'Teman Baru',
       email: email,
       avatarInitials: name
         ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -309,7 +309,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       id: `usr_${Date.now()}`,
       name: '',
       nickname: '',
-      pseudonym: 'Teman Baru (Anonim)',
+      pseudonym: 'Teman Baru',
       email: cleanEmail || 'teman@baru.id',
       avatarInitials: cleanEmail ? cleanEmail.slice(0, 2).toUpperCase() : 'TB',
       joinedDate: 'Nov 2026',

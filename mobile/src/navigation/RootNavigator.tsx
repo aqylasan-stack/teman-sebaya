@@ -41,6 +41,7 @@ import { MentalGameResultScreen } from '../screens/bermain/MentalGameResultScree
 import { SupportifScreen } from '../screens/supportif/SupportifScreen';
 import { EditProfileScreen } from '../screens/profil/EditProfileScreen';
 import { PrivacySettingsScreen } from '../screens/profil/PrivacySettingsScreen';
+import { AboutAppScreen } from '../screens/profil/AboutAppScreen';
 
 // Psychological Tests (matching WhatsApp screenshots)
 import { TestPsikologiScreen } from '../screens/tests/TestPsikologiScreen';
@@ -122,6 +123,8 @@ export const RootNavigator: React.FC = () => {
         return <EditProfileScreen />;
       case 'privacy_settings':
         return <PrivacySettingsScreen />;
+      case 'about_app':
+        return <AboutAppScreen />;
 
       // Main 5-tab shell
       case 'main':
