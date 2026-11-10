@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { User, Mail, Lock, CheckSquare, Square } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { colors, spacing } from '../../theme';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { GoogleIcon } from '../../components/common/GoogleIcon';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import { useApp } from '../../state/AppContext';
 
 export const RegisterScreen: React.FC = () => {
-  const { navigateTo } = useApp();
+  const { navigateTo, register } = useApp();
 
-  // All inputs strictly start empty
+  // All inputs strictly start empty per specification
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
 
-  // Errors
+  // Validation Errors
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmError, setConfirmError] = useState('');
   const [termsError, setTermsError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleRegister = () => {
     let isValid = true;
@@ -71,203 +83,342 @@ export const RegisterScreen: React.FC = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      // Navigate to OTP verification
+      // Navigate to OTP verification per architecture flow
       navigateTo('otp_verification', { name, email, password });
     }, 600);
   };
 
+  const handleGoogleRegister = () => {
+    setIsGoogleLoading(true);
+    setTimeout(() => {
+      setIsGoogleLoading(false);
+      register(name.trim() || 'Teman Baru', 'google.newuser@teman.id', 'google_session_pass');
+    }, 700);
+  };
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={styles.keyboardRoot}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.header}>
-        <Image
-          source={require('../../../assets/branding/logo.png')}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-        <Text style={styles.brandTitle}>TEMAN SEBAYA</Text>
-        <Text style={styles.screenHeading}>Daftar Akun Baru</Text>
-        <Text style={styles.screenSubheading}>
-          Dapatkan akses penuh ke seluruh ruang pendampingan dan fitur Teman Sebaya.
-        </Text>
-      </View>
+      <StatusBar barStyle="light-content" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        bounces={false}
+      >
+        {/* 1. Header Area: Follows App Primary Brand Blue */}
+        <View style={styles.header}>
+          {/* Die-Cut Sticker Logo (Clean standalone, without redundant text) */}
+          <Image
+            source={require('../../../assets/branding/logo_transparent.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
 
-      <View style={styles.form}>
-        <Input
-          label="Nama Lengkap / Samaran"
-          placeholder="Misal: Anya Sebaya"
-          value={name}
-          onChangeText={(val) => {
-            setName(val);
-            if (nameError) setNameError('');
-          }}
-          error={nameError}
-          leftIcon={<User size={18} color={colors.textMuted} />}
-        />
-
-        <Input
-          label="Alamat Email"
-          placeholder="contoh@email.com"
-          value={email}
-          onChangeText={(val) => {
-            setEmail(val);
-            if (emailError) setEmailError('');
-          }}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          error={emailError}
-          leftIcon={<Mail size={18} color={colors.textMuted} />}
-        />
-
-        <Input
-          label="Kata Sandi Baru"
-          placeholder="Minimal 8 karakter"
-          value={password}
-          onChangeText={(val) => {
-            setPassword(val);
-            if (passwordError) setPasswordError('');
-          }}
-          isPassword
-          error={passwordError}
-          leftIcon={<Lock size={18} color={colors.textMuted} />}
-        />
-
-        {/* Dynamic Password Strength Indicator */}
-        <PasswordStrengthMeter passwordValue={password} />
-
-        <Input
-          label="Konfirmasi Kata Sandi"
-          placeholder="Ulangi kata sandi baru"
-          value={confirmPassword}
-          onChangeText={(val) => {
-            setConfirmPassword(val);
-            if (confirmError) setConfirmError('');
-          }}
-          isPassword
-          error={confirmError}
-          leftIcon={<Lock size={18} color={colors.textMuted} />}
-          containerStyle={{ marginTop: spacing.xs }}
-        />
-
-        {/* Terms Agreement Checkbox */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => {
-            setTermsAgreed(!termsAgreed);
-            if (termsError) setTermsError('');
-          }}
-          style={styles.checkboxRow}
-        >
-          {termsAgreed ? (
-            <CheckSquare size={18} color={colors.brandBlue[600]} />
-          ) : (
-            <Square size={18} color={colors.borderMedium} />
-          )}
-          <Text style={styles.checkboxLabel}>
-            Saya menyetujui Ketentuan Layanan, Prinsip Ruang Aman, dan Kebijakan Privasi.
+          {/* Heading & Subtitle */}
+          <Text style={styles.headerHeading}>Buat Akun Barumu</Text>
+          <Text style={styles.headerSubtitle}>
+            Bergabung bersama ruang aman untuk mengenali diri dan bertumbuh bersama.
           </Text>
-        </TouchableOpacity>
-        {termsError ? <Text style={styles.errorText}>{termsError}</Text> : null}
+        </View>
 
-        <Button
-          title="Daftar Sekarang"
-          variant="primary"
-          fullWidth
-          loading={isLoading}
-          onPress={handleRegister}
-          style={styles.submitBtn}
-        />
-      </View>
+        {/* 2. Form Sheet: Rounded Top Corners overlapping Header */}
+        <View style={styles.formSheet}>
+          {/* Name Field */}
+          <Input
+            label="Nama Lengkap / Samaran"
+            placeholder="Misal: Anya Sebaya"
+            value={name}
+            onChangeText={(val) => {
+              setName(val);
+              if (nameError) setNameError('');
+            }}
+            error={nameError}
+            leftIcon={<User size={18} color={colors.textMuted} />}
+            inputWrapperStyle={styles.roundedInputWrapper}
+          />
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Sudah memiliki akun?</Text>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => navigateTo('login')}
-        >
-          <Text style={styles.loginLink}>Masuk ke Akun</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          {/* Email Field */}
+          <Input
+            label="Alamat Email"
+            placeholder="contoh@email.com"
+            value={email}
+            onChangeText={(val) => {
+              setEmail(val);
+              if (emailError) setEmailError('');
+            }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={emailError}
+            leftIcon={<Mail size={18} color={colors.textMuted} />}
+            inputWrapperStyle={styles.roundedInputWrapper}
+          />
+
+          {/* Password Field */}
+          <Input
+            label="Kata Sandi Baru"
+            placeholder="Minimal 8 karakter"
+            value={password}
+            onChangeText={(val) => {
+              setPassword(val);
+              if (passwordError) setPasswordError('');
+            }}
+            isPassword
+            error={passwordError}
+            leftIcon={<Lock size={18} color={colors.textMuted} />}
+            inputWrapperStyle={styles.roundedInputWrapper}
+            containerStyle={{ marginBottom: spacing.xs }}
+          />
+
+          {/* Password Strength Indicator */}
+          <PasswordStrengthMeter passwordValue={password} />
+
+          {/* Confirm Password Field */}
+          <Input
+            label="Konfirmasi Kata Sandi"
+            placeholder="Ulangi kata sandi baru"
+            value={confirmPassword}
+            onChangeText={(val) => {
+              setConfirmPassword(val);
+              if (confirmError) setConfirmError('');
+            }}
+            isPassword
+            error={confirmError}
+            leftIcon={<Lock size={18} color={colors.textMuted} />}
+            inputWrapperStyle={styles.roundedInputWrapper}
+            containerStyle={{ marginTop: spacing.xs, marginBottom: spacing.sm }}
+          />
+
+          {/* Terms & Conditions Agreement */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              setTermsAgreed(!termsAgreed);
+              if (termsError) setTermsError('');
+            }}
+            style={styles.termsRow}
+          >
+            {termsAgreed ? (
+              <CheckSquare size={17} color={colors.brandBlue[600]} style={{ marginTop: 2 }} />
+            ) : (
+              <Square size={17} color={termsError ? colors.crisis.dangerBorder : colors.borderMedium} style={{ marginTop: 2 }} />
+            )}
+            <Text style={styles.termsText}>
+              Saya menyetujui{' '}
+              <Text style={styles.termsHighlight}>Ketentuan Layanan</Text> &{' '}
+              <Text style={styles.termsHighlight}>Kebijakan Privasi</Text> Teman Sebaya.
+            </Text>
+          </TouchableOpacity>
+          {termsError ? <Text style={styles.termsErrorText}>{termsError}</Text> : null}
+
+          {/* Primary Action Button */}
+          <Button
+            title="Daftar Akun"
+            variant="primary"
+            fullWidth
+            size="lg"
+            loading={isLoading}
+            onPress={handleRegister}
+            style={styles.submitBtn}
+            textStyle={styles.submitBtnText}
+          />
+
+          {/* Separator ("atau") */}
+          <View style={styles.separatorRow}>
+            <View style={styles.separatorLine} />
+            <Text style={styles.separatorText}>atau</Text>
+            <View style={styles.separatorLine} />
+          </View>
+
+          {/* Google Sign-up Option */}
+          <TouchableOpacity
+            style={styles.googleBtn}
+            activeOpacity={0.8}
+            onPress={handleGoogleRegister}
+            disabled={isGoogleLoading}
+          >
+            <GoogleIcon size={20} />
+            <Text style={styles.googleBtnText}>
+              {isGoogleLoading ? 'Menghubungkan...' : 'Daftar dengan Google'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Bottom Navigation Link to Login */}
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Sudah memiliki akun? </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => navigateTo('login')}
+            >
+              <Text style={styles.footerLink}>Masuk</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.lg,
-    paddingTop: 54,
-    paddingBottom: 36,
-    justifyContent: 'space-between',
+  keyboardRoot: {
+    flex: 1,
+    backgroundColor: colors.brandBlue[600],
   },
+  scrollView: {
+    flex: 1,
+    backgroundColor: colors.brandBlue[600],
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: colors.brandBlue[600],
+  },
+
+  /* 1. Header Area */
   header: {
-    marginBottom: spacing.lg,
+    backgroundColor: colors.brandBlue[600],
+    paddingTop: Platform.OS === 'ios' ? 56 : 48,
+    paddingHorizontal: 24,
+    paddingBottom: 42,
   },
   logoImage: {
-    width: 56,
-    height: 56,
-    marginBottom: spacing.xs,
+    width: 136,
+    height: 79,
+    marginBottom: 16,
   },
-  brandTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    color: colors.brandBlue[600],
-    marginBottom: 4,
+  headerHeading: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    letterSpacing: -0.3,
   },
-  screenHeading: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 4,
+  headerSubtitle: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: 'rgba(255, 255, 255, 0.88)',
   },
-  screenSubheading: {
-    ...typography.bodyRegular,
-    color: colors.textSecondary,
-    lineHeight: 18,
-  },
-  form: {
+
+  /* 2. Form Sheet Container */
+  formSheet: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 30,
+    paddingBottom: Platform.OS === 'ios' ? 44 : 32,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  checkboxRow: {
+
+  /* Rounded Input Styling matching Reference */
+  roundedInputWrapper: {
+    borderRadius: 22,
+    height: 50,
+    borderColor: colors.borderMedium,
+    backgroundColor: '#FFFFFF',
+  },
+
+  /* Terms Checkbox */
+  termsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginVertical: spacing.xs,
+    alignItems: 'flex-start',
+    gap: 10,
+    marginTop: 4,
+    marginBottom: 20,
+    paddingRight: 8,
   },
-  checkboxLabel: {
+  termsText: {
     flex: 1,
-    fontSize: 11.5,
+    fontSize: 12.5,
+    lineHeight: 18,
     color: colors.textSecondary,
-    lineHeight: 16,
   },
-  errorText: {
+  termsHighlight: {
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+  },
+  termsErrorText: {
     fontSize: 11,
     color: colors.crisis.dangerText,
-    marginBottom: 6,
+    marginTop: -14,
+    marginBottom: 14,
   },
+
+  /* Primary Button */
   submitBtn: {
-    marginTop: spacing.md,
+    borderRadius: 24,
+    height: 50,
+    backgroundColor: colors.brandBlue[600],
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  footer: {
+  submitBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+
+  /* Separator */
+  separatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.borderLight,
+  },
+  separatorText: {
+    marginHorizontal: 14,
+    fontSize: 12.5,
+    color: colors.textMuted,
+    fontWeight: '500',
+  },
+
+  /* Google Button */
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    height: 50,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.borderMedium,
+    backgroundColor: '#FFFFFF',
+  },
+  googleBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+
+  /* Footer Bottom Navigation Link */
+  footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    marginTop: spacing.lg,
+    marginTop: 24,
+    paddingBottom: 10,
   },
   footerText: {
-    fontSize: 13,
+    fontSize: 13.5,
     color: colors.textSecondary,
   },
-  loginLink: {
-    fontSize: 13,
+  footerLink: {
+    fontSize: 13.5,
     fontWeight: '700',
     color: colors.brandBlue[600],
   },
 });
-

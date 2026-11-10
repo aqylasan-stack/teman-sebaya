@@ -14,6 +14,7 @@ export type ScreenType =
   | 'create_new_password'
   | 'password_reset_success'
   | 'age_consent'
+  | 'thoriq_onboarding'
   // Main Tabs (via tab bar)
   | 'main'
   // Sub-screens

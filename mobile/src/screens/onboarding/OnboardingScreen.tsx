@@ -9,6 +9,7 @@ import {
   Easing,
   StatusBar,
   Image,
+  Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useApp } from '../../state/AppContext';
@@ -17,6 +18,7 @@ const { width, height } = Dimensions.get('window');
 
 export const OnboardingScreen: React.FC = () => {
   const { navigateTo } = useApp();
+  const isNativeDriver = Platform.OS !== 'web';
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Animation values for smooth slide transitions
@@ -59,12 +61,12 @@ export const OnboardingScreen: React.FC = () => {
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 140,
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
       Animated.timing(slideAnim, {
         toValue: 8,
         duration: 140,
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
     ]).start(() => {
       setCurrentSlide(nextIndex);
@@ -73,13 +75,13 @@ export const OnboardingScreen: React.FC = () => {
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 200,
           easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
     });
@@ -89,12 +91,12 @@ export const OnboardingScreen: React.FC = () => {
     if (currentSlide < slides.length - 1) {
       animateSlideChange(currentSlide + 1);
     } else {
-      navigateTo('onboarding_complete');
+      navigateTo('login');
     }
   };
 
   const handleSkip = () => {
-    navigateTo('onboarding_complete');
+    navigateTo('login');
   };
 
   const handleGoToSlide = (idx: number) => {
@@ -239,10 +241,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  /* Top Section (~53% height) */
+  /* Top Section (~53% height + 18px vertical shift) */
   topArea: {
     width: width,
-    height: Math.round(height * 0.53),
+    height: Math.round(height * 0.53) + 18, // Geser ilustrasi beserta lengkungan bawahnya 18px ke bawah
     position: 'relative',
     overflow: 'hidden',
   },
@@ -276,14 +278,14 @@ const styles = StyleSheet.create({
   illustrationWrapper: {
     width: '100%',
     height: '100%',
-    marginTop: 20, // 1. Geser area ilustrasi sedikit lebih ke bawah menyerupai referensi
+    marginTop: 24, // Geser objek ilustrasi sedikit ke bawah mengikuti komposisi baru
   },
   illustrationImage: {
     width: '100%',
     height: '100%',
   },
 
-  /* Shallow Elliptical Curve Divider */
+  /* Shallow Elliptical Curve Divider (Bentuk Elips Horizontal Dipertahankan) */
   waveContainer: {
     position: 'absolute',
     bottom: 0,
@@ -303,7 +305,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 28,
-    paddingTop: 54, // 2. Turunkan posisi heading & deskripsi lebih ke bawah
+    paddingTop: 42, // Menyesuaikan posisi teks mengikuti posisi baru ilustrasi
     paddingBottom: 36,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -311,7 +313,7 @@ const styles = StyleSheet.create({
   textContainer: {
     alignItems: 'center',
     paddingHorizontal: 8,
-    marginTop: 12, // Spacing seimbang agar jarak lengkungan, heading, dan deskripsi proporsional
+    marginTop: 10, // Spacing seimbang antara lengkungan kurva elips dan heading
   },
   titleText: {
     fontSize: 24,

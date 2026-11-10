@@ -54,7 +54,7 @@ export const OtpVerificationScreen: React.FC = () => {
       if (screenParams.name && screenParams.email) {
         register(screenParams.name, screenParams.email, screenParams.password || '');
       }
-      navigateTo('registration_success');
+      navigateTo('thoriq_onboarding', { name: screenParams.name });
     }, 600);
   };
 

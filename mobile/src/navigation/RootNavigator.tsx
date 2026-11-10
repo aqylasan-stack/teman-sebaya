@@ -8,7 +8,7 @@ import { LogoutDialog } from '../components/profil/LogoutDialog';
 // Onboarding & Auth screens
 import { SplashScreen } from '../screens/onboarding/SplashScreen';
 import { OnboardingScreen } from '../screens/onboarding/OnboardingScreen';
-import { OnboardingCompleteScreen } from '../screens/onboarding/OnboardingCompleteScreen';
+import { ThoriqOnboardingScreen } from '../screens/onboarding/ThoriqOnboardingScreen';
 import { AgeConsentScreen } from '../screens/onboarding/AgeConsentScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
@@ -57,11 +57,11 @@ export const RootNavigator: React.FC = () => {
       case 'onboarding':
         return <OnboardingScreen />;
       case 'onboarding_complete':
-        return <OnboardingCompleteScreen />;
-      case 'age_consent':
-        return <AgeConsentScreen />;
       case 'login':
         return <LoginScreen />;
+      case 'age_consent':
+      case 'thoriq_onboarding':
+        return <ThoriqOnboardingScreen />;
       case 'register':
         return <RegisterScreen />;
       case 'otp_verification':

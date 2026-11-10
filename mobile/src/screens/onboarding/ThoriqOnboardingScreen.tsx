@@ -1,0 +1,1423 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Animated,
+  Easing,
+  Platform,
+  StatusBar,
+  KeyboardAvoidingView,
+  TextInput,
+} from 'react-native';
+import {
+  ArrowLeft,
+  CheckSquare,
+  Square,
+  Sparkles,
+  MapPin,
+  Smile,
+  Frown,
+  Flame,
+  Meh,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  Search,
+  X,
+} from 'lucide-react-native';
+import { colors, spacing, borderRadius, typography } from '../../theme';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
+import { Modal } from '../../components/common/Modal';
+import { useApp } from '../../state/AppContext';
+import { PrimaryEmotion } from '../../types';
+
+// Daftar resmi 27 Kota & Kabupaten di Provinsi Jawa Barat
+const WEST_JAVA_CITIES = [
+  'Kabupaten Bandung',
+  'Kabupaten Bandung Barat',
+  'Kabupaten Bekasi',
+  'Kabupaten Bogor',
+  'Kabupaten Ciamis',
+  'Kabupaten Cianjur',
+  'Kabupaten Cirebon',
+  'Kabupaten Garut',
+  'Kabupaten Indramayu',
+  'Kabupaten Karawang',
+  'Kabupaten Kuningan',
+  'Kabupaten Majalengka',
+  'Kabupaten Pangandaran',
+  'Kabupaten Purwakarta',
+  'Kabupaten Subang',
+  'Kabupaten Sukabumi',
+  'Kabupaten Sumedang',
+  'Kabupaten Tasikmalaya',
+  'Kota Bandung',
+  'Kota Banjar',
+  'Kota Bekasi',
+  'Kota Bogor',
+  'Kota Cimahi',
+  'Kota Cirebon',
+  'Kota Depok',
+  'Kota Sukabumi',
+  'Kota Tasikmalaya',
+];
+
+export const ThoriqOnboardingScreen: React.FC = () => {
+  const { user, updateProfile, saveMood, navigateTo, switchTab, screenParams } = useApp();
+
+  // Current Step (0: Intro Wysa-style, 1: Age & Consent, 2: Profile Setup, 3: First Mood Check-in)
+  const [step, setStep] = useState<number>(0);
+
+  // Form State: Step 1 (Age & Consent)
+  const [birthDay, setBirthDay] = useState('15');
+  const [birthMonth, setBirthMonth] = useState('7');
+  const [birthYear, setBirthYear] = useState('2008');
+  const [ageConsentAgreed, setAgeConsentAgreed] = useState(false);
+  const [step1Error, setStep1Error] = useState('');
+
+  // Form State: Step 2 (Profile Setup)
+  const initialName = screenParams?.name || user?.name || '';
+  const [nickname, setNickname] = useState(initialName ? initialName.split(' ')[0] : '');
+  const [city, setCity] = useState('');
+  const [showCityPicker, setShowCityPicker] = useState(false);
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([
+    'Kelola Stres',
+    'Emosi',
+  ]);
+  const [step2Error, setStep2Error] = useState('');
+  const [cityError, setCityError] = useState('');
+
+  // Form State: Step 3 (Mood Check-in)
+  const [selectedMood, setSelectedMood] = useState<PrimaryEmotion | null>(null);
+  const [moodNote, setMoodNote] = useState('');
+
+  // Animation values
+  const isNativeDriver = Platform.OS !== 'web';
+  const bubbleScale = useRef(new Animated.Value(0.85)).current;
+  const bubbleOpacity = useRef(new Animated.Value(0)).current;
+  const contentFade = useRef(new Animated.Value(1)).current;
+
+  // Speech bubble spring entrance when step changes
+  useEffect(() => {
+    bubbleScale.setValue(0.85);
+    bubbleOpacity.setValue(0);
+    contentFade.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(bubbleScale, {
+        toValue: 1,
+        friction: 5,
+        tension: 50,
+        useNativeDriver: isNativeDriver,
+      }),
+      Animated.timing(bubbleOpacity, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: isNativeDriver,
+      }),
+      Animated.timing(contentFade, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: isNativeDriver,
+      }),
+    ]).start();
+  }, [step, bubbleScale, bubbleOpacity, contentFade, isNativeDriver]);
+
+  // Dynamic age calculation
+  const calculateAge = () => {
+    const d = parseInt(birthDay, 10);
+    const m = parseInt(birthMonth, 10);
+    const y = parseInt(birthYear, 10);
+    if (!y || isNaN(y) || y < 1900) return 16;
+    const today = new Date();
+    let age = today.getFullYear() - y;
+    if (m && !isNaN(m)) {
+      const monthDiff = today.getMonth() + 1 - m;
+      if (monthDiff < 0 || (monthDiff === 0 && d && !isNaN(d) && today.getDate() < d)) {
+        age--;
+      }
+    }
+    return age;
+  };
+  const computedAge = calculateAge();
+  const isTeen = computedAge >= 10 && computedAge <= 17;
+  const isYoungAdult = computedAge >= 18 && computedAge <= 24;
+
+  // Calendar Lock & Auto-Clamp Helpers (Official Gregorian Calendar)
+  const getMaxDaysInMonth = (monthStr: string, yearStr: string): number => {
+    const m = parseInt(monthStr, 10);
+    if (!m || isNaN(m) || m < 1 || m > 12) return 31;
+    const y = parseInt(yearStr, 10) || 2024;
+    return new Date(y, m, 0).getDate();
+  };
+
+  const handleDayChange = (raw: string) => {
+    if (step1Error) setStep1Error('');
+    const cleaned = raw.replace(/[^0-9]/g, '');
+    if (!cleaned) {
+      setBirthDay('');
+      return;
+    }
+    const num = parseInt(cleaned, 10);
+    const maxDays = getMaxDaysInMonth(birthMonth, birthYear);
+    if (num > maxDays) {
+      setBirthDay(String(maxDays));
+    } else {
+      setBirthDay(cleaned);
+    }
+  };
+
+  const handleMonthChange = (raw: string) => {
+    if (step1Error) setStep1Error('');
+    const cleaned = raw.replace(/[^0-9]/g, '');
+    if (!cleaned) {
+      setBirthMonth('');
+      return;
+    }
+    const num = parseInt(cleaned, 10);
+    let finalMonth = cleaned;
+    if (num > 12) {
+      finalMonth = '12';
+    }
+    setBirthMonth(finalMonth);
+
+    // Auto-lock Day if existing day exceeds new month's calendar maximum
+    if (birthDay) {
+      const dayNum = parseInt(birthDay, 10);
+      const maxDays = getMaxDaysInMonth(finalMonth, birthYear);
+      if (dayNum > maxDays) {
+        setBirthDay(String(maxDays));
+      }
+    }
+  };
+
+  const handleYearChange = (raw: string) => {
+    if (step1Error) setStep1Error('');
+    const cleaned = raw.replace(/[^0-9]/g, '');
+    const currentYear = new Date().getFullYear();
+    if (!cleaned) {
+      setBirthYear('');
+      return;
+    }
+    let finalYear = cleaned;
+    if (cleaned.length === 4) {
+      const num = parseInt(cleaned, 10);
+      if (num > currentYear) {
+        finalYear = String(currentYear);
+      }
+    }
+    setBirthYear(finalYear);
+
+    // Re-check February days if year changed (leap year 28 vs 29)
+    if (birthDay && (birthMonth === '2' || birthMonth === '02')) {
+      const maxDays = getMaxDaysInMonth(birthMonth, finalYear);
+      if (parseInt(birthDay, 10) > maxDays) {
+        setBirthDay(String(maxDays));
+      }
+    }
+  };
+
+  // Navigation handlers between steps
+  const handleProceedFromIntro = () => {
+    setStep(1);
+  };
+
+  const handleProceedFromAge = () => {
+    const d = parseInt(birthDay, 10);
+    const m = parseInt(birthMonth, 10);
+    const y = parseInt(birthYear, 10);
+
+    if (!birthDay.trim() || !birthMonth.trim() || !birthYear.trim()) {
+      setStep1Error('Mohon masukkan tanggal, bulan, dan tahun lahirmu.');
+      return;
+    }
+
+    if (isNaN(d) || d < 1 || d > 31) {
+      setStep1Error('Tanggal lahir tidak valid (harus 1–31).');
+      return;
+    }
+
+    if (isNaN(m) || m < 1 || m > 12) {
+      setStep1Error('Bulan lahir tidak valid (harus 1–12).');
+      return;
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (isNaN(y) || y < 1900 || y > currentYear) {
+      setStep1Error('Tahun lahir tidak valid.');
+      return;
+    }
+
+    const age = computedAge;
+    if (age < 10) {
+      setStep1Error('Layanan Teman Sebaya ditujukan untuk usia minimal 10 tahun.');
+      return;
+    }
+
+    if (!ageConsentAgreed) {
+      setStep1Error('Mohon setujui prinsip perlindungan data & ruang aman.');
+      return;
+    }
+
+    setStep1Error('');
+    setStep(2);
+  };
+
+  const filteredCities = WEST_JAVA_CITIES.filter((c) =>
+    c.toLowerCase().includes(citySearchQuery.toLowerCase().trim())
+  );
+
+  const handleSelectCity = (selectedCity: string) => {
+    setCity(selectedCity);
+    if (cityError) setCityError('');
+    setShowCityPicker(false);
+    setCitySearchQuery('');
+  };
+
+  const handleProceedFromProfile = () => {
+    let hasError = false;
+    if (!nickname.trim()) {
+      setStep2Error('Nama panggilan tidak boleh kosong.');
+      hasError = true;
+    }
+    if (!city.trim()) {
+      setCityError('Silakan pilih kota atau kabupaten asalmu.');
+      hasError = true;
+    }
+    if (hasError) return;
+
+    setStep2Error('');
+    setCityError('');
+    setStep(3);
+  };
+
+  const handleFinishOnboarding = (skipMood = false) => {
+    // 1. Save Mood if selected and not skipped
+    if (!skipMood && selectedMood) {
+      saveMood(selectedMood, [], moodNote || 'Catatan saat pertama kali bergabung', ['Onboarding']);
+    }
+
+    // 2. Update Profile in App State
+    updateProfile({
+      nickname: nickname.trim(),
+      name: user?.name || nickname.trim(),
+      city: city.trim(),
+      interests: selectedInterests,
+      age: computedAge,
+      ageCategory: isTeen ? 'teen' : computedAge <= 24 ? 'young_adult' : 'adult',
+      birthDate: `${birthDay}-${birthMonth}-${birthYear}`,
+    });
+
+    // 3. Switch to Home Dashboard
+    switchTab('beranda');
+    navigateTo('main');
+  };
+
+  // Interest options (2-column symmetrical grid, concise without emoji)
+  const interestOptions = [
+    { id: 'stres', title: 'Kelola Stres' },
+    { id: 'teman', title: 'Pertemanan' },
+    { id: 'emosi', title: 'Emosi' },
+    { id: 'belajar', title: 'Belajar' },
+    { id: 'selfcare', title: 'Self-Care' },
+    { id: 'bullying', title: 'Anti-Bullying' },
+  ];
+
+  const toggleInterest = (title: string) => {
+    if (selectedInterests.includes(title)) {
+      setSelectedInterests(selectedInterests.filter((i) => i !== title));
+    } else {
+      setSelectedInterests([...selectedInterests, title]);
+    }
+  };
+
+  // Select mascot image according to active step
+  const getMascotSource = () => {
+    switch (step) {
+      case 0:
+        return require('../../../assets/mascot/mascot_waving_clean.png');
+      case 1:
+        return require('../../../assets/mascot/mascot_thinking_clean.png');
+      case 2:
+        return require('../../../assets/mascot/mascot_waving_clean.png');
+      case 3:
+      default:
+        return require('../../../assets/mascot/mascot_thumbsup_clean.png');
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <StatusBar barStyle="dark-content" />
+
+      {/* Progress & Header Bar (Only visible from step 1 onwards) */}
+      {step > 0 && (
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setStep(step - 1)}
+            style={styles.backBtn}
+          >
+            <ArrowLeft size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+
+          {/* 3-segment progress bar */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressSegment, step >= 1 && styles.progressSegmentActive]} />
+            <View style={[styles.progressSegment, step >= 2 && styles.progressSegmentActive]} />
+            <View style={[styles.progressSegment, step >= 3 && styles.progressSegmentActive]} />
+          </View>
+
+          <Text style={styles.stepText}>Langkah {step} dari 3</Text>
+        </View>
+      )}
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* ========================================================
+            STEP 0: INTRO WYSA-STYLE ("Hai! Aku Thoriq")
+        ======================================================== */}
+        {step === 0 && (
+          <View style={styles.introContainer}>
+            {/* Soft Ambient Radial Background Aura */}
+            <View style={styles.introAuraBackground} />
+
+            {/* Mascot Character (Static) */}
+            <View style={styles.introMascotWrap}>
+              <Image
+                source={getMascotSource()}
+                style={styles.introMascotImage}
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* Text Greeting ala Wysa */}
+            <View style={styles.introTextCard}>
+              <View style={styles.nameBadge}>
+                <Sparkles size={14} color={colors.brandBlue[600]} />
+                <Text style={styles.nameBadgeText}>TEMAN SEBAYA</Text>
+              </View>
+
+              <Text style={styles.introHeading}>Hai! Aku Thoriq 👋</Text>
+              <Text style={styles.introSubtitle}>
+                Teman sebaya yang siap mendengarkan tanpa menghakimi, membantumu merasa lebih tenang,
+                dan tumbuh bersama di ruang yang aman ini.
+              </Text>
+            </View>
+
+            {/* CTA Button */}
+            <Button
+              title="Hai Thoriq, Salam Kenal!"
+              variant="primary"
+              fullWidth
+              size="lg"
+              onPress={handleProceedFromIntro}
+              style={styles.introCtaBtn}
+              textStyle={styles.introCtaBtnText}
+            />
+          </View>
+        )}
+
+        {/* ========================================================
+            STEP 1: AGE & CONSENT (Screen A06 BRIEF TEMAN SEBAYA)
+        ======================================================== */}
+        {step === 1 && (
+          <Animated.View style={[styles.stepContainer, { opacity: contentFade }]}>
+            {/* Mascot & Speech Bubble */}
+            <View style={styles.mascotDialogRow}>
+              <View style={styles.dialogMascotWrap}>
+                <Image
+                  source={getMascotSource()}
+                  style={styles.dialogMascotImage}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.speechBubble,
+                  {
+                    transform: [{ scale: bubbleScale }],
+                    opacity: bubbleOpacity,
+                  },
+                ]}
+              >
+                <View style={styles.speechTail} />
+                <Text style={styles.speechText}>
+                  Boleh tahu tanggal lahirmu? Biar aku bisa menyiapkan ruang yang paling aman dan pas
+                  buat usiamu! 🤔
+                </Text>
+              </Animated.View>
+            </View>
+
+            {/* Date of Birth Selection Form */}
+            <View style={styles.formCard}>
+              <Text style={styles.inputGroupLabel}>Tanggal Lahir Kamu</Text>
+
+              <View style={styles.datePickerRow}>
+                {/* Tanggal */}
+                <View style={styles.dateCol}>
+                  <Text style={styles.dateSubLabel}>Hari</Text>
+                  <Input
+                    placeholder="15"
+                    value={birthDay}
+                    onChangeText={handleDayChange}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    containerStyle={styles.dateInputContainer}
+                    inputWrapperStyle={styles.dateInputWrapper}
+                  />
+                </View>
+
+                {/* Bulan */}
+                <View style={styles.dateCol}>
+                  <Text style={styles.dateSubLabel}>Bulan</Text>
+                  <Input
+                    placeholder="7"
+                    value={birthMonth}
+                    onChangeText={handleMonthChange}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    containerStyle={styles.dateInputContainer}
+                    inputWrapperStyle={styles.dateInputWrapper}
+                  />
+                </View>
+
+                {/* Tahun */}
+                <View style={[styles.dateCol, { flex: 1.4 }]}>
+                  <Text style={styles.dateSubLabel}>Tahun</Text>
+                  <Input
+                    placeholder="2008"
+                    value={birthYear}
+                    onChangeText={handleYearChange}
+                    keyboardType="number-pad"
+                    maxLength={4}
+                    containerStyle={styles.dateInputContainer}
+                    inputWrapperStyle={styles.dateInputWrapper}
+                  />
+                </View>
+              </View>
+
+              {/* Age Guideline Helper Text */}
+              <Text style={styles.dateHelperText}>
+                Layanan Teman Sebaya ditujukan untuk pengguna usia minimal 10 tahun.
+              </Text>
+
+              {/* Privacy Notice per Brief */}
+              <Text style={styles.privacyBriefNote}>
+                Data tanggal lahir hanya digunakan semata-mata untuk menentukan mekanisme
+                perlindungan privasi usia dan tidak pernah dibagikan kepada pihak ketiga.
+              </Text>
+
+              {/* Explicit Consent Checkbox */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  setAgeConsentAgreed(!ageConsentAgreed);
+                  if (step1Error) setStep1Error('');
+                }}
+                style={styles.consentCheckboxRow}
+              >
+                {ageConsentAgreed ? (
+                  <CheckSquare size={18} color={colors.brandBlue[600]} style={{ marginTop: 2 }} />
+                ) : (
+                  <Square
+                    size={18}
+                    color={step1Error ? colors.crisis.dangerBorder : colors.borderMedium}
+                    style={{ marginTop: 2 }}
+                  />
+                )}
+                <Text style={styles.consentCheckboxLabel}>
+                  Saya memahami dan menyetujui prinsip perlindungan ruang aman Teman Sebaya.
+                </Text>
+              </TouchableOpacity>
+              {step1Error ? <Text style={styles.errorText}>{step1Error}</Text> : null}
+
+              {/* Button */}
+              <Button
+                title="Lanjutkan"
+                variant="primary"
+                fullWidth
+                size="lg"
+                onPress={handleProceedFromAge}
+                style={styles.continueBtn}
+              />
+            </View>
+          </Animated.View>
+        )}
+
+        {/* ========================================================
+            STEP 2: PROFILE SETUP (Screen A07 BRIEF TEMAN SEBAYA)
+        ======================================================== */}
+        {step === 2 && (
+          <Animated.View style={[styles.stepContainer, { opacity: contentFade }]}>
+            {/* Mascot & Speech Bubble */}
+            <View style={styles.mascotDialogRow}>
+              <View style={styles.dialogMascotWrap}>
+                <Image
+                  source={getMascotSource()}
+                  style={styles.dialogMascotImage}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.speechBubble,
+                  {
+                    transform: [{ scale: bubbleScale }],
+                    opacity: bubbleOpacity,
+                  },
+                ]}
+              >
+                <View style={styles.speechTail} />
+                <Text style={styles.speechText}>
+                  Keren! Terus, bagaimana kami bisa memanggilmu? 😊
+                </Text>
+              </Animated.View>
+            </View>
+
+            {/* Profile Setup Form */}
+            <View style={styles.formCard}>
+              {/* Nama Panggilan */}
+              <Input
+                label="Nama Panggilan"
+                placeholder="Misal: Anya atau Thoriq"
+                value={nickname}
+                onChangeText={(val) => {
+                  setNickname(val);
+                  if (step2Error) setStep2Error('');
+                }}
+                error={step2Error}
+                helperText="Nama ini akan digunakan oleh Thoriq dan konselor untuk menyapamu."
+                inputWrapperStyle={styles.roundedInputWrapper}
+              />
+
+              {/* Kota / Kabupaten (Dropdown Khusus Jawa Barat) */}
+              <View style={styles.dropdownFieldContainer}>
+                <Text style={styles.dropdownFieldLabel}>Kota / Kabupaten</Text>
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  onPress={() => setShowCityPicker(true)}
+                  style={[
+                    styles.dropdownTrigger,
+                    cityError ? styles.dropdownTriggerError : null,
+                  ]}
+                >
+                  <View style={styles.dropdownTriggerLeft}>
+                    <MapPin size={18} color={city ? colors.brandBlue[600] : colors.textMuted} />
+                    <Text
+                      style={[
+                        styles.dropdownTriggerText,
+                        !city && styles.dropdownTriggerPlaceholder,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {city || 'Pilih Kota / Kabupaten (Jawa Barat)'}
+                    </Text>
+                  </View>
+                  <ChevronDown size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+
+                {cityError ? (
+                  <Text style={styles.fieldErrorText}>{cityError}</Text>
+                ) : (
+                  <Text style={styles.fieldHelperText}>
+                    Membantu merekomendasikan pos edukasi PIK-R dan faskes terdekat.
+                  </Text>
+                )}
+              </View>
+
+              {/* Minat Edukasi (Opsional) - Symmetrical 2-Column Grid */}
+              <Text style={styles.fieldSectionLabel}>Topik yang Ingin Kamu Jelajahi</Text>
+              <View style={styles.chipsGrid}>
+                {interestOptions.map((topic) => {
+                  const active = selectedInterests.includes(topic.title);
+                  return (
+                    <TouchableOpacity
+                      key={topic.id}
+                      activeOpacity={0.75}
+                      onPress={() => toggleInterest(topic.title)}
+                      style={[styles.topicCard, active && styles.topicCardActive]}
+                    >
+                      <Text
+                        style={[styles.topicText, active && styles.topicTextActive]}
+                        numberOfLines={1}
+                      >
+                        {topic.title}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Button */}
+              <Button
+                title="Lanjut ke Langkah Terakhir"
+                variant="primary"
+                fullWidth
+                size="lg"
+                onPress={handleProceedFromProfile}
+                style={styles.continueBtnMargin}
+              />
+            </View>
+          </Animated.View>
+        )}
+
+        {/* ========================================================
+            STEP 3: FIRST MOOD CHECK-IN (BISA DI-SKIP)
+        ======================================================== */}
+        {step === 3 && (
+          <Animated.View style={[styles.stepContainer, { opacity: contentFade }]}>
+            {/* Mascot & Speech Bubble */}
+            <View style={styles.mascotDialogRow}>
+              <View style={styles.dialogMascotWrap}>
+                <Image
+                  source={getMascotSource()}
+                  style={styles.dialogMascotImage}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <Animated.View
+                style={[
+                  styles.speechBubble,
+                  {
+                    transform: [{ scale: bubbleScale }],
+                    opacity: bubbleOpacity,
+                  },
+                ]}
+              >
+                <View style={styles.speechTail} />
+                <Text style={styles.speechText}>
+                  Sebelum kita mulai keliling, gimana perasaanmu hari ini, {nickname || 'Teman'}? 👍✨
+                </Text>
+              </Animated.View>
+            </View>
+
+            {/* 4 Mood Cards Selection */}
+            <View style={styles.formCard}>
+              <Text style={styles.moodPromptSubtitle}>
+                Pilih emosi yang paling mewakili hatimu sekarang:
+              </Text>
+
+              <View style={styles.moodGrid}>
+                {/* Bahagia */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedMood('Bahagia')}
+                  style={[
+                    styles.moodCardOption,
+                    selectedMood === 'Bahagia' && {
+                      borderColor: colors.brandGreen[600],
+                      backgroundColor: colors.brandGreen[50],
+                    },
+                  ]}
+                >
+                  <Smile size={32} color={colors.brandGreen[600]} />
+                  <Text style={styles.moodCardTitle}>Bahagia</Text>
+                  <Text style={styles.moodCardHint}>Senang & Bersemangat</Text>
+                </TouchableOpacity>
+
+                {/* Sedih */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedMood('Sedih')}
+                  style={[
+                    styles.moodCardOption,
+                    selectedMood === 'Sedih' && {
+                      borderColor: colors.brandBlue[600],
+                      backgroundColor: colors.brandBlue[50],
+                    },
+                  ]}
+                >
+                  <Frown size={32} color={colors.brandBlue[600]} />
+                  <Text style={styles.moodCardTitle}>Sedih</Text>
+                  <Text style={styles.moodCardHint}>Perlu didengarkan</Text>
+                </TouchableOpacity>
+
+                {/* Marah */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedMood('Marah')}
+                  style={[
+                    styles.moodCardOption,
+                    selectedMood === 'Marah' && {
+                      borderColor: colors.crisis.dangerText,
+                      backgroundColor: '#FEF2F2',
+                    },
+                  ]}
+                >
+                  <Flame size={32} color={colors.crisis.dangerText} />
+                  <Text style={styles.moodCardTitle}>Marah</Text>
+                  <Text style={styles.moodCardHint}>Sedang kesal / lelah</Text>
+                </TouchableOpacity>
+
+                {/* Biasa Saja */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedMood('Biasa Saja')}
+                  style={[
+                    styles.moodCardOption,
+                    selectedMood === 'Biasa Saja' && {
+                      borderColor: colors.accentAmber[600],
+                      backgroundColor: colors.accentAmber[50],
+                    },
+                  ]}
+                >
+                  <Meh size={32} color={colors.accentAmber[600]} />
+                  <Text style={styles.moodCardTitle}>Biasa Saja</Text>
+                  <Text style={styles.moodCardHint}>Tenang & netral</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Optional Mood Note */}
+              {selectedMood && (
+                <Input
+                  label="Cerita Singkat (Opsional)"
+                  placeholder="Mau cerita sedikit tentang apa yang terjadi?"
+                  value={moodNote}
+                  onChangeText={setMoodNote}
+                  inputWrapperStyle={styles.roundedInputWrapper}
+                  containerStyle={{ marginTop: spacing.sm }}
+                />
+              )}
+
+              {/* Submit Button */}
+              <Button
+                title={selectedMood ? 'Simpan & Masuk ke Beranda' : 'Mulai Petualangan'}
+                variant="primary"
+                fullWidth
+                size="lg"
+                onPress={() => handleFinishOnboarding(false)}
+                style={styles.continueBtn}
+              />
+
+              {/* Skip Option Button */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => handleFinishOnboarding(true)}
+                style={styles.skipButton}
+              >
+                <Text style={styles.skipButtonText}>Lewati untuk sekarang</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        )}
+      </ScrollView>
+
+      {/* Modal Dropdown Pilihan Kota / Kabupaten Jawa Barat */}
+      <Modal
+        visible={showCityPicker}
+        onClose={() => {
+          setShowCityPicker(false);
+          setCitySearchQuery('');
+        }}
+        contentStyle={styles.cityModalContent}
+      >
+        <View style={styles.cityModalContainer}>
+          {/* Header */}
+          <View style={styles.cityModalHeader}>
+            <View>
+              <Text style={styles.cityModalTitle}>Pilih Kota / Kabupaten</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                setShowCityPicker(false);
+                setCitySearchQuery('');
+              }}
+              style={styles.cityModalCloseBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <X size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Search Box */}
+          <View style={styles.citySearchBox}>
+            <Search size={16} color={colors.textMuted} />
+            <TextInput
+              style={styles.citySearchInput}
+              placeholder="Cari (misal: Karawang)..."
+              placeholderTextColor={colors.textPlaceholder}
+              value={citySearchQuery}
+              onChangeText={setCitySearchQuery}
+              autoCorrect={false}
+            />
+            {citySearchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setCitySearchQuery('')}>
+                <X size={15} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* List of 27 Cities */}
+          <ScrollView
+            style={styles.cityListScroll}
+            showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
+          >
+            {filteredCities.length > 0 ? (
+              filteredCities.map((cityName) => {
+                const isSelected = city === cityName;
+                return (
+                  <TouchableOpacity
+                    key={cityName}
+                    activeOpacity={0.7}
+                    onPress={() => handleSelectCity(cityName)}
+                    style={[
+                      styles.cityItemRow,
+                      isSelected && styles.cityItemRowSelected,
+                    ]}
+                  >
+                    <View style={styles.cityItemLeft}>
+                      <MapPin
+                        size={16}
+                        color={isSelected ? colors.brandBlue[600] : colors.textMuted}
+                      />
+                      <Text
+                        style={[
+                          styles.cityItemText,
+                          isSelected && styles.cityItemTextSelected,
+                        ]}
+                      >
+                        {cityName}
+                      </Text>
+                    </View>
+                    {isSelected && <Check size={18} color={colors.brandBlue[600]} />}
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              <View style={styles.cityEmptyWrap}>
+                <Text style={styles.cityEmptyText}>Kota/Kabupaten tidak ditemukan</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+    </KeyboardAvoidingView>
+  );
+};
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+
+  /* Top Bar & Stepper */
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  backBtn: {
+    padding: 6,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  progressSegment: {
+    flex: 1,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.borderMedium,
+  },
+  progressSegmentActive: {
+    backgroundColor: colors.brandBlue[600],
+  },
+  stepText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+
+  /* ==================== STEP 0: INTRO WYSA STYLES ==================== */
+  introContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
+    paddingBottom: 36,
+  },
+  introAuraBackground: {
+    position: 'absolute',
+    top: 60,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: '#DBEAFE',
+    opacity: 0.45,
+  },
+  introMascotWrap: {
+    width: 250,
+    height: 320,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  introMascotImage: {
+    width: '100%',
+    height: '100%',
+  },
+  introTextCard: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    marginBottom: 28,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  nameBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: colors.brandBlue[50],
+    marginBottom: 10,
+  },
+  nameBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.brandBlue[600],
+    letterSpacing: 0.6,
+  },
+  introHeading: {
+    fontSize: 27,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  introSubtitle: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  introCtaBtn: {
+    borderRadius: 24,
+    height: 52,
+    backgroundColor: colors.brandBlue[600],
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  introCtaBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  /* ==================== STEPS 1-3 DIALOG & FORM ==================== */
+  stepContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  mascotDialogRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 16,
+  },
+  dialogMascotWrap: {
+    width: 86,
+    height: 116,
+  },
+  dialogMascotImage: {
+    width: '100%',
+    height: '100%',
+  },
+  speechBubble: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+    marginTop: 6,
+  },
+  speechTail: {
+    position: 'absolute',
+    left: -8,
+    top: 24,
+    width: 0,
+    height: 0,
+    borderTopWidth: 8,
+    borderTopColor: 'transparent',
+    borderRightWidth: 10,
+    borderRightColor: '#FFFFFF',
+    borderBottomWidth: 8,
+    borderBottomColor: 'transparent',
+  },
+  speechText: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+
+  /* Form Card */
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputGroupLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: 10,
+  },
+  datePickerRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
+  },
+  dateCol: {
+    flex: 1,
+  },
+  dateSubLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
+  dateInputContainer: {
+    marginBottom: 0,
+  },
+  dateInputWrapper: {
+    borderRadius: 16,
+    height: 48,
+    borderColor: colors.borderMedium,
+    backgroundColor: '#F8FAFC',
+  },
+  roundedInputWrapper: {
+    borderRadius: 18,
+    height: 48,
+    borderColor: colors.borderMedium,
+    backgroundColor: '#F8FAFC',
+  },
+
+  dateHelperText: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginBottom: 16,
+    marginTop: -4,
+  },
+  privacyBriefNote: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: colors.textMuted,
+    marginBottom: 16,
+  },
+
+  /* Consent Checkbox */
+  consentCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 16,
+  },
+  consentCheckboxLabel: {
+    flex: 1,
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: colors.textSecondary,
+  },
+  errorText: {
+    fontSize: 11.5,
+    color: colors.crisis.dangerText,
+    marginTop: -8,
+    marginBottom: 12,
+  },
+
+  fieldSectionLabel: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginTop: 10,
+    marginBottom: 8,
+  },
+
+  /* Topic Cards (2-Column Symmetrical Grid) */
+  chipsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 10,
+    marginBottom: 16,
+  },
+  topicCard: {
+    width: '48.5%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: colors.borderLight,
+  },
+  topicCardActive: {
+    backgroundColor: colors.brandBlue[50],
+    borderColor: colors.brandBlue[600],
+  },
+  topicText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  topicTextActive: {
+    color: colors.brandBlue[700],
+    fontWeight: '700',
+  },
+
+  /* Step 3: Mood Grid */
+  moodPromptSubtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginBottom: 16,
+  },
+  moodGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  moodCardOption: {
+    width: '48%',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: colors.borderLight,
+    backgroundColor: '#F8FAFC',
+  },
+  moodCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  moodCardHint: {
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+
+  /* Buttons */
+  continueBtn: {
+    borderRadius: 22,
+    height: 50,
+    backgroundColor: colors.brandBlue[600],
+    marginTop: 6,
+  },
+  continueBtnMargin: {
+    borderRadius: 22,
+    height: 50,
+    backgroundColor: colors.brandBlue[600],
+    marginTop: spacing.md,
+  },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 6,
+  },
+  skipButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+
+  /* Dropdown Field (City Picker) */
+  dropdownFieldContainer: {
+    marginBottom: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  dropdownFieldLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 6,
+  },
+  dropdownTrigger: {
+    height: 48,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: colors.borderMedium,
+    backgroundColor: '#F8FAFC',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+  },
+  dropdownTriggerError: {
+    borderColor: colors.crisis.dangerBorder,
+  },
+  dropdownTriggerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    marginRight: 8,
+  },
+  dropdownTriggerText: {
+    fontSize: 13.5,
+    color: colors.textPrimary,
+    fontWeight: '500',
+  },
+  dropdownTriggerPlaceholder: {
+    color: colors.textPlaceholder,
+    fontWeight: '400',
+  },
+  fieldHelperText: {
+    fontSize: 11.5,
+    color: colors.textMuted,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  fieldErrorText: {
+    fontSize: 11.5,
+    color: colors.crisis.dangerText,
+    marginTop: 4,
+  },
+
+  /* City Picker Modal */
+  cityModalContent: {
+    padding: 20,
+    borderRadius: 24,
+    maxHeight: '85%',
+  },
+  cityModalContainer: {
+    width: '100%',
+  },
+  cityModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  cityModalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  cityModalSubtitle: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  cityModalCloseBtn: {
+    padding: 4,
+  },
+  citySearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 42,
+    gap: 8,
+    marginBottom: 12,
+  },
+  citySearchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.textPrimary,
+    paddingVertical: 0,
+  },
+  cityListScroll: {
+    maxHeight: 280,
+  },
+  cityItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    marginBottom: 4,
+  },
+  cityItemRowSelected: {
+    backgroundColor: colors.brandBlue[50],
+  },
+  cityItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  cityItemText: {
+    fontSize: 13.5,
+    color: colors.textPrimary,
+    fontWeight: '500',
+  },
+  cityItemTextSelected: {
+    color: colors.brandBlue[700],
+    fontWeight: '700',
+  },
+  cityEmptyWrap: {
+    paddingVertical: 24,
+    alignItems: 'center',
+  },
+  cityEmptyText: {
+    fontSize: 12.5,
+    color: colors.textMuted,
+  },
+});

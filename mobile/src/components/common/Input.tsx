@@ -18,6 +18,7 @@ interface InputProps extends TextInputProps {
   isPassword?: boolean;
   leftIcon?: React.ReactNode;
   containerStyle?: ViewStyle;
+  inputWrapperStyle?: ViewStyle;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -27,6 +28,7 @@ export const Input: React.FC<InputProps> = ({
   isPassword = false,
   leftIcon,
   containerStyle,
+  inputWrapperStyle,
   style,
   ...rest
 }) => {
@@ -40,6 +42,7 @@ export const Input: React.FC<InputProps> = ({
       <View
         style={[
           styles.inputWrapper,
+          inputWrapperStyle,
           isFocused && styles.focusedBorder,
           error ? styles.errorBorder : null,
         ]}

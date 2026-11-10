@@ -94,7 +94,7 @@ export const HomeScreen: React.FC = () => {
       {/* Greeting Banner (Screen B01 BRIEF TEMAN SEBAYA) */}
       <View style={styles.greetingSection}>
         <Text style={styles.greetingTitle}>
-          Halo, {user?.name ? user.name.split(' ')[0] : 'Sobat Sebaya'}!
+          Halo, {user?.nickname || (user?.name ? user.name.split(' ')[0] : 'Sobat Sebaya')}!
         </Text>
         <Text style={styles.greetingSubtitle}>
           Apa kabar kamu hari ini?

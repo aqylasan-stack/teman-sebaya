@@ -168,9 +168,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       pseudonym: `${name || 'Teman Baru'} (Anonim)`,
       email: email || 'teman@baru.id',
     });
-    setCurrentScreen('main');
-    setCurrentTab('beranda');
-    setScreenStack(['main']);
+    setCurrentScreen('thoriq_onboarding');
+    setScreenStack(['thoriq_onboarding']);
     return true;
   };
 

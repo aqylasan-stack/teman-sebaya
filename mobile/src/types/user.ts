@@ -1,6 +1,11 @@
 export interface UserProfile {
   id: string;
   name: string;
+  nickname?: string;
+  birthDate?: string;
+  age?: number;
+  ageCategory?: 'teen' | 'young_adult' | 'adult';
+  city?: string;
   pseudonym: string;
   email: string;
   avatarInitials: string;

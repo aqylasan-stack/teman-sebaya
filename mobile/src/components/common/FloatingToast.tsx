@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { Bookmark, CheckCircle2 } from 'lucide-react-native';
 import { borderRadius } from '../../theme';
 
@@ -16,6 +16,7 @@ export const FloatingToast: React.FC<FloatingToastProps> = ({
   icon = 'bookmark',
   bottomOffset = 96,
 }) => {
+  const isNativeDriver = Platform.OS !== 'web';
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(20)).current;
 
@@ -27,13 +28,13 @@ export const FloatingToast: React.FC<FloatingToastProps> = ({
           toValue: 1,
           duration: 220,
           easing: Easing.out(Easing.ease),
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
         Animated.timing(translateY, {
           toValue: 0,
           duration: 220,
           easing: Easing.out(Easing.back(1.5)),
-          useNativeDriver: true,
+          useNativeDriver: isNativeDriver,
         }),
       ]).start();
 
@@ -44,12 +45,12 @@ export const FloatingToast: React.FC<FloatingToastProps> = ({
             toValue: 0,
             duration: 220,
             easing: Easing.in(Easing.ease),
-            useNativeDriver: true,
+            useNativeDriver: isNativeDriver,
           }),
           Animated.timing(translateY, {
             toValue: 15,
             duration: 220,
-            useNativeDriver: true,
+            useNativeDriver: isNativeDriver,
           }),
         ]).start(() => {
           if (onDismiss) onDismiss();

@@ -6,11 +6,13 @@ import {
   Animated,
   Easing,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import { useApp } from '../../state/AppContext';
 
 export const SplashScreen: React.FC = () => {
   const { navigateTo } = useApp();
+  const isNativeDriver = Platform.OS !== 'web';
 
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.3)).current;
@@ -22,13 +24,13 @@ export const SplashScreen: React.FC = () => {
         toValue: 1,
         duration: 350,
         easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         friction: 3.8, // Playful bounce with satisfying spring overshoot
         tension: 40,
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
     ]).start();
 
@@ -46,13 +48,13 @@ export const SplashScreen: React.FC = () => {
         toValue: 0,
         duration: 280,
         easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
       Animated.timing(scaleAnim, {
         toValue: 1.08,
         duration: 280,
         easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
+        useNativeDriver: isNativeDriver,
       }),
     ]).start(() => {
       navigateTo('onboarding');
@@ -92,6 +94,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
   },
   logoImage: {
     width: 190,
