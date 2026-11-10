@@ -120,7 +120,8 @@ export const TestPsikologiScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    marginVertical: spacing.md,
+    marginTop: spacing.xs,
+    marginBottom: spacing.layout.sectionGap,
   },
   title: {
     fontSize: 20,
@@ -130,11 +131,11 @@ const styles = StyleSheet.create({
   subtitle: {
     ...typography.bodyRegular,
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: spacing.xs,
   },
   disclaimerCard: {
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing.layout.cardPadding,
+    marginBottom: spacing.layout.cardGap,
   },
   disclaimerRow: {
     flexDirection: 'row',
@@ -148,11 +149,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   testsList: {
-    gap: spacing.xs,
     marginBottom: spacing.xxl,
   },
   testCard: {
-    padding: spacing.md,
+    padding: spacing.layout.cardPadding,
   },
   cardRow: {
     flexDirection: 'row',

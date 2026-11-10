@@ -23,5 +23,8 @@ export interface MoodDayStat {
   dayName: string; // 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'
   primaryEmotion?: PrimaryEmotion;
   percentage: number;
+  dateString?: string;
+  secondaryEmotion?: string;
+  note?: string;
 }
 

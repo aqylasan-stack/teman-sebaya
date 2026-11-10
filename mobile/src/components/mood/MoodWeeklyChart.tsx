@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Sparkles, TrendingUp, Info } from 'lucide-react-native';
+import { Calendar } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
-import { MoodDayStat, PrimaryEmotion } from '../../types';
+import { MoodDayStat } from '../../types';
 
 interface MoodWeeklyChartProps {
   stats: MoodDayStat[];
@@ -10,72 +10,65 @@ interface MoodWeeklyChartProps {
   showDistribution?: boolean;
 }
 
-interface EmotionConfigItem {
+interface EmotionTheme {
   label: string;
   color: string;
-  trackColor: string;
-  lightBg: string;
-  textColor: string;
+  softBg: string;
   borderColor: string;
+  textColor: string;
   image: any;
   prompt: string;
 }
 
-const EMOTION_MAP: Record<string, EmotionConfigItem> = {
+const EMOTION_THEMES: Record<string, EmotionTheme> = {
   Bahagia: {
     label: 'Bahagia',
-    color: '#F59E0B', // Amber 500
-    trackColor: '#FEF3C7', // Amber 100
-    lightBg: '#FFFBEB',
-    textColor: '#92400E',
-    borderColor: '#FDE68A',
+    color: '#EAB308',
+    softBg: '#FFFDF0',
+    borderColor: '#FEF08A',
+    textColor: '#854D0E',
     image: require('../../../assets/emojis/emoji_bahagia.png'),
-    prompt: 'Penuh energi positif dan kehangatan!',
+    prompt: 'Hari yang penuh energi positif dan kehangatan.',
   },
   Sedih: {
     label: 'Sedih',
-    color: '#3B82F6', // Blue 500
-    trackColor: '#DBEAFE', // Blue 100
-    lightBg: '#EFF6FF',
-    textColor: '#1E40AF',
+    color: '#2563EB',
+    softBg: '#EFF6FF',
     borderColor: '#BFDBFE',
+    textColor: '#1E40AF',
     image: require('../../../assets/emojis/emoji_sedih.png'),
-    prompt: 'Wajar merasa lelah, beri ruang untuk jeda sejenak.',
+    prompt: 'Wajar merasa lelah, beri dirimu ruang untuk istirahat sejenak.',
   },
   Marah: {
     label: 'Marah',
-    color: '#EF4444', // Red 500
-    trackColor: '#FEE2E2', // Red 100
-    lightBg: '#FEF2F2',
-    textColor: '#991B1B',
+    color: '#DC2626',
+    softBg: '#FEF2F2',
     borderColor: '#FECACA',
+    textColor: '#991B1B',
     image: require('../../../assets/emojis/emoji_marah.png'),
-    prompt: 'Emosi adalah sinyal. Tarik napas dalam dan tenangkan pikiran.',
+    prompt: 'Tarik napas panjang dan berikan jeda untuk menenangkan pikiran.',
   },
   'Biasa Saja': {
     label: 'Biasa Saja',
-    color: '#B4916C', // Warm Sand / Neutral Latte
-    trackColor: '#F5EDE4',
-    lightBg: '#FAF5EE',
-    textColor: '#705030',
+    color: '#8C6E54',
+    softBg: '#FAF5EE',
     borderColor: '#E8DCCE',
+    textColor: '#705030',
     image: require('../../../assets/emojis/emoji_biasa.png'),
     prompt: 'Hari yang stabil, tenang, dan mengalir apa adanya.',
   },
-  // Backward compatibility alias
   Tenang: {
     label: 'Biasa Saja',
-    color: '#B4916C',
-    trackColor: '#F5EDE4',
-    lightBg: '#FAF5EE',
-    textColor: '#705030',
+    color: '#8C6E54',
+    softBg: '#FAF5EE',
     borderColor: '#E8DCCE',
+    textColor: '#705030',
     image: require('../../../assets/emojis/emoji_biasa.png'),
     prompt: 'Hari yang stabil, tenang, dan mengalir apa adanya.',
   },
 };
 
-const DEFAULT_CONFIG: EmotionConfigItem = EMOTION_MAP['Biasa Saja'];
+const DEFAULT_THEME: EmotionTheme = EMOTION_THEMES['Biasa Saja'];
 
 const DAY_FULL_NAMES: Record<string, string> = {
   Sen: 'Senin',
@@ -89,239 +82,299 @@ const DAY_FULL_NAMES: Record<string, string> = {
 
 export const MoodWeeklyChart: React.FC<MoodWeeklyChartProps> = ({
   stats,
-  dominantEmotion,
-  showDistribution = true,
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState<number>(
-    stats.length > 0 ? stats.length - 1 : 0
+  const daysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  const todayDayName = daysShort[new Date().getDay()];
+  const now = new Date();
+  const todayDateNum = String(now.getDate()).padStart(2, '0');
+
+  // Cari indeks hari ini secara dinamis agar default selected state selalu sinkron ke hari ini
+  const findDefaultIndex = (statsList: MoodDayStat[]): number => {
+    if (!statsList || statsList.length === 0) return 0;
+
+    // 1. Prioritaskan kecocokan tanggal (misal dateString memiliki "10 Nov" atau diawali "10")
+    const dateIdx = statsList.findIndex(
+      (s) =>
+        s.dateString &&
+        (s.dateString.includes(`${todayDateNum} `) ||
+          s.dateString.startsWith(todayDateNum))
+    );
+    if (dateIdx !== -1) return dateIdx;
+
+    // 2. Kecocokan nama hari ("Sel")
+    const dayIdx = statsList.findIndex((s) => s.dayName === todayDayName);
+    if (dayIdx !== -1) return dayIdx;
+
+    // 3. Fallback: hari terakhir yang memiliki catatan aktual
+    const lastRecorded = statsList
+      .map((s, idx) => (s.primaryEmotion ? idx : -1))
+      .filter((idx) => idx !== -1)
+      .pop();
+    if (lastRecorded !== undefined) return lastRecorded;
+
+    return statsList.length - 1;
+  };
+
+  const [selectedIndex, setSelectedIndex] = useState<number>(() =>
+    findDefaultIndex(stats)
   );
 
-  // Dynamic dominant calculation
-  const emotionCounts: Record<string, number> = {
+  // Jika stats diperbarui dan indeks di luar jangkauan, sinkronkan ke hari ini
+  React.useEffect(() => {
+    if (selectedIndex >= stats.length) {
+      setSelectedIndex(findDefaultIndex(stats));
+    }
+  }, [stats]);
+
+  // Filter hari yang memiliki catatan aktual
+  const recordedStats = stats.filter((s) => Boolean(s.primaryEmotion));
+  const totalRecordedDays = recordedStats.length;
+
+  // Hitung jumlah hari aktual per emosi
+  const emotionDaysCount: Record<string, number> = {
     Bahagia: 0,
     'Biasa Saja': 0,
     Sedih: 0,
     Marah: 0,
   };
 
-  stats.forEach((s) => {
-    const emotionKey =
+  recordedStats.forEach((s) => {
+    const key =
       s.primaryEmotion === 'Tenang' ? 'Biasa Saja' : s.primaryEmotion || 'Biasa Saja';
-    if (emotionCounts[emotionKey] !== undefined) {
-      emotionCounts[emotionKey] += 1;
+    if (emotionDaysCount[key] !== undefined) {
+      emotionDaysCount[key] += 1;
     }
   });
-
-  const totalDays = stats.length || 7;
-  let computedDominant = 'Bahagia';
-  let maxCount = -1;
-  Object.keys(emotionCounts).forEach((k) => {
-    if (emotionCounts[k] > maxCount) {
-      maxCount = emotionCounts[k];
-      computedDominant = k;
-    }
-  });
-
-  const computedPercentage = Math.round((maxCount / totalDays) * 100);
-  const displayDominantText =
-    dominantEmotion || `${computedDominant} (${computedPercentage}%)`;
-
-  const dominantConfig = EMOTION_MAP[computedDominant] || DEFAULT_CONFIG;
 
   const activeStat = stats[selectedIndex] || stats[0];
+  const activeHasRecord = Boolean(activeStat?.primaryEmotion);
   const activeEmotionKey =
     activeStat?.primaryEmotion === 'Tenang'
       ? 'Biasa Saja'
       : activeStat?.primaryEmotion || 'Biasa Saja';
-  const activeConfig = EMOTION_MAP[activeEmotionKey] || DEFAULT_CONFIG;
-  const activeDayFullName = activeStat ? DAY_FULL_NAMES[activeStat.dayName] || activeStat.dayName : '';
+  const activeTheme = activeHasRecord
+    ? EMOTION_THEMES[activeEmotionKey] || DEFAULT_THEME
+    : null;
+  const activeDayFullName = activeStat
+    ? DAY_FULL_NAMES[activeStat.dayName] || activeStat.dayName
+    : '';
+
+  const isToday =
+    activeStat?.dayName === todayDayName ||
+    (activeStat?.dateString != null &&
+      (activeStat.dateString.includes(`${todayDateNum} `) ||
+        activeStat.dateString.startsWith(todayDateNum)));
 
   return (
     <View style={styles.cardContainer}>
-      {/* Header with Title and Dominant Pill */}
-      <View style={styles.header}>
-        <View style={styles.titleWrap}>
-          <Text style={styles.title}>Statistik Emosi 7 Hari</Text>
-          <Text style={styles.subtitle}>Ketuk hari untuk melihat refleksi harian</Text>
-        </View>
-        <View
-          style={[
-            styles.dominantBadge,
-            {
-              backgroundColor: dominantConfig.lightBg,
-              borderColor: dominantConfig.borderColor,
-            },
-          ]}
-        >
-          <Sparkles size={11} color={dominantConfig.textColor} style={{ marginRight: 4 }} />
-          <Text style={[styles.dominantText, { color: dominantConfig.textColor }]}>
-            Dominan: {displayDominantText}
-          </Text>
+      {/* 1. Header Bagian: Judul */}
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>Ritme Emosi 7 Hari</Text>
+          <Text style={styles.subtitle}>Ketuk hari untuk melihat refleksi</Text>
         </View>
       </View>
 
-      {/* Selected Day Dynamic Inspector */}
-      {activeStat && (
-        <View
-          style={[
-            styles.inspectorCard,
-            {
-              backgroundColor: activeConfig.lightBg,
-              borderColor: activeConfig.borderColor,
-            },
-          ]}
-        >
-          <Image source={activeConfig.image} style={styles.inspectorEmoji} resizeMode="contain" />
-          <View style={styles.inspectorContent}>
-            <View style={styles.inspectorTopRow}>
-              <Text style={styles.inspectorDayText}>
-                {activeDayFullName}
-                <Text style={styles.inspectorPercentage}> · {activeStat.percentage}% Intensitas</Text>
-              </Text>
-              <View
-                style={[
-                  styles.miniEmotionPill,
-                  { backgroundColor: activeConfig.color },
-                ]}
-              >
-                <Text style={styles.miniEmotionPillText}>{activeConfig.label}</Text>
-              </View>
-            </View>
-            <Text style={[styles.inspectorPrompt, { color: activeConfig.textColor }]}>
-              {activeConfig.prompt}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {/* Bar Columns Container */}
-      <View style={styles.chartArea}>
+      {/* 2. 7-Day Emotion Strip (Selected State Berwarna Lembut & Natural, Penanda Khusus Hari Kosong) */}
+      <View style={styles.stripContainer}>
         {stats.map((stat, idx) => {
+          const hasRecord = Boolean(stat.primaryEmotion);
           const emotionKey =
             stat.primaryEmotion === 'Tenang'
               ? 'Biasa Saja'
-              : stat.primaryEmotion || 'Biasa Saja';
-          const config = EMOTION_MAP[emotionKey] || DEFAULT_CONFIG;
+              : stat.primaryEmotion;
+          const theme = emotionKey ? EMOTION_THEMES[emotionKey] || DEFAULT_THEME : null;
           const isSelected = idx === selectedIndex;
-          const barHeight = Math.max(18, (stat.percentage / 100) * 115);
 
           return (
             <TouchableOpacity
               key={idx}
               activeOpacity={0.7}
               onPress={() => setSelectedIndex(idx)}
-              style={styles.columnTouchable}
+              style={[
+                styles.dayColumn,
+                isSelected &&
+                  (hasRecord && theme
+                    ? [
+                        styles.dayColumnSelected,
+                        {
+                          backgroundColor: theme.softBg,
+                          borderColor: theme.borderColor,
+                        },
+                      ]
+                    : [
+                        styles.dayColumnSelected,
+                        {
+                          backgroundColor: colors.surfaceAlt,
+                          borderColor: colors.borderMedium,
+                        },
+                      ]),
+              ]}
             >
               <Text
                 style={[
-                  styles.percentageText,
-                  isSelected && {
-                    color: config.color,
-                    fontWeight: '700',
-                  },
+                  styles.dayLabel,
+                  isSelected && styles.dayLabelSelected,
                 ]}
               >
-                {stat.percentage}%
+                {stat.dayName}
               </Text>
 
-              {/* Bar track */}
-              <View
-                style={[
-                  styles.barTrack,
-                  { backgroundColor: config.trackColor },
-                  isSelected && {
-                    borderColor: config.color,
-                    borderWidth: 1.5,
-                  },
-                ]}
-              >
+              {/* Emoji jika ada catatan, Penanda Bersih jika belum tercatat */}
+              {hasRecord && theme ? (
+                <Image
+                  source={theme.image}
+                  style={[
+                    styles.dayEmoji,
+                    isSelected && styles.dayEmojiSelected,
+                  ]}
+                  resizeMode="contain"
+                />
+              ) : (
                 <View
                   style={[
-                    styles.barFill,
-                    {
-                      height: barHeight,
-                      backgroundColor: config.color,
-                    },
-                  ]}
-                />
-              </View>
-
-              {/* Day Name & Selection Indicator */}
-              <View style={styles.dayLabelWrap}>
-                <Text
-                  style={[
-                    styles.dayText,
-                    isSelected && {
-                      color: colors.textPrimary,
-                      fontWeight: '700',
-                    },
+                    styles.emptyDayPlaceholder,
+                    isSelected && styles.emptyDayPlaceholderSelected,
                   ]}
                 >
-                  {stat.dayName}
-                </Text>
-                {isSelected ? (
                   <View
-                    style={[styles.activeDot, { backgroundColor: config.color }]}
+                    style={[
+                      styles.emptyDayDot,
+                      isSelected && styles.emptyDayDotSelected,
+                    ]}
                   />
-                ) : (
-                  <View style={styles.inactiveSpacer} />
-                )}
-              </View>
+                </View>
+              )}
+
+              {/* Indikator Alami Hari Terpilih */}
+              <View
+                style={[
+                  styles.indicatorDot,
+                  isSelected && {
+                    backgroundColor:
+                      hasRecord && theme ? theme.color : colors.textMuted,
+                  },
+                ]}
+              />
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {/* Emotion Distribution (Screen C06 Brief) */}
-      {showDistribution && (
-        <View style={styles.distributionSection}>
-          <View style={styles.distributionDivider} />
-          <View style={styles.distributionHeader}>
-            <Text style={styles.distributionTitle}>Distribusi Emosi</Text>
-            <Text style={styles.distributionSubtitle}>7 Hari Terakhir</Text>
-          </View>
+      {/* 3. Detail Hari Terpilih (Editorial, Tanpa Card Bersarang) */}
+      {activeStat && (
+        activeHasRecord && activeTheme ? (
+          <View style={styles.activeDayContent}>
+            <View style={styles.activeDayHeader}>
+              <Image
+                source={activeTheme.image}
+                style={styles.activeDayMiniEmoji}
+                resizeMode="contain"
+              />
+              <View style={styles.activeDayHeaderTextWrap}>
+                <Text style={styles.activeDayTitle}>
+                  {activeDayFullName}
+                  {activeStat.dateString ? `, ${activeStat.dateString}` : ''} ·{' '}
+                  <Text style={{ color: activeTheme.color, fontWeight: '700' }}>
+                    {activeTheme.label}
+                  </Text>
+                </Text>
+                {activeStat.secondaryEmotion && (
+                  <Text style={styles.activeSubEmotionText}>
+                    Perasaan: {activeStat.secondaryEmotion}
+                  </Text>
+                )}
+              </View>
+            </View>
 
-          {/* Segmented Proportional Progress Bar */}
-          <View style={styles.segmentedBar}>
-            {Object.keys(emotionCounts).map((key) => {
-              const count = emotionCounts[key] || 0;
-              const pct = (count / totalDays) * 100;
-              if (pct === 0) return null;
-              const conf = EMOTION_MAP[key] || DEFAULT_CONFIG;
+            {activeStat.note && activeStat.note.trim() ? (
+              <View style={styles.activeDayStoryWrap}>
+                <Text style={styles.activeDayStoryLabel}>Catatan Refleksi:</Text>
+                <Text style={styles.activeDayStoryText}>
+                  "{activeStat.note}"
+                </Text>
+              </View>
+            ) : isToday ? (
+              <View style={styles.activeDayStoryWrap}>
+                <Text style={styles.activeDayStoryLabel}>Catatan Refleksi:</Text>
+                <Text style={[styles.activeDayStoryText, styles.activeDayStoryEmptyText]}>
+                  Tidak ada catatan tertulis untuk hari ini.
+                </Text>
+              </View>
+            ) : (
+              <Text style={[styles.activeDayPrompt, { color: activeTheme.textColor }]}>
+                {activeTheme.prompt}
+              </Text>
+            )}
+          </View>
+        ) : (
+          <View style={styles.activeDayContent}>
+            <View style={styles.activeDayHeader}>
+              <View style={styles.activeDayEmptyIconWrap}>
+                <Calendar size={14} color={colors.textMuted} />
+              </View>
+              <Text style={styles.activeDayEmptyTitle}>
+                {activeDayFullName}
+                {activeStat.dateString ? `, ${activeStat.dateString}` : ''} ·{' '}
+                <Text style={{ color: colors.textMuted, fontWeight: '600' }}>
+                  Belum Ada Catatan
+                </Text>
+              </Text>
+            </View>
+            <Text style={styles.activeDayEmptyBody}>
+              Kamu belum mencatat emosi pada hari ini. Mengambil jeda singkat dan mendengarkan diri selalu terbuka kapan pun kamu siap.
+            </Text>
+          </View>
+        )
+      )}
+
+      {/* 4. Distribusi Emosi (Menyatu dalam ritme mingguan) */}
+      <View style={styles.distributionSection}>
+        <View style={styles.distributionHeader}>
+          <Text style={styles.distributionTitle}>Distribusi Emosi</Text>
+        </View>
+
+        {/* Segmented Bar Proposional Berdasarkan Kategori Aktual */}
+        <View style={styles.segmentedTrack}>
+          {totalRecordedDays > 0 ? (
+            Object.keys(emotionDaysCount).map((k) => {
+              const count = emotionDaysCount[k] || 0;
+              if (count === 0) return null;
+              const theme = EMOTION_THEMES[k] || DEFAULT_THEME;
               return (
                 <View
-                  key={key}
+                  key={k}
                   style={[
-                    styles.barSegment,
+                    styles.segmentFill,
                     {
                       flex: count,
-                      backgroundColor: conf.color,
+                      backgroundColor: theme.color,
                     },
                   ]}
                 />
               );
-            })}
-          </View>
-
-          {/* Distribution Legend Chips */}
-          <View style={styles.legendRow}>
-            {Object.keys(emotionCounts).map((key) => {
-              const count = emotionCounts[key] || 0;
-              const pct = Math.round((count / totalDays) * 100);
-              const conf = EMOTION_MAP[key] || DEFAULT_CONFIG;
-              return (
-                <View key={key} style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: conf.color }]} />
-                  <Text style={styles.legendLabel}>
-                    {conf.label}{' '}
-                    <Text style={styles.legendPercentage}>{pct}%</Text>
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
+            })
+          ) : (
+            <View style={[styles.segmentFill, { flex: 1, backgroundColor: colors.surfaceAlt }]} />
+          )}
         </View>
-      )}
+
+        {/* Legenda Ringkas: Jumlah Hari Nyata */}
+        <View style={styles.legendRow}>
+          {Object.keys(emotionDaysCount).map((k) => {
+            const count = emotionDaysCount[k] || 0;
+            const theme = EMOTION_THEMES[k] || DEFAULT_THEME;
+            return (
+              <View key={k} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.color }]} />
+                <Text style={styles.legendText}>
+                  {theme.label} <Text style={styles.legendCount}>{count} hari</Text>
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
     </View>
   );
 };
@@ -332,200 +385,224 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    padding: spacing.md,
+    padding: spacing.lg,
     // Soft subtle shadow
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
+    marginBottom: spacing.layout.cardGap,
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  titleWrap: {
-    flex: 1,
-    marginRight: 8,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.textPrimary,
   },
   subtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: colors.textMuted,
     marginTop: 2,
   },
-  dominantBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-  },
-  dominantText: {
-    fontSize: 10.5,
-    fontWeight: '600',
-  },
-  inspectorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    marginVertical: spacing.xs,
-    gap: 10,
-  },
-  inspectorEmoji: {
-    width: 32,
-    height: 32,
-  },
-  inspectorContent: {
-    flex: 1,
-  },
-  inspectorTopRow: {
+  stripContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 4,
+    marginBottom: spacing.xs,
   },
-  inspectorDayText: {
-    fontSize: 12.5,
+  dayColumn: {
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 2,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  dayColumnSelected: {
+    borderWidth: 1.5,
+  },
+  dayLabel: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: colors.textMuted,
+    marginBottom: 6,
+  },
+  dayLabelSelected: {
     fontWeight: '700',
     color: colors.textPrimary,
   },
-  inspectorPercentage: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: colors.textMuted,
+  dayEmoji: {
+    width: 28,
+    height: 28,
   },
-  miniEmotionPill: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
+  dayEmojiSelected: {
+    width: 30,
+    height: 30,
+    transform: [{ scale: 1.05 }],
   },
-  miniEmotionPillText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  inspectorPrompt: {
-    fontSize: 11,
-    marginTop: 2,
-    lineHeight: 15,
-  },
-  chartArea: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 165,
-    paddingTop: spacing.xs,
-    paddingHorizontal: 2,
-  },
-  columnTouchable: {
+  emptyDayPlaceholder: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colors.borderMedium,
+    borderStyle: 'dashed',
     alignItems: 'center',
-    width: 40,
-    paddingVertical: 4,
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
-  percentageText: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: colors.textMuted,
-    marginBottom: 5,
+  emptyDayPlaceholderSelected: {
+    borderColor: colors.textSecondary,
+    backgroundColor: colors.surfaceAlt,
   },
-  barTrack: {
-    width: 16,
-    height: 115,
-    borderRadius: borderRadius.full,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
+  emptyDayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: colors.borderMedium,
   },
-  barFill: {
-    width: '100%',
-    borderRadius: borderRadius.full,
+  emptyDayDotSelected: {
+    backgroundColor: colors.textSecondary,
   },
-  dayLabelWrap: {
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  dayText: {
-    fontSize: 11.5,
-    fontWeight: '500',
-    color: colors.textSecondary,
-  },
-  activeDot: {
+  indicatorDot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    marginTop: 3,
+    backgroundColor: 'transparent',
+    marginTop: 6,
   },
-  inactiveSpacer: {
-    width: 4,
-    height: 4,
-    marginTop: 3,
+
+  /* Detail Hari Terpilih (Mengalir di dalam card utama) */
+  activeDayContent: {
+    paddingVertical: spacing.xs,
+    marginTop: spacing.xs,
   },
-  distributionSection: {
+  activeDayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  activeDayHeaderTextWrap: {
+    flex: 1,
+  },
+  activeDayMiniEmoji: {
+    width: 24,
+    height: 24,
+  },
+  activeDayTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  activeSubEmotionText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginTop: 1,
+  },
+  activeDayStoryWrap: {
     marginTop: spacing.sm,
+    paddingTop: spacing.xs,
   },
-  distributionDivider: {
-    height: 1,
-    backgroundColor: colors.borderLight,
-    marginBottom: spacing.sm,
+  activeDayStoryLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textMuted,
+    letterSpacing: 0.3,
+    marginBottom: 2,
+  },
+  activeDayStoryText: {
+    fontSize: 12.5,
+    lineHeight: 19,
+    color: colors.textPrimary,
+    fontStyle: 'italic',
+  },
+  activeDayStoryEmptyText: {
+    fontStyle: 'normal',
+    color: colors.textSecondary,
+  },
+  activeDayPrompt: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+  },
+  activeDayEmptyIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeDayEmptyTitle: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  activeDayEmptyBody: {
+    fontSize: 12,
+    color: colors.textMuted,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+
+  /* Distribusi Emosi */
+  distributionSection: {
+    paddingTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   distributionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 8,
   },
   distributionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: colors.textPrimary,
   },
-  distributionSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  segmentedBar: {
+  segmentedTrack: {
     flexDirection: 'row',
     height: 8,
-    borderRadius: borderRadius.full,
+    borderRadius: 4,
     overflow: 'hidden',
     backgroundColor: colors.surfaceAlt,
     gap: 2,
+    marginBottom: spacing.sm,
   },
-  barSegment: {
+  segmentFill: {
     height: '100%',
     borderRadius: 2,
   },
   legendRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     flexWrap: 'wrap',
-    marginTop: 8,
-    gap: 4,
+    justifyContent: 'space-between',
+    rowGap: 8,
+    marginTop: 4,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    width: '48%',
+    gap: 6,
   },
   legendDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  legendLabel: {
-    fontSize: 10.5,
+  legendText: {
+    fontSize: 11,
     color: colors.textSecondary,
-    fontWeight: '500',
   },
-  legendPercentage: {
+  legendCount: {
     fontWeight: '700',
     color: colors.textPrimary,
   },

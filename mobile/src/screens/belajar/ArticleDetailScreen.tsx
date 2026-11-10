@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { Bookmark, Clock, CheckCircle2, HelpCircle, ArrowRight } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Bookmark, Clock, HelpCircle, ArrowRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { ContextualHeader } from '../../components/layout/ContextualHeader';
-import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { QuizModal } from '../../components/learning/QuizModal';
 import { FloatingToast } from '../../components/common/FloatingToast';
@@ -16,6 +14,11 @@ const articleImages: Record<string, any> = {
   genre_activity_1: require('../../../assets/community/genre_activity_1.jpg'),
   genre_activity_2: require('../../../assets/community/genre_activity_2.jpg'),
   pikr_group: require('../../../assets/community/pikr_group.jpg'),
+  onboarding_mood: require('../../../assets/onboarding/onboarding_mood.jpg'),
+  onboarding_growth: require('../../../assets/onboarding/onboarding_growth.jpg'),
+  onboarding_counseling: require('../../../assets/onboarding/onboarding_counseling.jpg'),
+  personality_cover: require('../../../assets/tests/personality_cover.jpg'),
+  result_desk: require('../../../assets/tests/result_desk.jpg'),
 };
 
 export const ArticleDetailScreen: React.FC = () => {
@@ -33,7 +36,7 @@ export const ArticleDetailScreen: React.FC = () => {
     toggleBookmark(article.id);
     setToastMessage(
       willBeSaved
-        ? '🔖 Ditambahkan ke Bacaan Tersimpan!'
+        ? 'Ditambahkan ke Bacaan Tersimpan!'
         : 'Dihapus dari Bacaan Tersimpan'
     );
     setTimeout(() => {
@@ -52,6 +55,7 @@ export const ArticleDetailScreen: React.FC = () => {
               activeOpacity={0.7}
               onPress={handleToggleBookmark}
               style={styles.bookmarkAction}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Bookmark
                 size={20}
@@ -71,6 +75,18 @@ export const ArticleDetailScreen: React.FC = () => {
       }
     >
       <View style={styles.container}>
+        {/* 1. Category Kicker */}
+        <Text style={styles.categoryKicker}>{article.category}</Text>
+
+        {/* 2. Main Editorial Headline */}
+        <Text style={styles.articleTitle}>{article.title}</Text>
+
+        {/* 3. Narrative Summary Deck (Lead paragraph) */}
+        {article.summary ? (
+          <Text style={styles.articleDeck}>{article.summary}</Text>
+        ) : null}
+
+        {/* 4. Large Editorial Hero Cover Image */}
         {coverImage && (
           <Image
             source={coverImage}
@@ -78,33 +94,41 @@ export const ArticleDetailScreen: React.FC = () => {
             resizeMode="cover"
           />
         )}
-        {/* Title & Metadata */}
-        <View style={styles.titleSection}>
-          <Text style={styles.articleTitle}>{article.title}</Text>
+
+        {/* 5. Author & Reading Metadata Row */}
+        <View style={styles.bylineSection}>
+          <View style={styles.bylineTop}>
+            <Text style={styles.authorName}>Oleh {article.author}</Text>
+          </View>
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
-              <Clock size={13} color={colors.textMuted} />
+              <Clock size={12} color={colors.textMuted} />
               <Text style={styles.metaText}>{article.readingMinutes} menit baca</Text>
             </View>
             <Text style={styles.metaDivider}>•</Text>
             <Text style={styles.metaText}>{article.publishedDate}</Text>
-            <Text style={styles.metaDivider}>•</Text>
-            <Text style={styles.metaText}>{article.author}</Text>
           </View>
         </View>
 
-        {/* Key Takeaways Card */}
-        <Card variant="tintBlue" style={styles.takeawaysCard}>
-          <Text style={styles.takeawaysTitle}>💡 Poin Kunci Bacaan:</Text>
-          {article.keyTakeaways.map((point, idx) => (
-            <View key={idx} style={styles.pointRow}>
-              <CheckCircle2 size={14} color={colors.brandBlue[600]} style={{ marginTop: 2 }} />
-              <Text style={styles.pointText}>{point}</Text>
-            </View>
-          ))}
-        </Card>
+        {/* Hairline Divider */}
+        <View style={styles.sectionDivider} />
 
-        {/* Content Paragraphs */}
+        {/* 6. Poin Kunci Bacaan (Editorial & Alami, Tanpa Container Berwarna atau Border Aksen) */}
+        {article.keyTakeaways && article.keyTakeaways.length > 0 && (
+          <View style={styles.takeawaysSection}>
+            <Text style={styles.takeawaysHeading}>Poin Kunci Bacaan</Text>
+            <View style={styles.takeawaysList}>
+              {article.keyTakeaways.map((point, idx) => (
+                <View key={idx} style={styles.pointRow}>
+                  <Text style={styles.pointIndex}>{idx + 1}.</Text>
+                  <Text style={styles.pointText}>{point}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* 7. Longform Content Paragraphs (Tipografi Nyaman & Berjarak Alami) */}
         <View style={styles.paragraphsContainer}>
           {article.content.map((paragraph, idx) => (
             <Text key={idx} style={styles.paragraph}>
@@ -113,17 +137,17 @@ export const ArticleDetailScreen: React.FC = () => {
           ))}
         </View>
 
-        {/* Interactive Quiz Launcher */}
+        {/* 8. Interactive Quiz Reflection Section (Dignified Learning Block) */}
         {article.quiz && (
-          <Card variant="tintAmber" style={styles.quizCard}>
+          <View style={styles.quizSection}>
             <View style={styles.quizHeader}>
               <View style={styles.quizIconWrap}>
-                <HelpCircle size={22} color={colors.accentAmber[600]} />
+                <HelpCircle size={20} color={colors.brandBlue[600]} />
               </View>
               <View style={styles.quizInfo}>
                 <Text style={styles.quizTitle}>{article.quiz.title}</Text>
                 <Text style={styles.quizSub}>
-                  3 pertanyaan non-punitive untuk menguji pemahaman dan refleksimu.
+                  3 pertanyaan reflektif untuk menguji pemahaman dan refleksimu tanpa tekanan.
                 </Text>
               </View>
             </View>
@@ -131,11 +155,11 @@ export const ArticleDetailScreen: React.FC = () => {
               title="Mulai Kuis Singkat"
               variant="primary"
               fullWidth
-              iconRight={<ArrowRight size={16} color={colors.surface} />}
+              iconRight={<ArrowRight size={15} color={colors.surface} />}
               onPress={() => setIsQuizOpen(true)}
               style={styles.quizBtn}
             />
-          </Card>
+          </View>
         )}
       </View>
 
@@ -153,32 +177,65 @@ export const ArticleDetailScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: spacing.xs,
     paddingBottom: spacing.xxl,
-  },
-  heroCoverImage: {
-    width: '100%',
-    height: 180,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.sm,
   },
   bookmarkAction: {
     padding: 6,
   },
-  titleSection: {
-    marginVertical: spacing.md,
+
+  /* 1. Category Kicker */
+  categoryKicker: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 6,
   },
+
+  /* 2. Headline */
   articleTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.textPrimary,
     lineHeight: 28,
-    marginBottom: spacing.xs,
+    marginBottom: 8,
+  },
+
+  /* 3. Narrative Deck */
+  articleDeck: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+  },
+
+  /* 4. Hero Image */
+  heroCoverImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surfaceAlt,
+    marginBottom: spacing.sm,
+  },
+
+  /* 5. Byline & Meta */
+  bylineSection: {
+    paddingVertical: spacing.xs,
+  },
+  bylineTop: {
+    marginBottom: 3,
+  },
+  authorName: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: colors.textPrimary,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    flexWrap: 'wrap',
   },
   metaItem: {
     flexDirection: 'row',
@@ -186,45 +243,74 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   metaText: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: colors.textMuted,
   },
   metaDivider: {
+    fontSize: 11,
     color: colors.borderMedium,
   },
-  takeawaysCard: {
-    padding: spacing.md,
-    gap: spacing.xs,
-    marginVertical: spacing.xs,
+
+  /* Divider Editorial Tipis */
+  sectionDivider: {
+    height: 1,
+    backgroundColor: colors.borderLight,
+    marginVertical: spacing.layout.sectionGap,
   },
-  takeawaysTitle: {
-    fontSize: 13,
+
+  /* 6. Poin Kunci Bacaan (Editorial & Natural) */
+  takeawaysSection: {
+    marginVertical: spacing.md,
+    paddingBottom: spacing.xs,
+  },
+  takeawaysHeading: {
+    fontSize: 15,
     fontWeight: '700',
-    color: colors.brandBlue[700],
-    marginBottom: 4,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+    letterSpacing: -0.2,
+  },
+  takeawaysList: {
+    gap: spacing.layout.itemGap,
   },
   pointRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.xs,
+    gap: spacing.layout.itemGap,
+  },
+  pointIndex: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+    lineHeight: 22,
+    minWidth: 16,
   },
   pointText: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 22,
     flex: 1,
   },
+
+  /* 7. Content Paragraphs */
   paragraphsContainer: {
     gap: spacing.md,
-    marginVertical: spacing.md,
+    marginBottom: spacing.xl,
   },
   paragraph: {
-    fontSize: 14,
-    lineHeight: 23,
-    color: colors.textSecondary,
+    fontSize: 15,
+    lineHeight: 25,
+    color: '#334155', // Slate 700 - high contrast reading
+    letterSpacing: 0.1,
   },
-  quizCard: {
-    padding: spacing.md,
+
+  /* 8. Quiz Section */
+  quizSection: {
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    borderRadius: borderRadius.lg,
+    padding: spacing.layout.cardPadding,
     marginTop: spacing.md,
   },
   quizHeader: {
@@ -234,10 +320,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   quizIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.brandBlue[50],
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -250,12 +336,12 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   quizSub: {
-    fontSize: 11,
-    color: colors.textSecondary,
+    fontSize: 11.5,
+    color: colors.textMuted,
+    lineHeight: 16,
     marginTop: 2,
   },
   quizBtn: {
     marginTop: spacing.xs,
   },
 });
-

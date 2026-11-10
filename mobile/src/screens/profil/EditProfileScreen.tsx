@@ -146,9 +146,9 @@ export const EditProfileScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.md,
+    paddingVertical: 0,
     gap: spacing.lg,
-    marginBottom: spacing.xxl,
+    paddingBottom: spacing.lg,
   },
   avatarWrap: {
     alignItems: 'center',
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   form: {
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   interestsSection: {
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   sectionTitle: {
     fontSize: 12.5,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   saveBtn: {
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
   },
 });
 

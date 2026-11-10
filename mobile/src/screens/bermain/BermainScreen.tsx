@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   scenarioCard: {
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing.lg,
+    marginBottom: spacing.layout.cardGap,
   },
   scenarioCategoryWrap: {
     marginBottom: spacing.xs,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   choicesSection: {
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   choicesHeading: {
     fontSize: 12.5,
@@ -197,12 +197,12 @@ const styles = StyleSheet.create({
   choiceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.sm,
+    padding: 12,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.borderMedium,
     backgroundColor: colors.surface,
-    gap: spacing.sm,
+    gap: 10,
   },
   choiceBtnSelected: {
     borderColor: colors.brandBlue[600],

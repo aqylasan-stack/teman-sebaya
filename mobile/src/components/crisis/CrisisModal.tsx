@@ -257,6 +257,6 @@ const styles = StyleSheet.create({
     color: colors.brandGreen[700],
   },
   returnButton: {
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
 });

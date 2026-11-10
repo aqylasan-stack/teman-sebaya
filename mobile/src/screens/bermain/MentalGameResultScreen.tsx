@@ -385,8 +385,8 @@ const styles = StyleSheet.create({
     color: colors.brandGreen[700],
   },
   growthCard: {
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing.layout.cardPadding,
+    marginBottom: spacing.layout.cardGap,
   },
   growthHeader: {
     flexDirection: 'row',
@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   missionCard: {
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing.layout.cardPadding,
+    marginBottom: spacing.layout.cardGap,
   },
   missionHeading: {
     fontSize: 14,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   actionsContainer: {
-    gap: spacing.sm,
+    gap: spacing.layout.itemGap,
     paddingBottom: spacing.xl,
   },
   primaryActionBtn: {

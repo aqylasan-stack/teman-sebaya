@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
+    marginTop: spacing.layout.sectionGap,
+    marginBottom: spacing.sm,
   },
   titleWithIcon: {
     flexDirection: 'row',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   galleryScroll: {
-    gap: spacing.sm,
+    gap: spacing.md,
     paddingVertical: spacing.xs,
     paddingBottom: spacing.md,
   },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     height: 120,
   },
   galleryMeta: {
-    padding: spacing.sm,
+    padding: spacing.md,
   },
   galleryBadge: {
     marginBottom: 4,
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   list: {
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+    gap: spacing.md,
+    marginBottom: spacing.layout.sectionGap,
   },
   groupCard: {
     padding: 0,

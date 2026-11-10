@@ -265,7 +265,8 @@ export const HomeScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   greetingSection: {
-    marginVertical: spacing.md,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
   },
   greetingTitle: {
     fontSize: 20,
@@ -276,12 +277,13 @@ const styles = StyleSheet.create({
   greetingSubtitle: {
     ...typography.bodyRegular,
     color: colors.textSecondary,
+    lineHeight: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing.lg,
+    marginTop: spacing.layout.sectionGap,
     marginBottom: spacing.sm,
   },
   sectionTitle: {
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   upcomingSection: {
-    marginTop: spacing.xs,
+    marginTop: 0,
   },
   emptySessionText: {
     fontSize: 12,
@@ -401,7 +403,7 @@ const styles = StyleSheet.create({
     color: colors.surface,
   },
   recommendedSection: {
-    marginTop: spacing.xs,
+    marginTop: 0,
   },
   articleCard: {
     padding: spacing.md,
@@ -432,7 +434,7 @@ const styles = StyleSheet.create({
     padding: 0,
     overflow: 'hidden',
     marginTop: spacing.xs,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
   },
   testBannerImage: {
     width: '100%',
@@ -464,7 +466,7 @@ const styles = StyleSheet.create({
   },
   communityBanner: {
     marginTop: spacing.sm,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
     padding: 0,
     overflow: 'hidden',
   },

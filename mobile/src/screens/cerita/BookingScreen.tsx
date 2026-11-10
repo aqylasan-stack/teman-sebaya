@@ -224,11 +224,11 @@ export const BookingScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.md,
-    marginBottom: spacing.xxl,
+    gap: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   counselorCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   counselorName: {
     fontSize: 15,
@@ -247,13 +247,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   section: {
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   sectionTitle: {
     fontSize: 13,
@@ -263,14 +263,14 @@ const styles = StyleSheet.create({
   chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   dateChip: {
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.borderMedium,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderRadius: borderRadius.md,
   },
   timeChip: {
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderMedium,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: borderRadius.md,
   },
   chipActive: {

@@ -153,14 +153,14 @@ export const ProfileScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-    marginBottom: spacing.xxl,
+    paddingVertical: 0,
+    gap: spacing.layout.cardGap,
+    paddingBottom: spacing.lg,
   },
   userCard: {
     alignItems: 'center',
-    paddingVertical: spacing.xl,
-    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
   avatarCircle: {
     width: 68,
@@ -241,10 +241,11 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceAlt,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   menuIconWrap: {
     width: 34,

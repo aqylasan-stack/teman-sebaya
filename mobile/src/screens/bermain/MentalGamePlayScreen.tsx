@@ -341,12 +341,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
     paddingBottom: 110, // Prevent overlap with docked bottom bar
   },
   narrativeCard: {
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+    padding: spacing.layout.cardPadding,
+    marginBottom: spacing.layout.cardGap,
   },
   contextBannerPill: {
     flexDirection: 'row',
@@ -389,14 +390,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   choicesList: {
-    gap: spacing.sm,
+    gap: spacing.layout.itemGap,
   },
   choiceCard: {
     backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: colors.borderLight,
     borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    padding: 14,
     minHeight: 52,
   },
   choiceHeaderRow: {
@@ -492,7 +493,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.borderLight,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
     paddingTop: spacing.sm,
     paddingBottom: Platform.OS === 'ios' ? 32 : spacing.md,
   },

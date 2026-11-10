@@ -43,10 +43,17 @@ interface EmotionConfig {
   themeBg: string;
   themeCardBg: string;
   accentColor: string;
+  titleColor?: string;
+  ctaTextColor?: string;
   glowColor: string;
   chipActiveBg: string;
   chipActiveText: string;
   subEmotions: string[];
+  // Solid color system matching emotion selection cards
+  solidBg: string;
+  borderColor: string;
+  selectedBorderColor: string;
+  textColor: string;
 }
 
 const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
@@ -57,12 +64,18 @@ const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
     description:
       'Merasa bersyukur, bersemangat, dan penuh energi positif menyambut hari ini.',
     image: require('../../../assets/emojis/emoji_bahagia.png'),
-    themeBg: '#FFFBEB', // Soft warm sunny amber tint (Amber 50)
-    themeCardBg: '#FEF3C7',
-    accentColor: '#D97706',
-    glowColor: '#FEF3C7',
-    chipActiveBg: '#F59E0B',
-    chipActiveText: '#FFFFFF',
+    themeBg: '#FFFDF0', // Soft warm sunny yellow tint
+    themeCardBg: '#FEF9C3',
+    accentColor: '#EAB308', // True warm golden yellow (Yellow 500, Hue 45.4°)
+    titleColor: '#A16207', // Deep golden yellow for clear contrast on light bg
+    ctaTextColor: '#78350F', // Dark warm amber/brown for contrast on bright yellow button/chip
+    glowColor: '#FEF08A',
+    chipActiveBg: '#EAB308',
+    chipActiveText: '#78350F',
+    solidBg: '#FEF08A', // Solid warm sunny yellow (Yellow 200, Hue 52.8°)
+    borderColor: '#FDE047', // Yellow 300
+    selectedBorderColor: '#EAB308', // Rich golden yellow
+    textColor: '#78350F',
     subEmotions: [
       'Bersyukur',
       'Ceria',
@@ -84,9 +97,15 @@ const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
     themeBg: '#FAF7F2', // Soft warm linen / sand pastel (selaras dengan emoji krem/beige)
     themeCardBg: '#F5EDE4',
     accentColor: '#8C6E54', // Warm latte / sand
+    titleColor: '#8C6E54',
+    ctaTextColor: '#FFFFFF',
     glowColor: '#F5EDE4', // Warm cream glow
     chipActiveBg: '#8C6E54',
     chipActiveText: '#FFFFFF',
+    solidBg: '#EADBC8', // Solid warm beige
+    borderColor: '#D8C5B0',
+    selectedBorderColor: '#8C6E54',
+    textColor: '#3E2723',
     subEmotions: [
       'Netral',
       'Datar',
@@ -108,9 +127,15 @@ const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
     themeBg: '#EFF6FF', // Soft calming sky blue tint (Blue 50)
     themeCardBg: '#DBEAFE',
     accentColor: '#2563EB',
+    titleColor: '#2563EB',
+    ctaTextColor: '#FFFFFF',
     glowColor: '#DBEAFE',
     chipActiveBg: '#2563EB',
     chipActiveText: '#FFFFFF',
+    solidBg: '#BFDBFE', // Solid blue
+    borderColor: '#93C5FD',
+    selectedBorderColor: '#1D4ED8',
+    textColor: '#1E3A8A',
     subEmotions: [
       'Kesepian',
       'Kecewa',
@@ -132,9 +157,15 @@ const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
     themeBg: '#FEF2F2', // Soft pastel rose / red blush tint (Red 50)
     themeCardBg: '#FEE2E2',
     accentColor: '#DC2626',
+    titleColor: '#DC2626',
+    ctaTextColor: '#FFFFFF',
     glowColor: '#FEE2E2',
     chipActiveBg: '#DC2626',
     chipActiveText: '#FFFFFF',
+    solidBg: '#FECACA', // Solid coral red
+    borderColor: '#FCA5A5',
+    selectedBorderColor: '#DC2626',
+    textColor: '#7F1D1D',
     subEmotions: [
       'Dikecewakan',
       'Terhina',
@@ -308,7 +339,7 @@ export const DailyMoodCheckinScreen: React.FC = () => {
       currentConfig.name,
       [selectedSubEmotion],
       storyNote.trim(),
-      ['Daily Check-in']
+      []
     );
     // Masuk ke Home / Beranda
     navigateTo('main');
@@ -367,7 +398,15 @@ export const DailyMoodCheckinScreen: React.FC = () => {
           </View>
 
           {/* Central Hero Emotion Display */}
-          <View style={styles.heroCardContainer}>
+          <View
+            style={[
+              styles.heroCardContainer,
+              {
+                backgroundColor: currentConfig.solidBg,
+                borderColor: currentConfig.borderColor,
+              },
+            ]}
+          >
             <Image
               source={currentConfig.image}
               style={styles.heroEmojiImage}
@@ -379,12 +418,17 @@ export const DailyMoodCheckinScreen: React.FC = () => {
               <Text
                 style={[
                   styles.emotionHeadlineText,
-                  { color: currentConfig.accentColor },
+                  { color: currentConfig.textColor },
                 ]}
               >
                 {currentConfig.headlineText}
               </Text>
-              <Text style={styles.emotionDescriptionText}>
+              <Text
+                style={[
+                  styles.emotionDescriptionText,
+                  { color: currentConfig.textColor },
+                ]}
+              >
                 {currentConfig.description}
               </Text>
             </View>
@@ -408,8 +452,14 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                     }}
                     style={[
                       styles.dockItem,
+                      {
+                        backgroundColor: item.solidBg,
+                        borderColor: isSelected
+                          ? item.selectedBorderColor
+                          : item.borderColor,
+                        borderWidth: isSelected ? 2.5 : 1.5,
+                      },
                       isSelected && styles.dockItemSelected,
-                      isSelected && { borderColor: item.accentColor },
                     ]}
                   >
                     <View style={styles.dockThumbWrapper}>
@@ -422,22 +472,26 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.dockItemLabel,
-                        isSelected && {
-                          color: item.accentColor,
-                          fontWeight: '700',
+                        {
+                          color: item.textColor,
+                          fontWeight: isSelected ? '800' : '600',
                         },
                       ]}
+                      numberOfLines={1}
                     >
                       {item.label}
                     </Text>
-                    {isSelected && (
-                      <View
-                        style={[
-                          styles.activeDot,
-                          { backgroundColor: item.accentColor },
-                        ]}
-                      />
-                    )}
+                    {/* Indikator Titik Seleksi */}
+                    <View
+                      style={[
+                        styles.activeDot,
+                        {
+                          backgroundColor: isSelected
+                            ? item.selectedBorderColor
+                            : 'transparent',
+                        },
+                      ]}
+                    />
                   </TouchableOpacity>
                 );
               })}
@@ -505,7 +559,10 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             <Text
               style={[
                 styles.stage2EmotionTitle,
-                { color: currentConfig.accentColor },
+                {
+                  color:
+                    currentConfig.titleColor || currentConfig.accentColor,
+                },
               ]}
             >
               {currentConfig.name}
@@ -547,6 +604,9 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                           style={[
                             styles.subEmotionChipText,
                             isSelected && styles.subEmotionChipTextSelected,
+                            isSelected && {
+                              color: currentConfig.ctaTextColor || '#FFFFFF',
+                            },
                           ]}
                         >
                           {sub}
@@ -599,7 +659,11 @@ export const DailyMoodCheckinScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.doneInputText,
-                        { color: currentConfig.accentColor },
+                        {
+                          color:
+                            currentConfig.titleColor ||
+                            currentConfig.accentColor,
+                        },
                       ]}
                     >
                       Simpan Catatan
@@ -621,12 +685,28 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.stage2NextButton}
+              style={[
+                styles.stage2NextButton,
+                {
+                  backgroundColor: currentConfig.accentColor,
+                  shadowColor: currentConfig.accentColor,
+                },
+              ]}
               activeOpacity={0.8}
               onPress={handleNextToAffirmation}
             >
-              <Text style={styles.stage2NextText}>Simpan & Lanjut</Text>
-              <ArrowRight size={16} color={colors.surface} />
+              <Text
+                style={[
+                  styles.stage2NextText,
+                  { color: currentConfig.ctaTextColor || colors.surface },
+                ]}
+              >
+                Simpan & Lanjut
+              </Text>
+              <ArrowRight
+                size={16}
+                color={currentConfig.ctaTextColor || colors.surface}
+              />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -680,15 +760,13 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             </View>
           ) : null}
 
-          {/* Expressive Heart Accent */}
+          {/* Standalone Heart Hero matching selected emotion */}
           <View style={styles.heartHeroContainer}>
-            <View style={styles.heartGlowCircle}>
-              <Heart
-                size={40}
-                color={currentConfig.accentColor}
-                fill={currentConfig.accentColor}
-              />
-            </View>
+            <Heart
+              size={88}
+              color={currentConfig.accentColor}
+              fill={currentConfig.accentColor}
+            />
           </View>
 
           {/* Emotion Meta Pill */}
@@ -715,12 +793,25 @@ export const DailyMoodCheckinScreen: React.FC = () => {
 
           {/* Share Quote Button */}
           <TouchableOpacity
-            style={styles.shareButton}
+            style={[
+              styles.shareButton,
+              {
+                backgroundColor: currentConfig.solidBg,
+                borderColor: currentConfig.selectedBorderColor,
+              },
+            ]}
             activeOpacity={0.8}
             onPress={handleShareQuote}
           >
-            <Text style={styles.shareButtonText}>Bagikan</Text>
-            <Share2 size={16} color={colors.surface} />
+            <Text
+              style={[
+                styles.shareButtonText,
+                { color: currentConfig.textColor },
+              ]}
+            >
+              Bagikan
+            </Text>
+            <Share2 size={16} color={currentConfig.textColor} />
           </TouchableOpacity>
 
           {/* User Feedback Section */}
@@ -778,12 +869,28 @@ export const DailyMoodCheckinScreen: React.FC = () => {
 
           {/* Completion CTA Button */}
           <TouchableOpacity
-            style={styles.finishCtaButton}
+            style={[
+              styles.finishCtaButton,
+              {
+                backgroundColor: currentConfig.accentColor,
+                shadowColor: currentConfig.accentColor,
+              },
+            ]}
             activeOpacity={0.85}
             onPress={handleFinishCheckin}
           >
-            <Text style={styles.finishCtaText}>Selesai</Text>
-            <ArrowRight size={18} color={colors.surface} />
+            <Text
+              style={[
+                styles.finishCtaText,
+                { color: currentConfig.ctaTextColor || colors.surface },
+              ]}
+            >
+              Selesai
+            </Text>
+            <ArrowRight
+              size={18}
+              color={currentConfig.ctaTextColor || colors.surface}
+            />
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -814,11 +921,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.canvas,
   },
   topHeader: {
-    height: 56,
+    height: spacing.layout.headerHeight,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
     backgroundColor: colors.canvas,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
@@ -849,12 +956,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   stage1ScrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
     paddingBottom: spacing.xxxl,
   },
   headingSection: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
   },
   heroHeading: {
     fontSize: 26,
@@ -870,19 +977,18 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   heroCardContainer: {
-    backgroundColor: colors.surface,
     borderRadius: borderRadius.xl,
-    padding: spacing.xl,
+    paddingVertical: spacing.xxl,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.lg,
+    borderWidth: 1.5,
+    marginBottom: spacing.xxl,
     // subtle shadow
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 2,
   },
   emojiHaloGlow: {
     width: 140,
@@ -902,18 +1008,18 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   emotionHeadlineText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary,
+    fontSize: 21,
+    fontWeight: '800',
     marginBottom: 6,
     textAlign: 'center',
+    letterSpacing: -0.2,
   },
   emotionDescriptionText: {
-    ...typography.bodySmall,
-    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
     textAlign: 'center',
-    lineHeight: 18,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
+    opacity: 0.88,
   },
   primaryActionButton: {
     flexDirection: 'row',
@@ -936,12 +1042,7 @@ const styles = StyleSheet.create({
     color: colors.surface,
   },
   bottomSelectorDock: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.xl,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.md,
+    marginBottom: spacing.xxl,
   },
   dockTitle: {
     fontSize: 11,
@@ -962,15 +1063,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: 4,
     borderRadius: borderRadius.md,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    backgroundColor: colors.surfaceAlt,
   },
   dockItemSelected: {
-    backgroundColor: colors.surface,
-    shadowColor: '#000',
+    shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -988,14 +1085,12 @@ const styles = StyleSheet.create({
   },
   dockItemLabel: {
     fontSize: 11,
-    fontWeight: '500',
-    color: colors.textSecondary,
     textAlign: 'center',
   },
   activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
     marginTop: 4,
   },
 
@@ -1004,11 +1099,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   immersiveHeader: {
-    height: 56,
+    height: spacing.layout.headerHeight,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
   },
   translucentCircleButton: {
     width: 38,
@@ -1026,13 +1121,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   stage2ScrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
     paddingBottom: spacing.xxxl,
   },
   stage2HeroSection: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.layout.sectionGap,
   },
   stage2EmojiStandalone: {
     width: 136,
@@ -1053,7 +1148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   subEmotionSection: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.layout.sectionGap,
   },
   subEmotionPrompt: {
     fontSize: 14,
@@ -1199,16 +1294,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.brandBlue[600],
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: borderRadius.full,
     gap: spacing.xs,
-    shadowColor: colors.brandBlue[600],
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 3,
   },
   stage2NextText: {
     fontSize: 14,
@@ -1218,8 +1311,8 @@ const styles = StyleSheet.create({
 
   /* ------------------ TAHAP 3 STYLES ------------------ */
   stage3ScrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
     paddingBottom: spacing.xxxl,
     alignItems: 'center',
   },
@@ -1238,23 +1331,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   heartHeroContainer: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  heartGlowCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   subEmotionPillWrap: {
     marginBottom: spacing.lg,
@@ -1302,22 +1382,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.brandBlue[600],
+    borderWidth: 1.5,
     paddingHorizontal: 22,
     paddingVertical: 10,
     borderRadius: borderRadius.full,
     gap: spacing.sm,
     marginBottom: spacing.xxl,
-    shadowColor: colors.brandBlue[600],
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   shareButtonText: {
     fontSize: 13,
-    fontWeight: '600',
-    color: colors.surface,
+    fontWeight: '700',
   },
   feedbackSection: {
     width: '100%',
@@ -1390,15 +1469,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.brandBlue[600],
     height: 52,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.full,
     gap: spacing.sm,
-    shadowColor: colors.brandBlue[600],
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   finishCtaText: {
     fontSize: 15,

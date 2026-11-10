@@ -33,6 +33,7 @@ import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { useApp } from '../../state/AppContext';
+import { validateNickname } from '../../utils/validation';
 import { PrimaryEmotion } from '../../types';
 
 // Daftar resmi 27 Kota & Kabupaten di Provinsi Jawa Barat
@@ -66,56 +67,61 @@ const WEST_JAVA_CITIES = [
   'Kota Tasikmalaya',
 ];
 
-// 4 Emosi Utama untuk Mood Check-in Pertama (Menggunakan Karakter Emoji Asli)
+// 4 Emosi Utama untuk Mood Check-in Pertama dengan Background Solid
 const MOOD_OPTIONS: {
   type: PrimaryEmotion;
   label: string;
   hint: string;
   image: any;
-  activeColor: string;
-  activeBg: string;
-  activeTitleColor: string;
-  activeHintColor: string;
+  solidBg: string;
+  borderColor: string;
+  selectedBorderColor: string;
+  titleColor: string;
+  hintColor: string;
 }[] = [
   {
     type: 'Bahagia',
     label: 'Bahagia',
     hint: 'Ceria',
     image: require('../../../assets/emojis/emoji_bahagia.png'),
-    activeColor: '#EAB308',
-    activeBg: '#FEFCE8',
-    activeTitleColor: '#A16207',
-    activeHintColor: '#CA8A04',
+    solidBg: '#FEF08A', // Solid warm sunny yellow
+    borderColor: '#FDE047',
+    selectedBorderColor: '#EAB308',
+    titleColor: '#78350F',
+    hintColor: '#854D0E',
   },
   {
     type: 'Sedih',
     label: 'Sedih',
     hint: 'Murung',
     image: require('../../../assets/emojis/emoji_sedih.png'),
-    activeColor: '#3B82F6',
-    activeBg: '#EFF6FF',
-    activeTitleColor: '#1D4ED8',
-    activeHintColor: '#2563EB',
+    solidBg: '#BFDBFE', // Solid blue
+    borderColor: '#93C5FD',
+    selectedBorderColor: '#1D4ED8',
+    titleColor: '#1E3A8A',
+    hintColor: '#1D4ED8',
   },
   {
     type: 'Marah',
     label: 'Marah',
     hint: 'Kesal',
     image: require('../../../assets/emojis/emoji_marah.png'),
-    activeColor: '#EF4444',
-    activeBg: '#FEF2F2',
-    activeTitleColor: '#B91C1C',
-    activeHintColor: '#DC2626',
+    solidBg: '#FECACA', // Solid coral red
+    borderColor: '#FCA5A5',
+    selectedBorderColor: '#DC2626',
+    titleColor: '#7F1D1D',
+    hintColor: '#991B1B',
   },
   {
     type: 'Biasa Saja',
     label: 'Biasa Saja',
     hint: 'Tenang',
     image: require('../../../assets/emojis/emoji_biasa.png'),
-    activeColor: '#A8A29E',
-    activeBg: '#F5F5F4',
-    activeTitleColor: '#44403C',
-    activeHintColor: '#78716C',
+    solidBg: '#EADBC8', // Solid warm beige
+    borderColor: '#D8C5B0',
+    selectedBorderColor: '#8C6E54',
+    titleColor: '#3E2723',
+    hintColor: '#5D4037',
   },
 ];
 
@@ -332,18 +338,23 @@ export const ThoriqOnboardingScreen: React.FC = () => {
 
   const handleProceedFromProfile = () => {
     let hasError = false;
-    if (!nickname.trim()) {
-      setStep2Error('Nama panggilan tidak boleh kosong.');
+    const nicknameValidation = validateNickname(nickname);
+    if (!nicknameValidation.isValid) {
+      setStep2Error(nicknameValidation.error || 'Nama panggilan tidak valid.');
       hasError = true;
+    } else {
+      setStep2Error('');
     }
+
     if (!city.trim()) {
       setCityError('Silakan pilih kota atau kabupaten asalmu.');
       hasError = true;
+    } else {
+      setCityError('');
     }
+
     if (hasError) return;
 
-    setStep2Error('');
-    setCityError('');
     setStep(3);
   };
 
@@ -669,9 +680,15 @@ export const ThoriqOnboardingScreen: React.FC = () => {
                 label="Nama Panggilan"
                 placeholder="Misal: Anya atau Thoriq"
                 value={nickname}
+                maxLength={25}
                 onChangeText={(val) => {
                   setNickname(val);
-                  if (step2Error) setStep2Error('');
+                  if (step2Error) {
+                    const validation = validateNickname(val);
+                    if (validation.isValid) {
+                      setStep2Error('');
+                    }
+                  }
                 }}
                 error={step2Error}
                 helperText="Nama ini akan digunakan oleh Thoriq dan konselor untuk menyapamu."
@@ -698,7 +715,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
                       ]}
                       numberOfLines={1}
                     >
-                      {city || 'Pilih Kota / Kabupaten (Jawa Barat)'}
+                      {city || 'Pilih Kota / Kabupaten'}
                     </Text>
                   </View>
                   <ChevronDown size={18} color={colors.textMuted} />
@@ -796,29 +813,37 @@ export const ThoriqOnboardingScreen: React.FC = () => {
                       onPress={() => setSelectedMood(mood.type)}
                       style={[
                         styles.moodCardOption,
-                        isSelected && {
-                          borderColor: mood.activeColor,
-                          backgroundColor: mood.activeBg,
-                          shadowColor: mood.activeColor,
-                          shadowOffset: { width: 0, height: 4 },
-                          shadowOpacity: 0.22,
-                          shadowRadius: 8,
-                          elevation: 3,
+                        {
+                          backgroundColor: mood.solidBg,
+                          borderColor: isSelected
+                            ? mood.selectedBorderColor
+                            : mood.borderColor,
+                          borderWidth: isSelected ? 2.5 : 1.5,
                         },
+                        isSelected && styles.moodCardOptionSelected,
                       ]}
                     >
+                      {/* Indikator Pilihan (Selected State) */}
+                      {isSelected && (
+                        <View
+                          style={[
+                            styles.moodSelectedBadge,
+                            { backgroundColor: mood.selectedBorderColor },
+                          ]}
+                        >
+                          <Check size={11} color="#FFFFFF" strokeWidth={3} />
+                        </View>
+                      )}
+
                       <Image
                         source={mood.image}
-                        style={[
-                          styles.moodEmojiImage,
-                          !isSelected && styles.moodEmojiImageUnselected,
-                        ]}
+                        style={styles.moodEmojiImage}
                         resizeMode="contain"
                       />
                       <Text
                         style={[
                           styles.moodCardTitle,
-                          isSelected && { color: mood.activeTitleColor },
+                          { color: mood.titleColor },
                         ]}
                         numberOfLines={1}
                       >
@@ -827,7 +852,7 @@ export const ThoriqOnboardingScreen: React.FC = () => {
                       <Text
                         style={[
                           styles.moodCardHint,
-                          isSelected && { color: mood.activeHintColor },
+                          { color: mood.hintColor },
                         ]}
                         numberOfLines={1}
                       >
@@ -1033,8 +1058,8 @@ const styles = StyleSheet.create({
   introTextSection: {
     alignItems: 'center',
     width: '100%',
-    marginTop: 4,
-    marginBottom: 14,
+    marginTop: -12,
+    marginBottom: 20,
     zIndex: 2,
   },
   introHeading: {
@@ -1325,31 +1350,42 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 8,
     borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: colors.borderLight,
-    backgroundColor: '#F8FAFC',
+    position: 'relative',
+  },
+  moodCardOptionSelected: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  moodSelectedBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 3,
   },
   moodEmojiImage: {
     width: 48,
     height: 48,
     marginBottom: 6,
   },
-  moodEmojiImageUnselected: {
-    opacity: 0.88,
-  },
   moodCardTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: colors.textPrimary,
-    marginTop: 8,
+    marginTop: 4,
     marginBottom: 2,
     textAlign: 'center',
   },
   moodCardHint: {
     fontSize: 12,
-    color: colors.textMuted,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   /* Buttons */

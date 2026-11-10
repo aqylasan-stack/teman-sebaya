@@ -239,10 +239,10 @@ const styles = StyleSheet.create({
   },
   serviceCardsContainer: {
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.layout.sectionGap,
   },
   serviceCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   serviceHeader: {
     flexDirection: 'row',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   aiBridgeCard: {
     padding: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
   },
   aiBridgeRow: {
     flexDirection: 'row',
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   directorySection: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
   },
   directoryHeader: {
     flexDirection: 'row',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   counselorCard: {
     padding: spacing.md,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   counselorHeader: {
     flexDirection: 'row',

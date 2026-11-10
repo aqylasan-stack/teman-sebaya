@@ -1,15 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { BookOpen, Clock, Bookmark } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
-import { Card } from '../common/Card';
-import { Badge } from '../common/Badge';
+import { Clock, Bookmark } from 'lucide-react-native';
+import { colors, spacing, borderRadius } from '../../theme';
 import { Article } from '../../types';
 
 interface ArticleCardProps {
   article: Article;
   onPress: () => void;
   onToggleBookmark: () => void;
+  variant?: 'featured' | 'row';
 }
 
 const articleImages: Record<string, any> = {
@@ -17,116 +16,238 @@ const articleImages: Record<string, any> = {
   genre_activity_1: require('../../../assets/community/genre_activity_1.jpg'),
   genre_activity_2: require('../../../assets/community/genre_activity_2.jpg'),
   pikr_group: require('../../../assets/community/pikr_group.jpg'),
+  onboarding_mood: require('../../../assets/onboarding/onboarding_mood.jpg'),
+  onboarding_growth: require('../../../assets/onboarding/onboarding_growth.jpg'),
+  onboarding_counseling: require('../../../assets/onboarding/onboarding_counseling.jpg'),
+  personality_cover: require('../../../assets/tests/personality_cover.jpg'),
+  result_desk: require('../../../assets/tests/result_desk.jpg'),
 };
 
 export const ArticleCard: React.FC<ArticleCardProps> = ({
   article,
   onPress,
   onToggleBookmark,
+  variant = 'row',
 }) => {
   const coverImage = article.imageKey ? articleImages[article.imageKey] : null;
 
+  if (variant === 'featured') {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.88}
+        onPress={onPress}
+        style={styles.featuredContainer}
+      >
+        {coverImage && (
+          <Image
+            source={coverImage}
+            style={styles.featuredImage}
+            resizeMode="cover"
+          />
+        )}
+
+        <View style={styles.featuredContent}>
+          {/* Category Kicker */}
+          <Text style={styles.categoryKicker}>{article.category}</Text>
+
+          {/* Prominent Editorial Headline */}
+          <Text style={styles.featuredTitle}>{article.title}</Text>
+
+          {/* Concise Summary Deck */}
+          <Text style={styles.featuredSummary} numberOfLines={2}>
+            {article.summary}
+          </Text>
+
+          {/* Metadata & Actions */}
+          <View style={styles.metaRow}>
+            <View style={styles.metaLeft}>
+              <Clock size={12} color={colors.textMuted} />
+              <Text style={styles.metaText}>{article.readingMinutes} menit baca</Text>
+              <Text style={styles.metaDot}>•</Text>
+              <Text style={styles.metaText}>{article.publishedDate}</Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onToggleBookmark}
+              style={styles.bookmarkBtn}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Bookmark
+                size={18}
+                color={article.isSaved ? colors.brandBlue[600] : colors.textMuted}
+                fill={article.isSaved ? colors.brandBlue[600] : 'transparent'}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  // Row Layout: Editorial list item with thumbnail on left, typography on right
   return (
-    <Card style={styles.card} onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      style={styles.rowContainer}
+    >
       {coverImage && (
-        <Image source={coverImage} style={styles.coverImage} resizeMode="cover" />
+        <Image
+          source={coverImage}
+          style={styles.rowThumbnail}
+          resizeMode="cover"
+        />
       )}
 
-      <View style={styles.cardBody}>
-        <View style={styles.topRow}>
-          <Badge
-            label={article.category}
-            variant={
-              article.category === 'Kesehatan Mental'
-                ? 'blue'
-                : article.category === 'Relasi Sehat'
-                ? 'green'
-                : article.category === 'TRIAD KRR'
-                ? 'danger'
-                : 'amber'
-            }
-          />
+      <View style={styles.rowContent}>
+        <View style={styles.rowTopLine}>
+          <Text style={styles.categoryKickerSmall} numberOfLines={1}>
+            {article.category}
+          </Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={onToggleBookmark}
-            style={styles.bookmarkButton}
+            style={styles.bookmarkBtnSmall}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Bookmark
-              size={18}
-              color={article.isSaved ? colors.brandBlue[600] : colors.textPlaceholder}
+              size={15}
+              color={article.isSaved ? colors.brandBlue[600] : colors.textMuted}
               fill={article.isSaved ? colors.brandBlue[600] : 'transparent'}
             />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.title}>{article.title}</Text>
-        <Text style={styles.summary} numberOfLines={2}>
-          {article.summary}
+        <Text style={styles.rowTitle} numberOfLines={2}>
+          {article.title}
         </Text>
 
-        <View style={styles.footerRow}>
-          <View style={styles.metaItem}>
-            <Clock size={12} color={colors.textMuted} />
-            <Text style={styles.metaText}>{article.readingMinutes} menit baca</Text>
-          </View>
-          <Text style={styles.authorText}>Oleh {article.author}</Text>
+        <View style={styles.rowMeta}>
+          <Clock size={11} color={colors.textMuted} />
+          <Text style={styles.rowMetaText}>
+            {article.readingMinutes} mnt · {article.publishedDate}
+          </Text>
         </View>
       </View>
-    </Card>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 0,
-    overflow: 'hidden',
+  /* Featured Lead Story Styles */
+  featuredContainer: {
+    paddingBottom: spacing.lg,
+    marginBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
-  coverImage: {
+  featuredImage: {
     width: '100%',
-    height: 120,
+    height: 190,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.surfaceAlt,
   },
-  cardBody: {
-    padding: spacing.md,
+  featuredContent: {
+    paddingHorizontal: 2,
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  bookmarkButton: {
-    padding: 4,
-  },
-  title: {
-    ...typography.cardHeading,
-    color: colors.textPrimary,
+  categoryKicker: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
     marginBottom: 4,
   },
-  summary: {
-    ...typography.bodySmall,
+  featuredTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    lineHeight: 24,
+    color: colors.textPrimary,
+    marginBottom: 6,
+  },
+  featuredSummary: {
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.textSecondary,
     marginBottom: spacing.sm,
   },
-  footerRow: {
+  metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceAlt,
-    paddingTop: spacing.xs,
+    justifyContent: 'space-between',
+    paddingTop: 4,
   },
-  metaItem: {
+  metaLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  metaText: {
+    fontSize: 11.5,
+    color: colors.textMuted,
+  },
+  metaDot: {
+    fontSize: 11.5,
+    color: colors.borderMedium,
+  },
+  bookmarkBtn: {
+    padding: 4,
+  },
+
+  /* Row Story Styles */
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
+  },
+  rowThumbnail: {
+    width: 92,
+    height: 92,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceAlt,
+  },
+  rowContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+    minHeight: 92,
+    paddingVertical: 2,
+  },
+  rowTopLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categoryKickerSmall: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    flex: 1,
+    marginRight: 6,
+  },
+  bookmarkBtnSmall: {
+    padding: 2,
+  },
+  rowTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
+    color: colors.textPrimary,
+    marginVertical: 4,
+  },
+  rowMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  metaText: {
+  rowMetaText: {
     fontSize: 11,
     color: colors.textMuted,
-  },
-  authorText: {
-    fontSize: 10.5,
-    color: colors.textMuted,
-    fontStyle: 'italic',
   },
 });

@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+    padding: spacing.layout.cardPadding,
+    marginBottom: spacing.layout.cardGap,
   },
 });
 

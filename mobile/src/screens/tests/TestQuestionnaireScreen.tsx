@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface,
     paddingTop: 48,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
     paddingBottom: 32,
     justifyContent: 'space-between',
   },

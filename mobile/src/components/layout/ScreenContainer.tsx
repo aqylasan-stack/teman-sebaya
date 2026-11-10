@@ -38,7 +38,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
           style={styles.scroll}
           contentContainerStyle={[
             styles.scrollContent,
-            withBottomNav && { paddingBottom: 84 + insets.bottom },
+            withBottomNav && { paddingBottom: 92 + insets.bottom },
             contentContainerStyle,
           ]}
           showsVerticalScrollIndicator={false}
@@ -49,7 +49,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
         <View
           style={[
             styles.nonScrollContent,
-            withBottomNav && { paddingBottom: 84 + insets.bottom },
+            withBottomNav && { paddingBottom: 92 + insets.bottom },
             contentContainerStyle,
           ]}
         >
@@ -71,13 +71,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
+    paddingBottom: spacing.layout.screenPaddingBottom,
   },
   nonScrollContent: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.layout.screenPaddingTop,
   },
 });

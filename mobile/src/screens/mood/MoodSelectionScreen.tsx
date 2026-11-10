@@ -176,30 +176,30 @@ export const MoodSelectionScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginBottom: 2,
+    marginBottom: spacing.xs,
   },
   sectionSubtitle: {
     ...typography.bodySmall,
     color: colors.textSecondary,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   chipsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.layout.itemGap,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.borderMedium,
@@ -218,10 +218,10 @@ const styles = StyleSheet.create({
   },
   inputCard: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.borderMedium,
-    padding: spacing.md,
+    padding: spacing.layout.cardPadding,
   },
   textArea: {
     fontSize: 13,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   saveButton: {
-    marginTop: spacing.xs,
+    marginTop: spacing.md,
     marginBottom: spacing.xxl,
   },
 });

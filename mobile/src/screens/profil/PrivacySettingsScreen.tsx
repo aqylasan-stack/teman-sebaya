@@ -125,12 +125,12 @@ export const PrivacySettingsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-    marginBottom: spacing.xxl,
+    paddingVertical: 0,
+    gap: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   bannerCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
   },
   bannerRow: {
     flexDirection: 'row',
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.borderLight,
-    padding: spacing.md,
+    padding: spacing.lg,
     gap: spacing.sm,
   },
   groupHeader: {
@@ -167,10 +167,10 @@ const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceAlt,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   toggleIconWrap: {
     width: 34,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   ethicsCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
     backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
     borderColor: colors.borderMedium,

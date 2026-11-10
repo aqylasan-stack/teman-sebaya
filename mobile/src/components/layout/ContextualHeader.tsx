@@ -76,11 +76,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    height: spacing.layout.headerHeight,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-    height: 56,
   },
   backButton: {
     width: 36,

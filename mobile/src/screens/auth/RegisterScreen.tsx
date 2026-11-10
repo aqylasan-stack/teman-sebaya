@@ -17,6 +17,7 @@ import { Button } from '../../components/common/Button';
 import { GoogleIcon } from '../../components/common/GoogleIcon';
 import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import { useApp } from '../../state/AppContext';
+import { validateNickname } from '../../utils/validation';
 
 export const RegisterScreen: React.FC = () => {
   const { navigateTo, register } = useApp();
@@ -40,8 +41,9 @@ export const RegisterScreen: React.FC = () => {
   const handleRegister = () => {
     let isValid = true;
 
-    if (!name.trim()) {
-      setNameError('Nama lengkap atau nama samaran wajib diisi.');
+    const nameValidation = validateNickname(name);
+    if (!nameValidation.isValid) {
+      setNameError(nameValidation.error || 'Nama lengkap atau nama samaran wajib diisi.');
       isValid = false;
     } else {
       setNameError('');
@@ -132,9 +134,13 @@ export const RegisterScreen: React.FC = () => {
             label="Nama Lengkap / Samaran"
             placeholder="Misal: Anya Sebaya"
             value={name}
+            maxLength={30}
             onChangeText={(val) => {
               setName(val);
-              if (nameError) setNameError('');
+              if (nameError) {
+                const validation = validateNickname(val);
+                if (validation.isValid) setNameError('');
+              }
             }}
             error={nameError}
             leftIcon={<User size={18} color={colors.textMuted} />}

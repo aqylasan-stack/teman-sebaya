@@ -1,187 +1,236 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import {
-  Plus,
-  Flame,
-  Heart,
-  Sparkles,
-  ChevronRight,
-  CheckCircle2,
-  ArrowRight,
-  Smile,
-} from 'lucide-react-native';
+import { Plus, ArrowRight, Smile, X, ChevronRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { GlobalHeader } from '../../components/layout/GlobalHeader';
 import { MoodWeeklyChart } from '../../components/mood/MoodWeeklyChart';
+import { Modal } from '../../components/common/Modal';
 import { useApp } from '../../state/AppContext';
-import { PrimaryEmotion } from '../../types';
+import { PrimaryEmotion, MoodEntry } from '../../types';
 
-// 4 Emosi kanonikal terstandarisasi: Bahagia, Sedih, Marah, Biasa Saja
+// 4 Emosi utama aplikasi
 const QUICK_EMOTIONS: {
   name: PrimaryEmotion;
   label: string;
   image: any;
-  color: string;
-  bgColor: string;
-  borderColor: string;
 }[] = [
   {
     name: 'Bahagia',
     label: 'Bahagia',
     image: require('../../../assets/emojis/emoji_bahagia.png'),
-    color: '#F59E0B',
-    bgColor: '#FFFBEB',
-    borderColor: '#FDE68A',
   },
   {
     name: 'Sedih',
     label: 'Sedih',
     image: require('../../../assets/emojis/emoji_sedih.png'),
-    color: '#3B82F6',
-    bgColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
   },
   {
     name: 'Marah',
     label: 'Marah',
     image: require('../../../assets/emojis/emoji_marah.png'),
-    color: '#EF4444',
-    bgColor: '#FEF2F2',
-    borderColor: '#FECACA',
   },
   {
     name: 'Biasa Saja',
     label: 'Biasa Saja',
     image: require('../../../assets/emojis/emoji_biasa.png'),
-    color: '#B4916C',
-    bgColor: '#FAF5EE',
-    borderColor: '#E8DCCE',
   },
 ];
 
-const getEmotionMeta = (emotion: string) => {
-  switch (emotion) {
-    case 'Bahagia':
-      return {
-        label: 'Bahagia',
-        color: '#F59E0B',
-        bgColor: '#FFFBEB',
-        borderColor: '#FDE68A',
-        badgeBg: '#FEF3C7',
-        badgeText: '#92400E',
-        image: require('../../../assets/emojis/emoji_bahagia.png'),
-      };
-    case 'Sedih':
-      return {
-        label: 'Sedih',
-        color: '#3B82F6',
-        bgColor: '#EFF6FF',
-        borderColor: '#BFDBFE',
-        badgeBg: '#DBEAFE',
-        badgeText: '#1E40AF',
-        image: require('../../../assets/emojis/emoji_sedih.png'),
-      };
-    case 'Marah':
-      return {
-        label: 'Marah',
-        color: '#EF4444',
-        bgColor: '#FEF2F2',
-        borderColor: '#FECACA',
-        badgeBg: '#FEE2E2',
-        badgeText: '#991B1B',
-        image: require('../../../assets/emojis/emoji_marah.png'),
-      };
-    case 'Biasa Saja':
-    case 'Tenang':
-    default:
-      return {
-        label: 'Biasa Saja',
-        color: '#B4916C',
-        bgColor: '#FAF5EE',
-        borderColor: '#E8DCCE',
-        badgeBg: '#F5EDE4',
-        badgeText: '#705030',
-        image: require('../../../assets/emojis/emoji_biasa.png'),
-      };
+const EMOTION_THEMES: Record<
+  string,
+  {
+    label: string;
+    color: string;
+    softBg: string;
+    borderColor: string;
+    textColor: string;
+    image: any;
   }
+> = {
+  Bahagia: {
+    label: 'Bahagia',
+    color: '#EAB308',
+    softBg: '#FFFDF0',
+    borderColor: '#FEF08A',
+    textColor: '#854D0E',
+    image: require('../../../assets/emojis/emoji_bahagia.png'),
+  },
+  Sedih: {
+    label: 'Sedih',
+    color: '#2563EB',
+    softBg: '#F6FAFF',
+    borderColor: '#BFDBFE',
+    textColor: '#1E40AF',
+    image: require('../../../assets/emojis/emoji_sedih.png'),
+  },
+  Marah: {
+    label: 'Marah',
+    color: '#DC2626',
+    softBg: '#FEF7F7',
+    borderColor: '#FECACA',
+    textColor: '#991B1B',
+    image: require('../../../assets/emojis/emoji_marah.png'),
+  },
+  'Biasa Saja': {
+    label: 'Biasa Saja',
+    color: '#8C6E54',
+    softBg: '#FDFBF9',
+    borderColor: '#E8DCCE',
+    textColor: '#705030',
+    image: require('../../../assets/emojis/emoji_biasa.png'),
+  },
+  Tenang: {
+    label: 'Biasa Saja',
+    color: '#8C6E54',
+    softBg: '#FDFBF9',
+    borderColor: '#E8DCCE',
+    textColor: '#705030',
+    image: require('../../../assets/emojis/emoji_biasa.png'),
+  },
 };
+
+const DEFAULT_THEME = EMOTION_THEMES['Biasa Saja'];
 
 export const MoodScreen: React.FC = () => {
   const {
     moodEntries,
     weeklyStats,
-    user,
     navigateTo,
     todayMood,
     dailyMoodStatus,
   } = useApp();
 
+  // State untuk modal detail catatan refleksi yang diklik
+  const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
+
   const isCheckedInToday = dailyMoodStatus === 'completed' && Boolean(todayMood);
-  const todayMeta = todayMood ? getEmotionMeta(todayMood.primaryEmotion) : null;
+  const todayTheme = todayMood
+    ? EMOTION_THEMES[todayMood.primaryEmotion] || DEFAULT_THEME
+    : null;
+
+  // Sinkronkan data 7 hari dengan check-in hari ini jika ada
+  const daysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  const todayDayName = daysShort[new Date().getDay()];
+
+  const enhancedWeeklyStats = weeklyStats.map((stat) => {
+    if (todayMood && stat.dayName === todayDayName) {
+      const cleanDate = todayMood.dateString
+        ? todayMood.dateString.replace(/ \d{4}$/, '')
+        : stat.dateString;
+      return {
+        ...stat,
+        primaryEmotion: todayMood.primaryEmotion,
+        secondaryEmotion: todayMood.secondaryEmotions?.[0] || stat.secondaryEmotion,
+        note: todayMood.note,
+        dateString: cleanDate,
+      };
+    }
+    return stat;
+  });
 
   return (
     <ScreenContainer header={<GlobalHeader />} withBottomNav>
-      {/* Header Banner */}
+      {/* 1. Header Layar: Sederhana & Terarah */}
       <View style={styles.header}>
         <View style={styles.headerTextWrap}>
           <Text style={styles.title}>Teman Mood</Text>
           <Text style={styles.subtitle}>
-            Kenali perasaanmu, satu hari dalam satu waktu.
+            Ruang hening untuk mengenali dan merawat perasaanmu.
           </Text>
         </View>
 
-        {isCheckedInToday ? (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.completedPillBtn}
-            onPress={() => navigateTo('daily_mood_checkin')}
-          >
-            <CheckCircle2 size={13} color={colors.brandGreen[700]} />
-            <Text style={styles.completedPillText}>Tercatat</Text>
-          </TouchableOpacity>
-        ) : (
+        {!isCheckedInToday && (
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.recordPillBtn}
+            style={styles.actionBtnPrimary}
             onPress={() => navigateTo('daily_mood_checkin')}
           >
             <Plus size={15} color="#FFFFFF" />
-            <Text style={styles.recordPillBtnText}>Catat Mood</Text>
+            <Text style={styles.actionBtnPrimaryText}>Catat Mood</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Daily Check-in Quick Action Hero */}
-      {!isCheckedInToday ? (
-        <View style={styles.checkinPromptCard}>
-          <View style={styles.promptHeader}>
-            <View style={styles.promptSparkleWrap}>
-              <Sparkles size={15} color={colors.brandBlue[600]} />
+      {/* 2. Mood Hari Ini: Visual Emphasis dengan Soft Tinted Background & Emoji Besar Standalone */}
+      {isCheckedInToday && todayMood && todayTheme ? (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => setSelectedEntry(todayMood)}
+          style={[
+            styles.todayCard,
+            {
+              backgroundColor: todayTheme.softBg,
+              borderColor: todayTheme.borderColor,
+            },
+          ]}
+        >
+          {/* Card Header: Eyebrow + Action */}
+          <View style={styles.todayCardHeader}>
+            <Text style={[styles.todayEyebrow, { color: todayTheme.textColor }]}>
+              MOOD HARI INI
+            </Text>
+            <View style={styles.todayHeaderRight}>
+              <Text style={styles.todayEditLink}>Lihat Detail</Text>
+              <ChevronRight size={13} color={colors.brandBlue[600]} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.promptTitle}>
-                Halo {user?.name ? user.name.split(' ')[0] : 'Teman'}, apa kabarmu hari ini?
+          </View>
+
+          {/* Hero Row: Emoji Besar Standalone (68x68) + Info Komposisi Seimbang */}
+          <View style={styles.todayHeroRow}>
+            <Image
+              source={todayTheme.image}
+              style={styles.todayLargeEmoji}
+              resizeMode="contain"
+            />
+
+            <View style={styles.todayInfoCol}>
+              <Text
+                style={[
+                  styles.todayEmotionTitle,
+                  { color: todayTheme.color },
+                ]}
+              >
+                {todayTheme.label}
               </Text>
-              <Text style={styles.promptSubtitle}>
-                Ketuk salah satu suasana hati untuk mulai check-in:
+
+              {todayMood.secondaryEmotions.length > 0 && (
+                <Text style={styles.todaySubEmotionText}>
+                  {todayMood.secondaryEmotions[0]}
+                </Text>
+              )}
+
+              <Text style={styles.todayTimeText}>
+                Tercatat pukul {todayMood.timeString}
               </Text>
             </View>
           </View>
 
-          {/* Quick 4 Emoji Taps */}
-          <View style={styles.quickEmotionsRow}>
+          {/* Catatan Refleksi Pengguna dalam Wadah Halus */}
+          {Boolean(todayMood.note && todayMood.note.trim()) && (
+            <View style={styles.todayNoteWrap}>
+              <Text style={styles.todayNoteText}>“{todayMood.note}”</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      ) : (
+        /* Keadaan Belum Check-in Hari Ini: Soft Card Interaktif */
+        <View style={styles.todayUncheckedCard}>
+          <Text style={styles.promptEyebrow}>HARI INI</Text>
+          <Text style={styles.promptHeadline}>
+            Bagaimana suasana hatimu hari ini?
+          </Text>
+          <Text style={styles.promptSubtext}>
+            Pilih satu emosi yang paling menggambarkan perasaanmu:
+          </Text>
+
+          {/* 4 Emoji Standalone Touchables */}
+          <View style={styles.quickEmojisRow}>
             {QUICK_EMOTIONS.map((item) => (
               <TouchableOpacity
                 key={item.name}
-                activeOpacity={0.75}
-                style={[
-                  styles.quickEmotionCard,
-                  {
-                    backgroundColor: item.bgColor,
-                    borderColor: item.borderColor,
-                  },
-                ]}
+                activeOpacity={0.7}
+                style={styles.quickEmojiItem}
                 onPress={() =>
                   navigateTo('daily_mood_checkin', {
                     selectedEmotion: item.name,
@@ -191,209 +240,201 @@ export const MoodScreen: React.FC = () => {
               >
                 <Image
                   source={item.image}
-                  style={styles.quickEmotionImage}
+                  style={styles.quickEmojiImg}
                   resizeMode="contain"
                 />
-                <Text style={[styles.quickEmotionLabel, { color: item.color }]}>
-                  {item.label}
-                </Text>
+                <Text style={styles.quickEmojiLabel}>{item.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
-      ) : todayMeta && todayMood ? (
-        <View
-          style={[
-            styles.todaySummaryCard,
-            {
-              backgroundColor: todayMeta.bgColor,
-              borderColor: todayMeta.borderColor,
-            },
-          ]}
-        >
-          <View style={styles.todaySummaryLeft}>
-            <Image
-              source={todayMeta.image}
-              style={styles.todaySummaryEmoji}
-              resizeMode="contain"
-            />
-            <View style={styles.todaySummaryInfo}>
-              <View style={styles.todaySummaryTitleRow}>
-                <Text style={styles.todaySummaryTitle}>Mood Hari Ini</Text>
-                <View
-                  style={[
-                    styles.todayBadge,
-                    { backgroundColor: todayMeta.badgeBg },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.todayBadgeText,
-                      { color: todayMeta.badgeText },
-                    ]}
-                  >
-                    {todayMeta.label}
-                  </Text>
-                </View>
-              </View>
-              <Text style={styles.todaySummaryTime}>
-                Tercatat pukul {todayMood.timeString}
-              </Text>
-            </View>
+      )}
+
+      {/* 3. Ritme Emosi 7 Hari & Distribusi Emosi */}
+      <View style={styles.sectionWrap}>
+        <MoodWeeklyChart stats={enhancedWeeklyStats} />
+      </View>
+
+      {/* 4. Jurnal Refleksi: Timeline Jurnal dengan Entri Interaktif (Dapat Diklik) */}
+      <View style={styles.journalSection}>
+        <View style={styles.journalHeaderRow}>
+          <View>
+            <Text style={styles.journalTitle}>Jurnal Refleksi</Text>
+            <Text style={styles.journalSubtitle}>
+              {moodEntries.length} catatan tersimpan
+            </Text>
           </View>
 
           <TouchableOpacity
             activeOpacity={0.7}
-            style={styles.todayViewLink}
-            onPress={() => navigateTo('daily_mood_checkin')}
+            style={styles.analysisLink}
+            onPress={() => navigateTo('mood_analysis')}
           >
-            <Text style={styles.todayViewLinkText}>Detail</Text>
-            <ChevronRight size={13} color={colors.brandBlue[600]} />
+            <Text style={styles.analysisLinkText}>Analisis Lengkap</Text>
+            <ArrowRight size={13} color={colors.brandBlue[600]} />
           </TouchableOpacity>
         </View>
-      ) : null}
 
-      {/* Streak & Metric Summary Cards */}
-      <View style={styles.statsRow}>
-        <View style={[styles.metricCard, styles.streakMetricCard]}>
-          <View style={styles.metricHeaderRow}>
-            <View style={styles.streakIconWrap}>
-              <Flame size={16} color="#D97706" />
-            </View>
-            <View style={styles.streakTag}>
-              <Text style={styles.streakTagText}>🔥 Aktif</Text>
-            </View>
-          </View>
-          <Text style={styles.metricValue}>
-            {user?.activeStreakDays || 14} Hari
-          </Text>
-          <Text style={styles.metricLabel}>Runtun Check-in</Text>
-        </View>
-
-        <View style={[styles.metricCard, styles.reflectionsMetricCard]}>
-          <View style={styles.metricHeaderRow}>
-            <View style={styles.reflectionsIconWrap}>
-              <Heart size={16} color={colors.brandBlue[600]} />
-            </View>
-            <View style={styles.reflectionsTag}>
-              <Text style={styles.reflectionsTagText}>💙 Tersimpan</Text>
-            </View>
-          </View>
-          <Text style={styles.metricValue}>{moodEntries.length} Catatan</Text>
-          <Text style={styles.metricLabel}>Refleksi Diri</Text>
-        </View>
-      </View>
-
-      {/* Weekly Emotional Distribution Chart */}
-      <View style={styles.chartWrapper}>
-        <MoodWeeklyChart stats={weeklyStats} />
-      </View>
-
-      {/* Recent Entries Section */}
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Riwayat Refleksi</Text>
-          <View style={styles.countBadge}>
-            <Text style={styles.countBadgeText}>{moodEntries.length}</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.seeStatsWrap}
-          onPress={() => navigateTo('mood_stats')}
-        >
-          <Text style={styles.seeStatsLink}>Lihat Analisis Lengkap</Text>
-          <ArrowRight size={12} color={colors.brandBlue[600]} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.entriesList}>
         {moodEntries.length === 0 ? (
-          <View style={styles.emptyStateCard}>
-            <Smile size={32} color={colors.textMuted} />
-            <Text style={styles.emptyStateTitle}>Belum ada catatan refleksi</Text>
-            <Text style={styles.emptyStateSubtitle}>
-              Mulai kenali perasaanmu hari ini dengan melakukan check-in singkat.
+          <View style={styles.emptyStateWrap}>
+            <Smile size={28} color={colors.textMuted} />
+            <Text style={styles.emptyStateTitle}>
+              Belum ada catatan refleksi
+            </Text>
+            <Text style={styles.emptyStateDesc}>
+              Catatan harianmu akan tersusun rapi di sini layaknya jurnal pribadi.
             </Text>
           </View>
         ) : (
-          moodEntries.map((entry) => {
-            const meta = getEmotionMeta(entry.primaryEmotion);
+          <View style={styles.timelineList}>
+            {moodEntries.map((entry) => {
+              const theme =
+                EMOTION_THEMES[entry.primaryEmotion] || DEFAULT_THEME;
 
-            return (
-              <View
-                key={entry.id}
-                style={[
-                  styles.entryCard,
-                  { borderLeftColor: meta.color, borderLeftWidth: 4 },
-                ]}
-              >
-                {/* Entry Header: Emoji, Emotion Badge & Timestamp */}
-                <View style={styles.entryHeader}>
-                  <View style={styles.entryHeaderLeft}>
+              return (
+                <TouchableOpacity
+                  key={entry.id}
+                  activeOpacity={0.75}
+                  onPress={() => setSelectedEntry(entry)}
+                  style={styles.journalEntryCard}
+                >
+                  {/* Baris Tanggal & Waktu + Indikator Panah */}
+                  <View style={styles.entryHeaderRow}>
+                    <Text style={styles.entryDateText}>
+                      {entry.dateString} · {entry.timeString}
+                    </Text>
+                    <ChevronRight size={14} color={colors.textMuted} />
+                  </View>
+
+                  {/* Baris Mood & Sub-emosi (Hanya 1 sub-emosi tunggal) */}
+                  <View style={styles.entryMoodRow}>
                     <Image
-                      source={meta.image}
+                      source={theme.image}
                       style={styles.entryEmoji}
                       resizeMode="contain"
                     />
-                    <View
-                      style={[
-                        styles.entryEmotionBadge,
-                        {
-                          backgroundColor: meta.badgeBg,
-                          borderColor: meta.borderColor,
-                        },
-                      ]}
+                    <Text style={styles.entryEmotionTitle}>
+                      {theme.label}
+                      {entry.secondaryEmotions.length > 0 && (
+                        <Text style={styles.entrySubEmotions}>
+                          {' '}
+                          · {entry.secondaryEmotions[0]}
+                        </Text>
+                      )}
+                    </Text>
+                  </View>
+
+                  {/* Isi Refleksi / Cerita Pengguna */}
+                  {Boolean(entry.note && entry.note.trim()) && (
+                    <Text
+                      style={styles.entryStoryText}
+                      numberOfLines={3}
                     >
-                      <Text
-                        style={[
-                          styles.entryEmotionBadgeText,
-                          { color: meta.badgeText },
-                        ]}
-                      >
-                        {meta.label}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.entryDate}>
-                    {entry.dateString} · {entry.timeString}
-                  </Text>
-                </View>
-
-                {/* Sub-emotions row */}
-                {entry.secondaryEmotions.length > 0 && (
-                  <View style={styles.subTagsRow}>
-                    {entry.secondaryEmotions.map((sub, idx) => (
-                      <View key={idx} style={styles.subTag}>
-                        <Text style={styles.subTagText}>{sub}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Reflection Note */}
-                {Boolean(entry.note && entry.note.trim()) && (
-                  <View style={styles.noteQuoteContainer}>
-                    <Text style={styles.entryNote}>{entry.note}</Text>
-                  </View>
-                )}
-
-                {/* Context Hashtags */}
-                {entry.contextTags.length > 0 && (
-                  <View style={styles.contextTagsRow}>
-                    {entry.contextTags.map((ctx, idx) => (
-                      <View key={idx} style={styles.contextTagPill}>
-                        <Text style={styles.contextTagText}>#{ctx}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            );
-          })
+                      {entry.note}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         )}
       </View>
+
+      {/* 5. Modal Detail Catatan Refleksi yang Dapat Diklik */}
+      {selectedEntry && (
+        <Modal
+          visible={Boolean(selectedEntry)}
+          onClose={() => setSelectedEntry(null)}
+          animationType="none"
+        >
+          {(() => {
+            const theme =
+              EMOTION_THEMES[selectedEntry.primaryEmotion] || DEFAULT_THEME;
+            const isTodayEntry = todayMood?.id === selectedEntry.id;
+
+          return (
+            <View style={styles.modalContent}>
+              {/* Header Modal */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalDateText}>
+                  {selectedEntry.dateString} · {selectedEntry.timeString}
+                </Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedEntry(null)}
+                  style={styles.modalCloseBtn}
+                >
+                  <X size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Banner Emosi & Sub-emosi */}
+              <View
+                style={[
+                  styles.modalEmotionBanner,
+                  {
+                    backgroundColor: theme.softBg,
+                    borderColor: theme.borderColor,
+                  },
+                ]}
+              >
+                <Image
+                  source={theme.image}
+                  style={styles.modalEmoji}
+                  resizeMode="contain"
+                />
+                <View style={styles.modalEmotionInfo}>
+                  <Text style={[styles.modalEmotionTitle, { color: theme.color }]}>
+                    {theme.label}
+                  </Text>
+                  {selectedEntry.secondaryEmotions.length > 0 && (
+                    <Text style={styles.modalSubEmotionText}>
+                      {selectedEntry.secondaryEmotions[0]}
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Isi Lengkap Cerita Refleksi */}
+              <View style={styles.modalStorySection}>
+                <Text style={styles.modalStoryLabel}>Cerita Refleksi:</Text>
+                <Text style={styles.modalStoryBody}>
+                  {selectedEntry.note && selectedEntry.note.trim()
+                    ? selectedEntry.note
+                    : 'Tidak ada catatan tertulis untuk hari ini.'}
+                </Text>
+              </View>
+
+              {/* Tombol Aksi Bawah */}
+              <View style={styles.modalActionsRow}>
+                {isTodayEntry && (
+                  <TouchableOpacity
+                    style={styles.modalEditBtn}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      setSelectedEntry(null);
+                      navigateTo('daily_mood_checkin');
+                    }}
+                  >
+                    <Text style={styles.modalEditBtnText}>Ubah Catatan</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={[
+                    styles.modalDismissBtn,
+                    !isTodayEntry && { flex: 1 },
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedEntry(null)}
+                >
+                  <Text style={styles.modalDismissBtnText}>Tutup</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          );
+        })()}
+      </Modal>
+      )}
     </ScreenContainer>
   );
 };
@@ -408,10 +449,10 @@ const styles = StyleSheet.create({
   },
   headerTextWrap: {
     flex: 1,
-    paddingRight: 10,
+    paddingRight: 12,
   },
   title: {
-    fontSize: 21,
+    fontSize: 22,
     fontWeight: '800',
     color: colors.textPrimary,
     letterSpacing: -0.3,
@@ -420,388 +461,344 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.textSecondary,
     marginTop: 2,
-    lineHeight: 16,
+    lineHeight: 17,
   },
-  recordPillBtn: {
+  actionBtnPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: colors.brandBlue[600],
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: borderRadius.full,
-    shadowColor: colors.brandBlue[600],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: borderRadius.md,
   },
-  recordPillBtnText: {
+  actionBtnPrimaryText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
   },
-  completedPillBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.brandGreen[50],
-    borderColor: colors.brandGreen[100],
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: borderRadius.full,
-  },
-  completedPillText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: colors.brandGreen[700],
-  },
-  checkinPromptCard: {
-    backgroundColor: colors.surface,
+  todayCard: {
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.borderLight,
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    padding: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
   },
-  promptHeader: {
+  todayCardHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  promptSparkleWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.brandBlue[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  promptTitle: {
-    fontSize: 13.5,
+  todayEyebrow: {
+    fontSize: 10.5,
     fontWeight: '700',
-    color: colors.textPrimary,
+    letterSpacing: 0.8,
   },
-  promptSubtitle: {
-    fontSize: 11.5,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  quickEmotionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  quickEmotionCard: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-  },
-  quickEmotionImage: {
-    width: 32,
-    height: 32,
-    marginBottom: 4,
-  },
-  quickEmotionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  todaySummaryCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    marginBottom: spacing.md,
-  },
-  todaySummaryLeft: {
+  todayHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    flex: 1,
+    gap: 2,
   },
-  todaySummaryEmoji: {
-    width: 34,
-    height: 34,
-  },
-  todaySummaryInfo: {
-    flex: 1,
-  },
-  todaySummaryTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  todaySummaryTitle: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  todayBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: borderRadius.full,
-  },
-  todayBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  todaySummaryTime: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  todayViewLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  todayViewLinkText: {
+  todayEditLink: {
     fontSize: 11.5,
     fontWeight: '600',
     color: colors.brandBlue[600],
   },
-  statsRow: {
+  todayHeroRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.md,
+    alignItems: 'center',
+    gap: 16,
   },
-  metricCard: {
+  todayLargeEmoji: {
+    width: 68,
+    height: 68,
+  },
+  todayInfoCol: {
     flex: 1,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
   },
-  streakMetricCard: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
-  },
-  reflectionsMetricCard: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
-  },
-  metricHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  streakIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FEF3C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  streakTag: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-  },
-  streakTagText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-  reflectionsIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reflectionsTag: {
-    backgroundColor: '#DBEAFE',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-  },
-  reflectionsTagText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.brandBlue[700],
-  },
-  metricValue: {
-    fontSize: 18,
+  todayEmotionTitle: {
+    fontSize: 22,
     fontWeight: '800',
-    color: colors.textPrimary,
+    letterSpacing: -0.2,
   },
-  metricLabel: {
-    fontSize: 11,
+  todaySubEmotionText: {
+    fontSize: 13.5,
     fontWeight: '500',
     color: colors.textSecondary,
     marginTop: 2,
   },
-  chartWrapper: {
+  todayTimeText: {
+    fontSize: 11.5,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+  todayNoteWrap: {
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    borderRadius: borderRadius.md,
+    padding: 10,
+    marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.05)',
+  },
+  todayNoteText: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: colors.textPrimary,
+    fontStyle: 'italic',
+  },
+  todayUncheckedCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    padding: spacing.lg,
+    marginBottom: spacing.layout.sectionGap,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  promptEyebrow: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
+  promptHeadline: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  promptSubtext: {
+    fontSize: 12.5,
+    color: colors.textSecondary,
+    marginTop: 2,
     marginBottom: spacing.md,
   },
-  sectionHeader: {
+  quickEmojisRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  quickEmojiItem: {
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 4,
+  },
+  quickEmojiImg: {
+    width: 42,
+    height: 42,
+    marginBottom: 6,
+  },
+  quickEmojiLabel: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  sectionWrap: {
+    marginBottom: spacing.layout.sectionGap,
+  },
+  journalSection: {
+    paddingBottom: spacing.xl,
+  },
+  journalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.sm,
+  },
+  journalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  journalSubtitle: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  analysisLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingVertical: 2,
+  },
+  analysisLinkText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.brandBlue[600],
+  },
+  emptyStateWrap: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    gap: 6,
+  },
+  emptyStateTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginTop: 4,
+  },
+  emptyStateDesc: {
+    fontSize: 12,
+    color: colors.textMuted,
+    textAlign: 'center',
+    maxWidth: 260,
+  },
+  timelineList: {
+    gap: spacing.md,
+  },
+  journalEntryCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    padding: 14,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  entryHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
+    marginBottom: 6,
   },
-  sectionTitleRow: {
+  entryDateText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  entryMoodRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
+    marginBottom: 6,
   },
-  sectionTitle: {
+  entryEmoji: {
+    width: 26,
+    height: 26,
+  },
+  entryEmotionTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: colors.textPrimary,
   },
-  countBadge: {
-    backgroundColor: colors.surfaceAlt,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: borderRadius.full,
-  },
-  countBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
+  entrySubEmotions: {
+    fontSize: 13,
+    fontWeight: '400',
     color: colors.textSecondary,
   },
-  seeStatsWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
+  entryStoryText: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: colors.textPrimary,
+    marginTop: 2,
   },
-  seeStatsLink: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.brandBlue[600],
+
+  /* Modal Detail Styles */
+  modalContent: {
+    gap: spacing.md,
   },
-  entriesList: {
-    gap: spacing.sm,
-    marginBottom: spacing.xl,
-  },
-  entryCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    padding: spacing.md,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  entryHeader: {
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  entryHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  entryEmoji: {
-    width: 24,
-    height: 24,
-  },
-  entryEmotionBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-  },
-  entryEmotionBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  entryDate: {
-    fontSize: 11,
+  modalDateText: {
+    fontSize: 12,
+    fontWeight: '600',
     color: colors.textMuted,
   },
-  subTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 8,
-  },
-  subTag: {
+  modalCloseBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: colors.surfaceAlt,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: borderRadius.full,
-  },
-  subTagText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
-  noteQuoteContainer: {
-    backgroundColor: '#F8FAFC',
-    padding: 10,
-    borderRadius: borderRadius.md,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.borderMedium,
-    marginBottom: 8,
-  },
-  entryNote: {
-    ...typography.bodyRegular,
-    color: colors.textPrimary,
-    lineHeight: 18,
-    fontSize: 12.5,
-  },
-  contextTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  contextTagPill: {
-    backgroundColor: colors.brandBlue[50],
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: borderRadius.sm,
-  },
-  contextTagText: {
-    fontSize: 10.5,
-    color: colors.brandBlue[700],
-    fontWeight: '600',
-  },
-  emptyStateCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    padding: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyStateTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginTop: spacing.sm,
+  modalEmotionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
   },
-  emptyStateSubtitle: {
-    fontSize: 12,
+  modalEmoji: {
+    width: 40,
+    height: 40,
+  },
+  modalEmotionInfo: {
+    flex: 1,
+  },
+  modalEmotionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  modalSubEmotionText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  modalStorySection: {
+    backgroundColor: colors.surfaceAlt,
+    padding: 14,
+    borderRadius: borderRadius.md,
+  },
+  modalStoryLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
     color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: 4,
-    maxWidth: 240,
+    marginBottom: 4,
+    letterSpacing: 0.3,
+  },
+  modalStoryBody: {
+    fontSize: 13.5,
+    lineHeight: 21,
+    color: colors.textPrimary,
+  },
+  modalActionsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  modalEditBtn: {
+    flex: 1,
+    backgroundColor: colors.brandBlue[600],
+    paddingVertical: 10,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalEditBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  modalDismissBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  modalDismissBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
 });

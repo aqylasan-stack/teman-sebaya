@@ -122,12 +122,12 @@ const styles = StyleSheet.create({
   disclaimerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingVertical: 8,
   },
   disclaimerText: {
     fontSize: 10.5,
@@ -141,9 +141,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContent: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
   },
   moodPermissionBox: {
     backgroundColor: colors.brandBlue[50],

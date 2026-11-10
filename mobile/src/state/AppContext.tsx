@@ -261,6 +261,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     // Filter out any existing today entry so user only records once per day (or updates existing)
     setMoodEntries((prev) => [newEntry, ...prev.filter((e) => !isToday(e.timestamp))]);
 
+    // Sinkronkan ke weeklyStats agar data ritme mingguan selalu konsisten
+    const daysShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const todayDayName = daysShort[now.getDay()];
+    const cleanDate = `${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]}`;
+
+    setWeeklyStats((prev) =>
+      prev.map((stat) => {
+        if (stat.dayName === todayDayName) {
+          return {
+            ...stat,
+            primaryEmotion,
+            secondaryEmotion: secondaryEmotions[0] || stat.secondaryEmotion,
+            note,
+            dateString: cleanDate,
+          };
+        }
+        return stat;
+      })
+    );
+
     // Update streak if needed
     if (user) {
       setUser({

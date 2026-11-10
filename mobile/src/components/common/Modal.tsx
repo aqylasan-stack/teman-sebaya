@@ -13,6 +13,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   contentStyle?: ViewStyle;
+  animationType?: 'none' | 'slide' | 'fade';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -20,17 +21,20 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   children,
   contentStyle,
+  animationType = 'none',
 }) => {
+  if (!visible) return null;
+
   return (
     <RNModal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType={animationType}
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
-          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+          <TouchableWithoutFeedback onPress={(e: any) => e?.stopPropagation?.()}>
             <View style={[styles.dialogContainer, contentStyle]}>
               {children}
             </View>

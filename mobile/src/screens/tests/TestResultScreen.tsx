@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface,
     paddingTop: 48,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: 24,
+    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
+    paddingBottom: spacing.layout.screenPaddingBottom,
     justifyContent: 'space-between',
   },
   topBar: {

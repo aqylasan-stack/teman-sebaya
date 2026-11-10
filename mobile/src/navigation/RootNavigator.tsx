@@ -30,6 +30,7 @@ import { ProfileScreen } from '../screens/profil/ProfileScreen';
 import { MoodSelectionScreen } from '../screens/mood/MoodSelectionScreen';
 import { DailyMoodCheckinScreen } from '../screens/mood/DailyMoodCheckinScreen';
 import { MoodStatsScreen } from '../screens/mood/MoodStatsScreen';
+import { MoodAnalysisScreen } from '../screens/mood/MoodAnalysisScreen';
 import { AIChatScreen } from '../screens/cerita/AIChatScreen';
 import { BookingScreen } from '../screens/cerita/BookingScreen';
 import { ArticleDetailScreen } from '../screens/belajar/ArticleDetailScreen';
@@ -85,6 +86,8 @@ export const RootNavigator: React.FC = () => {
         return <DailyMoodCheckinScreen />;
       case 'mood_stats':
         return <MoodStatsScreen />;
+      case 'mood_analysis':
+        return <MoodAnalysisScreen />;
       case 'ai_chat':
       case 'teman_akses':
         return <AIChatScreen />;

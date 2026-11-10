@@ -114,10 +114,10 @@ export const QuizModal: React.FC<QuizModalProps> = ({
             })}
           </View>
 
-          {/* Explanation Box */}
+          {/* Explanation Section (Editorial Unboxed) */}
           {isAnswered && (
-            <View style={styles.explanationBox}>
-              <Text style={styles.explanationTitle}>Pembahasan Edukatif:</Text>
+            <View style={styles.explanationSection}>
+              <Text style={styles.explanationTitle}>Pembahasan Edukatif</Text>
               <Text style={styles.explanationText}>{currentQ.explanation}</Text>
             </View>
           )}
@@ -208,24 +208,21 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 18,
   },
-  explanationBox: {
-    backgroundColor: colors.surfaceAlt,
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.brandBlue[600],
+  explanationSection: {
+    paddingVertical: spacing.xs,
     marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   explanationTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
-    color: colors.brandBlue[700],
-    marginBottom: 2,
+    color: colors.textPrimary,
+    marginBottom: 4,
   },
   explanationText: {
-    fontSize: 11.5,
+    fontSize: 13,
     color: colors.textSecondary,
-    lineHeight: 16,
+    lineHeight: 20,
   },
   nextButton: {
     marginTop: spacing.sm,

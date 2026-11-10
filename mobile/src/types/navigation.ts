@@ -21,6 +21,7 @@ export type ScreenType =
   | 'mood_selection'
   | 'daily_mood_checkin'
   | 'mood_stats'
+  | 'mood_analysis'
   | 'ai_chat'
   | 'teman_akses'
   | 'counselor_directory'

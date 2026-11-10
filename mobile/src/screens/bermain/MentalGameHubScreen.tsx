@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   scenarioCard: {
-    padding: spacing.md,
+    padding: spacing.lg,
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,

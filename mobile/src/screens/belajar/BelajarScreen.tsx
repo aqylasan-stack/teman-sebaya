@@ -7,7 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { Search, BookOpen, Bookmark, Sparkles, ArrowRight } from 'lucide-react-native';
+import { Search, BookOpen, Bookmark, Sparkles } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { GlobalHeader } from '../../components/layout/GlobalHeader';
@@ -64,7 +64,7 @@ export const BelajarScreen: React.FC = () => {
     }, 2200);
   };
 
-  // Filtered list depending on main tab
+  // Filtered list depending on main tab, search, and category
   const displayedArticles = articles.filter((art) => {
     if (activeMainTab === 'saved' && !art.isSaved) return false;
 
@@ -93,61 +93,17 @@ export const BelajarScreen: React.FC = () => {
         />
       }
     >
+      {/* 1. Header Editorial Bersih */}
       <View style={styles.header}>
         <Text style={styles.title}>Teman Belajar</Text>
         <Text style={styles.subtitle}>
-          Belajar memahami diri, hubungan, dan kehidupan sehari-hari.
+          Ruang bacaan psikoedukasi, kesehatan mental, dan literasi hidup remaja.
         </Text>
       </View>
 
-      {/* Segmented Main Tabs: Jelajah vs Tersimpan */}
-      <View style={styles.segmentedRow}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setActiveMainTab('all')}
-          style={[styles.segmentBtn, activeMainTab === 'all' && styles.segmentBtnActive]}
-        >
-          <BookOpen
-            size={16}
-            color={activeMainTab === 'all' ? colors.brandBlue[600] : colors.textMuted}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              activeMainTab === 'all' && styles.segmentTextActive,
-            ]}
-          >
-            Jelajah Artikel
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setActiveMainTab('saved')}
-          style={[styles.segmentBtn, activeMainTab === 'saved' && styles.segmentBtnActive]}
-        >
-          <Bookmark
-            size={16}
-            color={activeMainTab === 'saved' ? colors.brandBlue[600] : colors.textMuted}
-            fill={activeMainTab === 'saved' ? colors.brandBlue[600] : 'transparent'}
-          />
-          <Text
-            style={[
-              styles.segmentText,
-              activeMainTab === 'saved' && styles.segmentTextActive,
-            ]}
-          >
-            Tersimpan
-          </Text>
-          <View style={styles.countBadge}>
-            <Text style={styles.countBadgeText}>{savedArticles.length}</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search Bar (Available in both tabs) */}
+      {/* 2. Editorial Search Bar (Pill Shape Minimalis) */}
       <View style={styles.searchBar}>
-        <Search size={18} color={colors.textPlaceholder} />
+        <Search size={18} color={colors.textMuted} />
         <TextInput
           style={styles.searchInput}
           placeholder={
@@ -161,7 +117,64 @@ export const BelajarScreen: React.FC = () => {
         />
       </View>
 
-      {/* Category Pills (Only in 'all' tab) */}
+      {/* 3. Segmented Navigation Tabs: Jelajah vs Tersimpan */}
+      <View style={styles.tabBarRow}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setActiveMainTab('all')}
+          style={[styles.tabItem, activeMainTab === 'all' && styles.tabItemActive]}
+        >
+          <BookOpen
+            size={15}
+            color={activeMainTab === 'all' ? colors.brandBlue[600] : colors.textMuted}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              activeMainTab === 'all' && styles.tabTextActive,
+            ]}
+          >
+            Jelajah Artikel
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setActiveMainTab('saved')}
+          style={[styles.tabItem, activeMainTab === 'saved' && styles.tabItemActive]}
+        >
+          <Bookmark
+            size={15}
+            color={activeMainTab === 'saved' ? colors.brandBlue[600] : colors.textMuted}
+            fill={activeMainTab === 'saved' ? colors.brandBlue[600] : 'transparent'}
+          />
+          <Text
+            style={[
+              styles.tabText,
+              activeMainTab === 'saved' && styles.tabTextActive,
+            ]}
+          >
+            Tersimpan
+          </Text>
+          <View
+            style={[
+              styles.countPill,
+              activeMainTab === 'saved' && styles.countPillActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.countPillText,
+                activeMainTab === 'saved' && styles.countPillTextActive,
+              ]}
+            >
+              {savedArticles.length}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* 4. Category Pills Horizontal Scroll (Hanya di tab 'all') */}
       {activeMainTab === 'all' && (
         <ScrollView
           horizontal
@@ -175,7 +188,7 @@ export const BelajarScreen: React.FC = () => {
                 key={cat}
                 label={cat}
                 active={isActive}
-                variant="blue"
+                variant={isActive ? 'blue' : 'gray'}
                 onPress={() => setSelectedCategory(cat)}
               />
             );
@@ -183,36 +196,43 @@ export const BelajarScreen: React.FC = () => {
         </ScrollView>
       )}
 
-      {/* Saved Tab Subtitle Info */}
+      {/* 5. Info Banner Khusus Tab Tersimpan */}
       {activeMainTab === 'saved' && (
         <View style={styles.savedInfoBanner}>
           <Text style={styles.savedInfoText}>
-            📌 Menampilkan <Text style={styles.bold}>{savedArticles.length}</Text> artikel yang telah kamu bookmark untuk dibaca kembali.
+            Menampilkan <Text style={styles.bold}>{savedArticles.length}</Text> artikel yang telah kamu bookmark untuk dibaca kembali.
           </Text>
         </View>
       )}
 
-      {/* Article Feed */}
+      {/* 6. Editorial Feed List (Featured Story + Editorial Rows) */}
       <View style={styles.articleList}>
         {displayedArticles.length > 0 ? (
-          displayedArticles.map((art) => (
-            <ArticleCard
-              key={art.id}
-              article={art}
-              onPress={() => navigateTo('article_detail', { articleId: art.id })}
-              onToggleBookmark={() => handleToggleBookmarkWithFeedback(art.id)}
-            />
-          ))
+          displayedArticles.map((art, idx) => {
+            // Artikel pertama di tab utama tanpa pencarian dijadikan 'featured lead story'
+            const isFeatured =
+              idx === 0 && activeMainTab === 'all' && searchQuery.trim() === '';
+
+            return (
+              <ArticleCard
+                key={art.id}
+                article={art}
+                variant={isFeatured ? 'featured' : 'row'}
+                onPress={() => navigateTo('article_detail', { articleId: art.id })}
+                onToggleBookmark={() => handleToggleBookmarkWithFeedback(art.id)}
+              />
+            );
+          })
         ) : (
           <View style={styles.emptyWrap}>
             {activeMainTab === 'saved' ? (
               <>
                 <View style={styles.emptyIconCircle}>
-                  <Bookmark size={36} color={colors.brandBlue[600]} />
+                  <Bookmark size={32} color={colors.brandBlue[600]} />
                 </View>
                 <Text style={styles.emptyTitle}>Belum Ada Bacaan Tersimpan</Text>
                 <Text style={styles.emptyDesc}>
-                  Tekan ikon bookmark (🔖) pada artikel mana saja di Teman Belajar untuk menyimpannya di sini agar mudah dibaca nanti!
+                  Tekan ikon bookmark pada artikel mana saja di Teman Belajar untuk menyimpannya di sini agar mudah dibaca nanti.
                 </Text>
                 <Button
                   title="Jelajahi Artikel Sekarang"
@@ -223,10 +243,10 @@ export const BelajarScreen: React.FC = () => {
               </>
             ) : (
               <>
-                <BookOpen size={40} color={colors.borderMedium} />
+                <BookOpen size={36} color={colors.borderMedium} />
                 <Text style={styles.emptyTitle}>Tidak ada artikel ditemukan</Text>
                 <Text style={styles.emptyDesc}>
-                  Coba cari dengan kata kunci lain atau pilih kategori yang berbeda.
+                  Coba cari dengan kata kunci lain atau pilih kategori topik yang berbeda.
                 </Text>
               </>
             )}
@@ -239,7 +259,8 @@ export const BelajarScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    marginVertical: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   title: {
     fontSize: 20,
@@ -247,69 +268,25 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   subtitle: {
-    ...typography.bodyRegular,
+    fontSize: 13,
     color: colors.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
     lineHeight: 18,
   },
-  segmentedRow: {
-    flexDirection: 'row',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: borderRadius.md,
-    padding: 4,
-    marginBottom: spacing.md,
-    gap: 4,
-  },
-  segmentBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: borderRadius.sm,
-    gap: 6,
-  },
-  segmentBtnActive: {
-    backgroundColor: colors.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  segmentText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textMuted,
-  },
-  segmentTextActive: {
-    color: colors.brandBlue[600],
-    fontWeight: '700',
-  },
-  countBadge: {
-    backgroundColor: colors.brandBlue[50],
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.brandBlue[200],
-  },
-  countBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.brandBlue[700],
-  },
+
+  /* Search Bar Editorial Pill */
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
-    borderColor: colors.borderMedium,
-    borderRadius: borderRadius.md,
+    borderColor: colors.borderLight,
+    borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
-    height: 44,
+    height: 42,
     gap: spacing.sm,
-    marginBottom: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
   },
   searchInput: {
     flex: 1,
@@ -318,32 +295,89 @@ const styles = StyleSheet.create({
     height: '100%',
     padding: 0,
   },
+
+  /* Tab Bar Segmented Minimalis */
+  tabBarRow: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: borderRadius.md,
+    padding: 3,
+    marginBottom: spacing.md,
+    gap: 4,
+  },
+  tabItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: borderRadius.sm,
+    gap: 6,
+  },
+  tabItemActive: {
+    backgroundColor: colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  tabText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  tabTextActive: {
+    color: colors.brandBlue[600],
+    fontWeight: '700',
+  },
+  countPill: {
+    backgroundColor: colors.borderLight,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: borderRadius.full,
+  },
+  countPillActive: {
+    backgroundColor: colors.brandBlue[50],
+  },
+  countPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textMuted,
+  },
+  countPillTextActive: {
+    color: colors.brandBlue[700],
+  },
+
+  /* Category Scroll */
   categoryScroll: {
     flexDirection: 'row',
     gap: 8,
-    paddingBottom: spacing.md,
+    paddingVertical: spacing.xs,
+    marginBottom: spacing.md,
   },
+
+  /* Saved Info Banner (Editorial Bersih Tanpa Box Kaku) */
   savedInfoBanner: {
-    backgroundColor: colors.brandBlue[50],
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.brandBlue[100],
+    paddingVertical: spacing.xs,
     marginBottom: spacing.md,
   },
   savedInfoText: {
-    fontSize: 12,
-    color: colors.brandBlue[700],
-    lineHeight: 17,
+    fontSize: 12.5,
+    color: colors.textSecondary,
+    lineHeight: 18,
   },
   bold: {
     fontWeight: '700',
+    color: colors.textPrimary,
   },
+
+  /* Article List Container */
   articleList: {
-    gap: spacing.xs,
-    marginBottom: spacing.xl,
+    paddingBottom: spacing.xl,
   },
+
+  /* Empty Wrap */
   emptyWrap: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
@@ -351,9 +385,9 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   emptyIconCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: borderRadius.full,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: colors.brandBlue[50],
     alignItems: 'center',
     justifyContent: 'center',
@@ -365,11 +399,11 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   emptyDesc: {
-    ...typography.bodySmall,
+    fontSize: 12.5,
     color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 18,
-    maxWidth: 280,
+    maxWidth: 290,
   },
   browseBtn: {
     marginTop: spacing.md,
