@@ -165,6 +165,16 @@ export const MoodWeeklyChart: React.FC<MoodWeeklyChartProps> = ({
       (activeStat.dateString.includes(`${todayDateNum} `) ||
         activeStat.dateString.startsWith(todayDateNum)));
 
+  const weekDayOrder = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+  const todayWeekIdx = weekDayOrder.indexOf(todayDayName === 'Min' ? 'Min' : todayDayName);
+  const activeWeekIdx = activeStat ? weekDayOrder.indexOf(activeStat.dayName) : -1;
+  const isFutureDay =
+    (activeWeekIdx > -1 && todayWeekIdx > -1 && activeWeekIdx > todayWeekIdx) ||
+    Boolean(
+      activeStat?.dateString &&
+        Number(activeStat.dateString.slice(0, 2)) > Number(todayDateNum)
+    );
+
   return (
     <View style={styles.cardContainer}>
       {/* 1. Header Bagian: Judul */}
@@ -311,18 +321,34 @@ export const MoodWeeklyChart: React.FC<MoodWeeklyChartProps> = ({
           <View style={styles.activeDayContent}>
             <View style={styles.activeDayHeader}>
               <View style={styles.activeDayEmptyIconWrap}>
-                <Calendar size={14} color={colors.textMuted} />
+                <Calendar
+                  size={14}
+                  color={isToday ? colors.brandBlue[600] : colors.textMuted}
+                />
               </View>
               <Text style={styles.activeDayEmptyTitle}>
                 {activeDayFullName}
                 {activeStat.dateString ? `, ${activeStat.dateString}` : ''} ·{' '}
-                <Text style={{ color: colors.textMuted, fontWeight: '600' }}>
-                  Belum Ada Catatan
+                <Text
+                  style={{
+                    color: isToday ? colors.brandBlue[600] : colors.textMuted,
+                    fontWeight: '600',
+                  }}
+                >
+                  {isFutureDay
+                    ? 'Belum Berjalan'
+                    : isToday
+                    ? 'Belum Dicatat'
+                    : 'Belum Ada Catatan'}
                 </Text>
               </Text>
             </View>
             <Text style={styles.activeDayEmptyBody}>
-              Kamu belum mencatat emosi pada hari ini. Mengambil jeda singkat dan mendengarkan diri selalu terbuka kapan pun kamu siap.
+              {isFutureDay
+                ? 'Hari ini belum tiba. Luangkan waktu sejenak untuk hadir dan mencatat emosimu saat harinya tiba nanti.'
+                : isToday
+                ? 'Kamu belum mencatat emosi hari ini. Sentuh tombol "Catat Mood" di atas untuk memulai refleksi.'
+                : 'Tidak ada catatan emosi yang tersimpan pada hari ini.'}
             </Text>
           </View>
         )

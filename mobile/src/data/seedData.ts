@@ -297,7 +297,7 @@ export const educationalArticles: Article[] = [
             'Menghindari sekolah sepenuhnya tanpa komunikasi',
           ],
           correctIndex: 1,
-          explanation: 'Tepat sekali! Mengakui batas kapasitas diri dan beristirahat terencana adalah bentuk tanggung jawab terhadap kesehatan mentalmu.',
+          explanation: 'Mengakui batas kapasitas diri dan beristirahat terencana adalah bentuk tanggung jawab terhadap kesehatan mentalmu.',
         },
         {
           id: 'q2',
@@ -321,7 +321,7 @@ export const educationalArticles: Article[] = [
             'Tidak perlu berkonsultasi pada siapa pun',
           ],
           correctIndex: 1,
-          explanation: 'Benar! Kamu tidak perlu menunggu krisis parah untuk mencari teman bicara yang terpercaya.',
+          explanation: 'Kamu tidak perlu menunggu krisis parah untuk mencari teman bicara yang terpercaya.',
         },
       ],
     },
@@ -360,7 +360,7 @@ export const educationalArticles: Article[] = [
             'Memutuskan pertemanan secara tiba-tiba tanpa kejelasan',
           ],
           correctIndex: 1,
-          explanation: 'Tepat! Asertif adalah titik tengah antara pasif (mengorbankan diri) dan agresif (menyakiti orang lain).',
+          explanation: 'Asertif adalah titik tengah antara pasif (mengorbankan diri) dan agresif (menyakiti orang lain).',
         },
         {
           id: 'q2',
@@ -372,7 +372,7 @@ export const educationalArticles: Article[] = [
             'Menyalahkan teman karena mengajak di waktu yang salah',
           ],
           correctIndex: 2,
-          explanation: 'Benar sekali. Mengapresiasi niat baik teman dan menawarkan waktu alternatif menunjukkan bahwa kamu tetap peduli.',
+          explanation: 'Mengapresiasi niat baik teman dan menawarkan waktu alternatif menunjukkan bahwa kamu tetap peduli.',
         },
         {
           id: 'q3',

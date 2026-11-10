@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { CheckCircle2, HelpCircle, ArrowRight, Award } from 'lucide-react-native';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  ArrowRight,
+  Award,
+  X,
+} from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
@@ -24,6 +31,14 @@ export const QuizModal: React.FC<QuizModalProps> = ({
   const [isCompleted, setIsCompleted] = useState(false);
 
   const currentQ = quiz.questions[currentQuestionIndex];
+  const isUserCorrect =
+    selectedOption !== null && selectedOption === currentQ.correctIndex;
+
+  // Bersihkan awalan "Tepat!" atau "Benar!" dari string pembahasan jika ada
+  const cleanExplanation = currentQ.explanation.replace(
+    /^(Tepat sekali!|Benar sekali\.|Tepat!|Benar!)\s*/i,
+    ''
+  );
 
   const handleSelectOption = (idx: number) => {
     if (isAnswered) return;
@@ -57,14 +72,24 @@ export const QuizModal: React.FC<QuizModalProps> = ({
     <Modal visible={visible} onClose={handleReset}>
       {!isCompleted ? (
         <View style={styles.container}>
-          {/* Header */}
+          {/* Header Bar: Badge Counter + Tombol Tutup */}
           <View style={styles.header}>
             <View style={styles.badgeWrap}>
-              <HelpCircle size={16} color={colors.brandBlue[600]} />
+              <HelpCircle size={15} color={colors.brandBlue[600]} />
               <Text style={styles.badgeText}>
                 Soal {currentQuestionIndex + 1} dari {quiz.questions.length}
               </Text>
             </View>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleReset}
+              style={styles.closeButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="Tutup Kuis"
+            >
+              <X size={18} color={colors.textSecondary} />
+            </TouchableOpacity>
           </View>
 
           {/* Question Text */}
@@ -82,13 +107,17 @@ export const QuizModal: React.FC<QuizModalProps> = ({
 
               if (isAnswered) {
                 if (isCorrect) {
-                  optBg = colors.feedback.successBg;
-                  optBorder = colors.feedback.successBorder;
-                  optTextColor = colors.feedback.successText;
+                  optBg = '#F0FDF4';
+                  optBorder = '#86EFAC';
+                  optTextColor = '#15803D';
                 } else if (isSelected) {
-                  optBg = colors.crisis.dangerBg;
-                  optBorder = colors.crisis.dangerBorder;
-                  optTextColor = colors.crisis.dangerText;
+                  optBg = '#FEF2F2';
+                  optBorder = '#FCA5A5';
+                  optTextColor = '#B91C1C';
+                } else {
+                  optBg = colors.surfaceAlt;
+                  optBorder = colors.borderLight;
+                  optTextColor = colors.textMuted;
                 }
               } else if (isSelected) {
                 optBg = colors.brandBlue[50];
@@ -106,19 +135,80 @@ export const QuizModal: React.FC<QuizModalProps> = ({
                     { backgroundColor: optBg, borderColor: optBorder },
                   ]}
                 >
-                  <Text style={[styles.optionText, { color: optTextColor }]}>
-                    {opt}
-                  </Text>
+                  <View style={styles.optionContentRow}>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        { color: optTextColor },
+                        isAnswered && (isCorrect || isSelected) && { fontWeight: '600' },
+                      ]}
+                    >
+                      {opt}
+                    </Text>
+
+                    {/* Badge Indikator Status Jawaban */}
+                    {isAnswered && isCorrect && (
+                      <View style={styles.optionTagSuccess}>
+                        <CheckCircle2 size={13} color="#16A34A" />
+                        <Text style={styles.optionTagSuccessText}>Benar</Text>
+                      </View>
+                    )}
+
+                    {isAnswered && isSelected && !isCorrect && (
+                      <View style={styles.optionTagDanger}>
+                        <XCircle size={13} color="#DC2626" />
+                        <Text style={styles.optionTagDangerText}>Pilihanmu</Text>
+                      </View>
+                    )}
+                  </View>
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          {/* Explanation Section (Editorial Unboxed) */}
+          {/* Dynamic Feedback Banner + Pembahasan Edukatif */}
           {isAnswered && (
-            <View style={styles.explanationSection}>
-              <Text style={styles.explanationTitle}>Pembahasan Edukatif</Text>
-              <Text style={styles.explanationText}>{currentQ.explanation}</Text>
+            <View style={styles.feedbackContainer}>
+              {/* Banner Status: Menyesuaikan apakah jawaban pengguna benar atau salah */}
+              <View
+                style={[
+                  styles.statusBanner,
+                  isUserCorrect
+                    ? styles.statusBannerSuccess
+                    : styles.statusBannerDanger,
+                ]}
+              >
+                {isUserCorrect ? (
+                  <CheckCircle2 size={18} color="#16A34A" />
+                ) : (
+                  <XCircle size={18} color="#DC2626" />
+                )}
+
+                <View style={styles.statusTextWrap}>
+                  <Text
+                    style={[
+                      styles.statusTitle,
+                      { color: isUserCorrect ? '#15803D' : '#B91C1C' },
+                    ]}
+                  >
+                    {isUserCorrect ? 'Jawabanmu Tepat! 🎉' : 'Jawabanmu Kurang Tepat'}
+                  </Text>
+                  {!isUserCorrect && (
+                    <Text style={styles.statusSub}>
+                      Kunci yang benar adalah{' '}
+                      <Text style={styles.correctHighlight}>
+                        "{currentQ.options[currentQ.correctIndex]}"
+                      </Text>
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Box Pembahasan Netral & Berwawasan */}
+              <View style={styles.explanationBox}>
+                <Text style={styles.explanationTitle}>Pembahasan Edukatif</Text>
+                <Text style={styles.explanationText}>{cleanExplanation}</Text>
+              </View>
             </View>
           )}
 
@@ -189,6 +279,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.brandBlue[700],
   },
+  closeButton: {
+    padding: 4,
+  },
   questionText: {
     ...typography.cardHeading,
     fontSize: 15,
@@ -204,28 +297,104 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
   },
+  optionContentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+  },
   optionText: {
     fontSize: 12.5,
     lineHeight: 18,
+    flex: 1,
   },
-  explanationSection: {
-    paddingVertical: spacing.xs,
+  optionTagSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  optionTagSuccessText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  optionTagDanger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  optionTagDangerText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#B91C1C',
+  },
+
+  /* Feedback Container */
+  feedbackContainer: {
+    gap: 8,
     marginTop: spacing.xs,
-    marginBottom: spacing.xs,
   },
-  explanationTitle: {
+  statusBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: 10,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+  },
+  statusBannerSuccess: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  statusBannerDanger: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  statusTextWrap: {
+    flex: 1,
+  },
+  statusTitle: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  statusSub: {
+    fontSize: 11.5,
+    color: '#7F1D1D',
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  correctHighlight: {
+    fontWeight: '700',
+    color: '#991B1B',
+  },
+  explanationBox: {
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    borderRadius: borderRadius.md,
+    padding: 10,
+  },
+  explanationTitle: {
+    fontSize: 12,
+    fontWeight: '700',
     color: colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   explanationText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 18,
   },
   nextButton: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   completedContainer: {
     alignItems: 'center',
@@ -262,4 +431,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 });
-

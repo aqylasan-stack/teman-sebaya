@@ -1,4 +1,4 @@
-import { MoodEntry, MoodDayStat } from '../types';
+import { MoodEntry, MoodDayStat } from '../types/mood';
 
 /**
  * Membangun array 7 hari (Senin s/d Minggu) untuk minggu kalender yang sedang berjalan.
