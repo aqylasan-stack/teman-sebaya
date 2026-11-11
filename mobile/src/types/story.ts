@@ -10,10 +10,19 @@ export interface ChatMessage {
   recommendedArticleTitle?: string;
 }
 
+export interface CounselorReview {
+  id: string;
+  clientInitials: string;
+  tier: string;
+  verdict: string;
+  date: string;
+  comment: string;
+}
+
 export interface Counselor {
   id: string;
   name: string;
-  role: 'Konselor Sebaya PIK-R' | 'Psikolog Klinis Mitra';
+  role: 'Konselor Sebaya PIK-R' | 'Psikolog Klinis Mitra' | string;
   institution: string; // e.g. "PIK-R Garuda Muda Karawang" | "Klinik Remaja Mitra"
   rating: number;
   reviewCount: number;
@@ -21,6 +30,18 @@ export interface Counselor {
   about: string;
   isAvailableToday: boolean;
   availableSlots: string[];
+  initials?: string;
+  experience?: string;
+  totalSessions?: number;
+  positiveRatingPct?: number;
+  hasVideoCall?: boolean;
+  reviews?: CounselorReview[];
+  availableDays?: string[];
+  availableTimeSlots?: {
+    morning?: boolean;
+    afternoon?: boolean;
+    evening?: boolean;
+  };
 }
 
 export interface BookingSession {

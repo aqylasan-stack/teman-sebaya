@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
+  SafeAreaView,
   Platform,
+  Image,
 } from 'react-native';
-import {
-  X,
-  Compass,
-  Sparkles,
-  ArrowRight,
-  Brain,
-  CheckCircle2,
-} from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
-import { Card } from '../../components/common/Card';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import {
   PSYCH_GAME_CATEGORIES,
-  PsychGameChoice,
   PsychGameCategory,
+  PsychGameScene,
 } from '../../data/gamePsychData';
 import { useApp } from '../../state/AppContext';
 
+// ============================================================================
+// MAIN COMPONENT: GAMEPLAY SCREEN (100% MATCH REFERENCE 3)
+// ============================================================================
+
 export const MentalGamePlayScreen: React.FC = () => {
-  const { screenParams, navigateTo, goBack } = useApp();
+  const { screenParams, replace, goBack } = useApp();
+  const insets = useSafeAreaInsets();
 
   const categoryId = screenParams?.categoryId || 'karakter';
   const category: PsychGameCategory =
@@ -35,12 +35,46 @@ export const MentalGamePlayScreen: React.FC = () => {
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
 
+  // Start time tracker for genuine session duration metric
+  const startTimeRef = useRef<number>(Date.now());
+
   // Accumulated Scores across scenes
   const [accumulatedTraits, setAccumulatedTraits] = useState<Record<string, number>>({});
   const [totalScore, setTotalScore] = useState(0);
+  const [userChoices, setUserChoices] = useState<
+    Array<{
+      sceneOrder: number;
+      sceneId: string;
+      contextBanner?: string;
+      situation: string;
+      choiceId: string;
+      choiceLabel: string;
+      choiceText: string;
+      feedback: string;
+      learningPoint: string;
+    }>
+  >([]);
 
-  const currentScene = category.scenes[currentSceneIdx];
+  const currentScene: PsychGameScene = category.scenes[currentSceneIdx];
   const isLastScene = currentSceneIdx === category.scenes.length - 1;
+
+  // Split narrative situation and core focal question
+  const splitSituation = (text: string) => {
+    const qMarkIdx = text.lastIndexOf('?');
+    if (qMarkIdx !== -1) {
+      const beforeQ = text.slice(0, qMarkIdx);
+      const lastDot = beforeQ.lastIndexOf('.');
+      if (lastDot !== -1 && lastDot < beforeQ.length - 2) {
+        return {
+          narrative: text.slice(0, lastDot + 1).trim(),
+          prompt: text.slice(lastDot + 1).trim(),
+        };
+      }
+    }
+    return { narrative: '', prompt: text };
+  };
+
+  const sceneText = splitSituation(currentScene.situation);
 
   const handleSelectChoice = (idx: number) => {
     setSelectedChoiceIdx(idx);
@@ -63,457 +97,452 @@ export const MentalGamePlayScreen: React.FC = () => {
     setAccumulatedTraits(updatedTraits);
     setTotalScore(newTotalScore);
 
+    const record = {
+      sceneOrder: currentSceneIdx + 1,
+      sceneId: currentScene.id,
+      contextBanner: currentScene.contextBanner,
+      situation: currentScene.situation,
+      choiceId: choice.id,
+      choiceLabel: choice.tag,
+      choiceText: choice.text,
+      feedback: choice.feedback,
+      learningPoint: choice.learningPoint,
+    };
+    const updatedChoices = [...userChoices, record];
+    setUserChoices(updatedChoices);
+
     if (!isLastScene) {
       setCurrentSceneIdx((prev) => prev + 1);
       setSelectedChoiceIdx(null);
     } else {
-      // Navigate to Gamified Psychological Reflection Results
-      navigateTo('mental_game_result', {
+      const elapsedSeconds = Math.max(
+        15,
+        Math.round((Date.now() - startTimeRef.current) / 1000)
+      );
+
+      // Evaluasi apakah hasil optimal (good / senang), adaptif (harmoni), atau bertumbuh
+      const isGood =
+        category.id === 'resiliensi'
+          ? newTotalScore >= 175
+          : category.id === 'relasi'
+          ? newTotalScore >= 180
+          : newTotalScore >= 195;
+
+      const isBalanced =
+        !isGood &&
+        newTotalScore >= (category.id === 'resiliensi' ? 140 : 150);
+
+      const statusValue = isGood
+        ? 'Optimal'
+        : isBalanced
+        ? 'Adaptif'
+        : 'Bertumbuh';
+
+      // Selesai: Replace layar saat ini dengan Game Result Screen
+      replace('mental_game_result', {
         categoryId: category.id,
+        gameId: screenParams?.gameId,
         totalScore: newTotalScore,
         traits: updatedTraits,
+        userChoices: updatedChoices,
+        durationSeconds: elapsedSeconds,
+        isGood,
+        bannerLabel: 'Hasil Refleksi',
+        bannerValue: statusValue,
       });
     }
   };
 
-  const activeChoice: PsychGameChoice | null =
-    selectedChoiceIdx !== null ? currentScene.choices[selectedChoiceIdx] : null;
+  const handlePreviousScene = () => {
+    if (currentSceneIdx > 0) {
+      setCurrentSceneIdx((prev) => prev - 1);
+      setSelectedChoiceIdx(null);
+    }
+  };
 
-  const progressPercent = ((currentSceneIdx + 1) / category.scenes.length) * 100;
+  const handleExitGame = () => {
+    goBack();
+  };
+
+  const progressPercent =
+    ((currentSceneIdx + 1) / category.scenes.length) * 100;
 
   return (
-    <View style={styles.container}>
-      {/* Top Bar: Clean header with category info and progress */}
-      <View style={styles.topBar}>
-        <View style={styles.topBarHeader}>
-          <View style={styles.categoryBadgeWrap}>
-            <View
-              style={[
-                styles.categoryDot,
-                { backgroundColor: category.themeColor },
-              ]}
-            />
-            <Text style={styles.categoryNameText}>{category.title}</Text>
-          </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.screen, { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 8) : 0 }]}>
+        <StatusBar barStyle="dark-content" />
+
+        {/* ============================================================== */}
+        {/* 1. THIN PROGRESS LINE (Reference 3: Very top edge)             */}
+        {/* ============================================================== */}
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+        </View>
+
+        {/* ============================================================== */}
+        {/* 2. TOP BAR (Reference 3: Centered Counter + Right Close 'X')    */}
+        {/* ============================================================== */}
+        <View style={styles.topBar}>
+          <View style={styles.topBarSideEmpty} />
+
+          <Text style={styles.counterText}>
+            {currentSceneIdx + 1}/{category.scenes.length}
+          </Text>
+
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={goBack}
+            activeOpacity={0.6}
+            onPress={handleExitGame}
             style={styles.closeBtn}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+            accessibilityRole="button"
             accessibilityLabel="Keluar dari permainan"
           >
-            <X size={18} color={colors.textSecondary} />
+            <X size={24} color="#0F172A" strokeWidth={2.4} />
           </TouchableOpacity>
         </View>
 
-        {/* Clean Step Counter & Progress Bar */}
-        <View style={styles.progressRow}>
-          <Text style={styles.progressStepText}>
-            Skenario {currentSceneIdx + 1} dari {category.scenes.length}
-          </Text>
-          <View style={styles.progressBarBg}>
-            <View
-              style={[
-                styles.progressBarFill,
-                {
-                  width: `${progressPercent}%`,
-                  backgroundColor: category.themeColor,
-                },
-              ]}
-            />
+      {/* ============================================================== */}
+      {/* 3. SCENARIO CONTEXT, ARTWORK & QUESTION STATEMENT             */}
+      {/* ============================================================== */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* A. Context Badge (Scenario Tag) */}
+        <View style={styles.contextBadgeRow}>
+          <View style={styles.contextBadge}>
+            <Text style={styles.contextBadgeText}>
+              {currentScene.contextBanner || `${category.badgeLabel} · Skenario ${currentSceneIdx + 1}`}
+            </Text>
           </View>
         </View>
-      </View>
 
-      {/* Main Gameplay Scenario Body */}
-      <ScrollView
-        style={styles.scrollBody}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Scenario Narrative Box (Primary Focal Point) */}
-        <Card style={styles.narrativeCard}>
-          {currentScene.contextBanner && (
-            <View style={styles.contextBannerPill}>
-              <Compass size={13} color={category.themeColor} />
-              <Text
-                style={[
-                  styles.contextBannerText,
-                  { color: category.themeColor },
-                ]}
-              >
-                {currentScene.contextBanner}
-              </Text>
-            </View>
-          )}
-
-          <Text style={styles.situationText}>{currentScene.situation}</Text>
-
-          <View style={styles.promptDivider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.promptQuestion}>Apa langkah keputusanmu?</Text>
-            <View style={styles.dividerLine} />
+        {/* B. Scenario Dedicated 3D Artwork */}
+        {currentScene.illustration && (
+          <View style={styles.illustrationWrapper}>
+            <Image
+              source={currentScene.illustration}
+              style={styles.illustrationImage}
+              resizeMode="cover"
+            />
           </View>
+        )}
 
-          {/* Response Choices List (A, B, C) */}
-          <View style={styles.choicesList}>
-            {currentScene.choices.map((choice, idx) => {
-              const isSelected = selectedChoiceIdx === idx;
+        {/* C. Split Question Hierarchy (Narrative vs Focal Prompt) */}
+        <View style={styles.questionBlock}>
+          {sceneText.narrative ? (
+            <Text style={styles.situationNarrative}>
+              {sceneText.narrative}
+            </Text>
+          ) : null}
 
-              return (
-                <TouchableOpacity
-                  key={choice.id}
-                  activeOpacity={0.85}
-                  onPress={() => handleSelectChoice(idx)}
+          <Text style={styles.promptQuestion}>
+            {sceneText.prompt}
+          </Text>
+        </View>
+
+        {/* ============================================================== */}
+        {/* 4. CHOICE CARDS WITH CLEAR LETTER BADGES (A, B, C)            */}
+        {/* ============================================================== */}
+        <View style={styles.pillList}>
+          {currentScene.choices.map((choice, idx) => {
+            const isSelected = selectedChoiceIdx === idx;
+            const letter = String.fromCharCode(65 + idx); // A, B, C
+            return (
+              <TouchableOpacity
+                key={choice.id}
+                activeOpacity={0.85}
+                onPress={() => handleSelectChoice(idx)}
+                style={[
+                  styles.choiceCard,
+                  isSelected && styles.choiceCardSelected,
+                ]}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <View
                   style={[
-                    styles.choiceCard,
-                    isSelected && {
-                      borderColor: category.themeColor,
-                      backgroundColor: category.themeBg,
-                    },
+                    styles.choiceLetterBadge,
+                    isSelected && styles.choiceLetterBadgeSelected,
                   ]}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isSelected }}
                 >
-                  <View style={styles.choiceHeaderRow}>
-                    <View
-                      style={[
-                        styles.choiceBullet,
-                        isSelected && {
-                          backgroundColor: category.themeColor,
-                          borderColor: category.themeColor,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.choiceBulletText,
-                          isSelected && { color: '#FFFFFF' },
-                        ]}
-                      >
-                        {String.fromCharCode(65 + idx)}
-                      </Text>
-                    </View>
-                    <View style={styles.choiceTagPill}>
-                      <Text style={styles.choiceTagText}>{choice.tag}</Text>
-                    </View>
-                  </View>
-
                   <Text
                     style={[
-                      styles.choiceText,
-                      isSelected && styles.choiceTextSelected,
+                      styles.choiceLetterText,
+                      isSelected && styles.choiceLetterTextSelected,
                     ]}
                   >
-                    {choice.text}
+                    {letter}
                   </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Card>
+                </View>
 
-        {/* Psychological Reflection & Consequence (Displayed upon choice selection) */}
-        {activeChoice && (
-          <Card variant="tintGreen" style={styles.reflectionCard}>
-            <View style={styles.reflectionHeader}>
-              <Sparkles size={16} color={colors.brandGreen[700]} />
-              <Text style={styles.reflectionTitle}>
-                Refleksi Psikologis dari Pilihanmu
-              </Text>
-            </View>
-            <Text style={styles.feedbackText}>{activeChoice.feedback}</Text>
-
-            <View style={styles.learningBox}>
-              <View style={styles.learningBoxHeader}>
-                <Brain size={14} color={colors.brandBlue[600]} />
-                <Text style={styles.learningLabel}>
-                  Wawasan Edukasi Sebaya:
+                <Text
+                  style={[
+                    styles.choiceText,
+                    isSelected && styles.choiceTextSelected,
+                  ]}
+                >
+                  {choice.text}
                 </Text>
-              </View>
-              <Text style={styles.learningText}>
-                {activeChoice.learningPoint}
-              </Text>
-            </View>
-          </Card>
-        )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </ScrollView>
 
-      {/* Docked Sticky Bottom CTA Bar */}
-      <View style={styles.bottomBar}>
+      {/* ============================================================== */}
+      {/* 5. BOTTOM NAVIGATION BUTTONS (Reference 3: '<' and '>')        */}
+      {/* ============================================================== */}
+      <View style={styles.bottomNavRow}>
+        {/* Previous Button '<' */}
         <TouchableOpacity
-          activeOpacity={0.85}
-          disabled={selectedChoiceIdx === null}
-          onPress={handleNextScene}
+          activeOpacity={0.7}
+          onPress={handlePreviousScene}
+          disabled={currentSceneIdx === 0}
           style={[
-            styles.nextBtn,
-            { backgroundColor: category.themeColor },
-            selectedChoiceIdx === null && styles.nextBtnDisabled,
+            styles.navSquareBtn,
+            currentSceneIdx === 0 && styles.navSquareBtnDisabled,
           ]}
-          accessibilityRole="button"
+          accessibilityLabel="Pertanyaan sebelumnya"
         >
-          <Text
-            style={[
-              styles.nextBtnText,
-              selectedChoiceIdx === null && styles.nextBtnTextDisabled,
-            ]}
-          >
-            {isLastScene
-              ? 'Lihat Hasil Analisis Arketipe'
-              : 'Lanjut ke Skenario Berikutnya'}
-          </Text>
-          <ArrowRight
-            size={18}
-            color={selectedChoiceIdx === null ? colors.textMuted : '#FFFFFF'}
+          <ChevronLeft
+            size={20}
+            color={currentSceneIdx === 0 ? '#CBD5E1' : '#0F172A'}
+            strokeWidth={2.4}
+          />
+        </TouchableOpacity>
+
+        {/* Next Button '>' */}
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={handleNextScene}
+          disabled={selectedChoiceIdx === null}
+          style={[
+            styles.navSquareBtn,
+            selectedChoiceIdx === null && styles.navSquareBtnDisabled,
+            selectedChoiceIdx !== null && styles.navSquareBtnActive,
+          ]}
+          accessibilityLabel="Lanjut ke pertanyaan berikutnya"
+        >
+          <ChevronRight
+            size={20}
+            color={selectedChoiceIdx === null ? '#CBD5E1' : '#FFFFFF'}
+            strokeWidth={2.4}
           />
         </TouchableOpacity>
       </View>
     </View>
+  </SafeAreaView>
   );
 };
 
+// ============================================================================
+// STYLESHEET (100% Faithful to Reference 3)
+// ============================================================================
+
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: colors.canvas,
+    backgroundColor: '#FFFFFF',
   },
+  screen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
+  /* Top Progress Line */
+  progressTrack: {
+    width: '100%',
+    height: 3,
+    backgroundColor: '#E2E8F0',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#2563EB',
+  },
+
+  /* Top Bar */
   topBar: {
-    backgroundColor: colors.surface,
-    paddingTop: Platform.OS === 'ios' ? 48 : 36,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-  },
-  topBarHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    backgroundColor: '#FFFFFF',
+    zIndex: 20,
   },
-  categoryBadgeWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  topBarSideEmpty: {
+    width: 44,
+    height: 44,
   },
-  categoryDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  categoryNameText: {
-    fontSize: 14,
+  counterText: {
+    fontSize: 15,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#0F172A',
   },
   closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceAlt,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 30,
   },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    marginTop: 4,
-  },
-  progressStepText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  progressBarBg: {
-    flex: 1,
-    height: 6,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: borderRadius.full,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: borderRadius.full,
-  },
-  scrollBody: {
-    flex: 1,
-  },
+
+  /* Content */
   scrollContent: {
-    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
-    paddingTop: spacing.layout.screenPaddingTop,
-    paddingBottom: 110, // Prevent overlap with docked bottom bar
-  },
-  narrativeCard: {
-    padding: spacing.layout.cardPadding,
-    marginBottom: spacing.layout.cardGap,
-  },
-  contextBannerPill: {
-    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 40,
     alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surfaceAlt,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: borderRadius.full,
-    marginBottom: spacing.md,
   },
-  contextBannerText: {
-    fontSize: 12,
+
+  /* Context Badge (Scenario Category & Order) */
+  contextBadgeRow: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  contextBadge: {
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  contextBadgeText: {
+    fontSize: 11.5,
     fontWeight: '700',
+    color: '#2563EB',
+    letterSpacing: 0.2,
   },
-  situationText: {
-    fontSize: 15,
-    lineHeight: 23,
-    color: colors.textPrimary,
-    fontWeight: '400',
-    marginBottom: spacing.lg,
+
+  /* Dedicated Scenario Artwork */
+  illustrationWrapper: {
+    width: '100%',
+    height: 155,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 16,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  promptDivider: {
-    flexDirection: 'row',
+  illustrationImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  /* Question Hierarchy (Narrative vs Focal Prompt) */
+  questionBlock: {
+    width: '100%',
+    paddingHorizontal: 4,
+    marginBottom: 18,
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.borderLight,
+  situationNarrative: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#475569', // Slate 600
+    textAlign: 'center',
+    lineHeight: 21,
+    marginBottom: 6,
   },
   promptQuestion: {
-    fontSize: 13,
+    fontSize: 16.5,
     fontWeight: '700',
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: '#0F172A', // Slate 900 Focal Point
+    textAlign: 'center',
+    lineHeight: 24,
+    letterSpacing: -0.2,
   },
-  choicesList: {
-    gap: spacing.layout.itemGap,
+
+  /* Choices (Clean Cards with Letter Badges) */
+  pillList: {
+    width: '100%',
+    gap: 10,
   },
   choiceCard: {
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.borderLight,
-    borderRadius: borderRadius.lg,
-    padding: 14,
+    width: '100%',
     minHeight: 52,
-  },
-  choiceHeaderRow: {
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xs,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
-  choiceBullet: {
+  choiceCardSelected: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1.8,
+  },
+  choiceLetterBadge: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 12,
   },
-  choiceBulletText: {
+  choiceLetterBadgeSelected: {
+    backgroundColor: '#2563EB',
+  },
+  choiceLetterText: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.textSecondary,
+    color: '#64748B',
   },
-  choiceTagPill: {
-    backgroundColor: colors.surfaceAlt,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: borderRadius.full,
-  },
-  choiceTagText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
+  choiceLetterTextSelected: {
+    color: '#FFFFFF',
   },
   choiceText: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.textSecondary,
+    flex: 1,
+    fontSize: 13.5,
+    fontWeight: '500',
+    color: '#1E293B',
+    lineHeight: 19,
   },
   choiceTextSelected: {
-    color: colors.textPrimary,
     fontWeight: '600',
+    color: '#1D4ED8',
   },
-  reflectionCard: {
-    padding: spacing.md,
-    marginTop: spacing.xs,
-  },
-  reflectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: spacing.xs,
-  },
-  reflectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.brandGreen[700],
-  },
-  feedbackText: {
-    fontSize: 13.5,
-    lineHeight: 20,
-    color: colors.textPrimary,
-  },
-  learningBox: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    padding: spacing.sm,
-    marginTop: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.brandGreen[100],
-  },
-  learningBoxHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  learningLabel: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: colors.brandBlue[700],
-  },
-  learningText: {
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: colors.textSecondary,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
-    paddingTop: spacing.sm,
-    paddingBottom: Platform.OS === 'ios' ? 32 : spacing.md,
-  },
-  nextBtn: {
+
+  /* Bottom Navigation Buttons (Square '<' and '>') */
+  bottomNavRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 16,
+    paddingTop: 12,
+    paddingBottom: 32,
+    backgroundColor: '#FFFFFF',
+  },
+  navSquareBtn: {
+    width: 48,
     height: 48,
-    borderRadius: borderRadius.md,
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  nextBtnDisabled: {
-    backgroundColor: colors.surfaceAlt,
+  navSquareBtnDisabled: {
+    borderColor: '#F1F5F9',
+    backgroundColor: '#F8FAFC',
   },
-  nextBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  nextBtnTextDisabled: {
-    color: colors.textMuted,
+  navSquareBtnActive: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
 });

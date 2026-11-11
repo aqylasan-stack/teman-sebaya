@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
 import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { useApp } from '../../state/AppContext';
@@ -10,6 +10,7 @@ interface ContextualHeaderProps {
   onBack?: () => void;
   showCrisisButton?: boolean;
   rightAction?: React.ReactNode;
+  avatarSource?: ImageSourcePropType;
 }
 
 export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
@@ -18,6 +19,7 @@ export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
   onBack,
   showCrisisButton = false,
   rightAction,
+  avatarSource,
 }) => {
   const { goBack, openCrisisModal } = useApp();
 
@@ -39,6 +41,13 @@ export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
       >
         <ArrowLeft size={20} color={colors.textPrimary} />
       </TouchableOpacity>
+
+      {/* Avatar (if provided) */}
+      {avatarSource && (
+        <View style={styles.avatarContainer}>
+          <Image source={avatarSource} style={styles.avatarImage} resizeMode="cover" />
+        </View>
+      )}
 
       {/* Title & subtitle */}
       <View style={styles.titleContainer}>
@@ -90,6 +99,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.sm,
   },
+  avatarContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.brandBlue[50],
+    borderWidth: 1.5,
+    borderColor: colors.brandBlue[100],
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  avatarImage: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
   titleContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -98,10 +124,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.textPrimary,
+    lineHeight: 20,
   },
   subtitle: {
     fontSize: 11,
     color: colors.textMuted,
+    lineHeight: 15,
+    marginTop: 1,
   },
   rightActionContainer: {
     alignItems: 'flex-end',

@@ -12,9 +12,7 @@ export const PrivacySettingsScreen: React.FC = () => {
 
   const [isAnonymous, setIsAnonymous] = useState(user?.isAnonymous ?? true);
   const [allowAiMood, setAllowAiMood] = useState(user?.allowAiMoodAccess ?? false);
-  const [dailyReminder, setDailyReminder] = useState(
-    user?.dailyReminderEnabled ?? true
-  );
+  const [isEndToEndEncrypted, setIsEndToEndEncrypted] = useState(true);
 
   const handleToggleAnonymous = (val: boolean) => {
     setIsAnonymous(val);
@@ -24,11 +22,6 @@ export const PrivacySettingsScreen: React.FC = () => {
   const handleToggleAiMood = (val: boolean) => {
     setAllowAiMood(val);
     updateProfile({ allowAiMoodAccess: val });
-  };
-
-  const handleToggleReminder = (val: boolean) => {
-    setDailyReminder(val);
-    updateProfile({ dailyReminderEnabled: val });
   };
 
   return (
@@ -90,20 +83,20 @@ export const PrivacySettingsScreen: React.FC = () => {
             />
           </View>
 
-          {/* Daily Reminder */}
+          {/* End-to-End Chat Encryption Status */}
           <View style={[styles.toggleRow, { borderBottomWidth: 0 }]}>
             <View style={styles.toggleIconWrap}>
-              <Database size={18} color={colors.accentAmber[600]} />
+              <Lock size={18} color={colors.accentAmber[600]} />
             </View>
             <View style={styles.toggleDetails}>
-              <Text style={styles.toggleTitle}>Pengingat Check-in Emosi Harian</Text>
+              <Text style={styles.toggleTitle}>Enkripsi Percakapan Konseling</Text>
               <Text style={styles.toggleDesc}>
-                Dapatkan notifikasi lembut pada pukul 20:00 WIB untuk merefleksikan harimu.
+                Setiap sesi obrolan terenkripsi otomatis dan hanya dapat dibaca olehmu dan konselor sebaya.
               </Text>
             </View>
             <Switch
-              value={dailyReminder}
-              onValueChange={handleToggleReminder}
+              value={isEndToEndEncrypted}
+              onValueChange={setIsEndToEndEncrypted}
               trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
             />
           </View>

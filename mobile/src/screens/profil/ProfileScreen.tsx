@@ -122,7 +122,7 @@ export const ProfileScreen: React.FC = () => {
       title: 'Pengaturan Notifikasi',
       subtitle: `Pengingat check-in harian ${user?.dailyReminderTime || '20:00 WIB'}`,
       icon: Bell,
-      action: () => navigateTo('privacy_settings'),
+      action: () => navigateTo('notification_settings'),
     },
     {
       id: 'privacy_security',

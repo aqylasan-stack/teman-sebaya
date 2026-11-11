@@ -26,7 +26,7 @@ export const OnboardingScreen: React.FC = () => {
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   // Real onboarding illustration assets tailored to Teman Sebaya
-  // Warna konsisten sesuai Brand Blue (#2563EB) & Soft Sky (#EAF5FC) dari Design System
+  // Warna konsisten sesuai Brand Blue (#2563EB) & Soft Sky (#EFF6FF) dari Design System
   const slides = [
     {
       id: 'mood',
@@ -34,7 +34,7 @@ export const OnboardingScreen: React.FC = () => {
       subtitle:
         'Luangkan waktu sejenak untuk memahami apa yang sedang kamu rasakan hari ini.',
       themeColor: '#2563EB', // Brand Blue konsisten sesuai FigCraft & Design System
-      skyColor: '#EAF5FC',
+      skyColor: '#EFF6FF', // Soft Sky Blue selaras dengan Brand Identity Teman Sebaya
       image: require('../../../assets/onboarding/onboarding_mood.jpg'),
     },
     {
@@ -43,7 +43,7 @@ export const OnboardingScreen: React.FC = () => {
       subtitle:
         'Konselor sebaya dan tenaga profesional siap mendengarkan tanpa menghakimi.',
       themeColor: '#2563EB', // Brand Blue konsisten
-      skyColor: '#EAF5FC',
+      skyColor: '#EFF6FF', // Soft Sky Blue
       image: require('../../../assets/onboarding/onboarding_counseling.jpg'),
     },
     {
@@ -52,7 +52,7 @@ export const OnboardingScreen: React.FC = () => {
       subtitle:
         'Kumpulan artikel psikoedukasi, simulasi interaktif, dan komunitas remaja positif.',
       themeColor: '#2563EB', // Brand Blue konsisten
-      skyColor: '#EAF5FC',
+      skyColor: '#EFF6FF', // Soft Sky Blue
       image: require('../../../assets/onboarding/onboarding_growth.jpg'),
     },
   ];

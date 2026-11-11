@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 
@@ -20,43 +21,59 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   disabled = false,
 }) => {
   const [inputText, setInputText] = useState('');
+  const insets = useSafeAreaInsets();
 
   const handleSend = () => {
     if (!inputText.trim() || disabled) return;
-    onSendMessage(inputText);
+    onSendMessage(inputText.trim());
     setInputText('');
   };
 
+  const hasText = inputText.trim().length > 0;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingBottom: Math.max(insets.bottom, Platform.OS === 'ios' ? 8 : 8) },
+      ]}
+    >
       <View style={styles.inputRow}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Tulis ceritamu di sini..."
-          placeholderTextColor={colors.textPlaceholder}
-          value={inputText}
-          onChangeText={setInputText}
-          multiline
-          maxLength={500}
-          editable={!disabled}
-        />
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Tulis ceritamu di sini..."
+            placeholderTextColor="#94A3B8"
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            maxLength={1000}
+            editable={!disabled}
+            textAlignVertical="center"
+          />
+        </View>
+
         <TouchableOpacity
-          activeOpacity={0.7}
+          activeOpacity={0.8}
           onPress={handleSend}
-          disabled={!inputText.trim() || disabled}
+          disabled={!hasText || disabled}
+          hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
           style={[
             styles.sendButton,
-            inputText.trim() ? styles.sendActive : styles.sendDisabled,
+            hasText && !disabled ? styles.sendActive : styles.sendDisabled,
           ]}
+          accessibilityRole="button"
+          accessibilityLabel="Kirim Pesan"
         >
           <Send
-            size={16}
-            color={inputText.trim() ? colors.surface : colors.textPlaceholder}
+            size={18}
+            color={hasText && !disabled ? '#FFFFFF' : '#94A3B8'}
           />
         </TouchableOpacity>
       </View>
+
       <Text style={styles.disclaimerText}>
-        Jika dalam kondisi bahaya, ketuk tombol Darurat di atas atau hubungi 119.
+        Jika dalam kondisi krisis atau bahaya darurat, segera hubungi 119.
       </Text>
     </View>
   );
@@ -64,51 +81,59 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+    borderTopColor: '#E2E8F0',
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: borderRadius.lg,
+    gap: 10,
+  },
+  inputWrap: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.borderMedium,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 14,
+    paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+    minHeight: 40,
+    maxHeight: 100,
+    justifyContent: 'center',
   },
   textInput: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.textPrimary,
-    maxHeight: 80,
-    minHeight: 38,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 4,
+    fontSize: 14,
+    color: '#0F172A',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
   },
   sendButton: {
-    width: 34,
-    height: 34,
-    borderRadius: borderRadius.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 4,
   },
   sendActive: {
-    backgroundColor: colors.brandBlue[600],
+    backgroundColor: '#2563EB',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
   sendDisabled: {
-    backgroundColor: colors.borderLight,
+    backgroundColor: '#F1F5F9',
   },
   disclaimerText: {
-    fontSize: 10,
-    color: colors.textMuted,
+    fontSize: 11,
+    color: '#94A3B8',
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 15,
   },
 });
-

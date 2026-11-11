@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, BackHandler } from 'react-native';
 import { useApp } from '../state/AppContext';
 import { BottomNavBar } from '../components/layout/BottomNavBar';
 import { CrisisModal } from '../components/crisis/CrisisModal';
@@ -33,14 +33,20 @@ import { MoodStatsScreen } from '../screens/mood/MoodStatsScreen';
 import { MoodAnalysisScreen } from '../screens/mood/MoodAnalysisScreen';
 import { AIChatScreen } from '../screens/cerita/AIChatScreen';
 import { BookingScreen } from '../screens/cerita/BookingScreen';
+import { CounselorDirectoryScreen } from '../screens/cerita/CounselorDirectoryScreen';
+import { CounselorDetailScreen } from '../screens/cerita/CounselorDetailScreen';
+import { ServiceInfoScreen } from '../screens/cerita/ServiceInfoScreen';
 import { ArticleDetailScreen } from '../screens/belajar/ArticleDetailScreen';
 import { BermainScreen } from '../screens/bermain/BermainScreen';
 import { MentalGameHubScreen } from '../screens/bermain/MentalGameHubScreen';
+import { GameCategoryListScreen } from '../screens/bermain/GameCategoryListScreen';
+import { GameDetailScreen } from '../screens/bermain/GameDetailScreen';
 import { MentalGamePlayScreen } from '../screens/bermain/MentalGamePlayScreen';
 import { MentalGameResultScreen } from '../screens/bermain/MentalGameResultScreen';
 import { SupportifScreen } from '../screens/supportif/SupportifScreen';
 import { EditProfileScreen } from '../screens/profil/EditProfileScreen';
 import { PrivacySettingsScreen } from '../screens/profil/PrivacySettingsScreen';
+import { NotificationSettingsScreen } from '../screens/profil/NotificationSettingsScreen';
 import { AboutAppScreen } from '../screens/profil/AboutAppScreen';
 
 // Psychological Tests (matching WhatsApp screenshots)
@@ -50,7 +56,40 @@ import { TestQuestionnaireScreen } from '../screens/tests/TestQuestionnaireScree
 import { TestResultScreen } from '../screens/tests/TestResultScreen';
 
 export const RootNavigator: React.FC = () => {
-  const { currentScreen, currentTab } = useApp();
+  const { currentScreen, currentTab, screenStack, goBack, popTo, switchTab } = useApp();
+
+  // Consistent Android Hardware Back Support
+  useEffect(() => {
+    const onHardwareBack = () => {
+      // 1. Jika di halaman Hasil Refleksi Permainan, unwind kembali ke Teman Bermain
+      if (currentScreen === 'mental_game_result') {
+        popTo('teman_bermain');
+        return true;
+      }
+
+      // 2. Jika di dalam stack sub-screen (kedalaman > 1), jalankan goBack()
+      if (screenStack.length > 1) {
+        goBack();
+        return true;
+      }
+
+      // 3. Jika di tab bar tapi bukan di Beranda, arahkan ke Beranda
+      if (currentScreen === 'main' && currentTab !== 'beranda') {
+        switchTab('beranda');
+        return true;
+      }
+
+      // 4. Jika di root (Beranda), izinkan OS keluar dari aplikasi secara normal
+      return false;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onHardwareBack
+    );
+
+    return () => subscription.remove();
+  }, [currentScreen, currentTab, screenStack, goBack, popTo, switchTab]);
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -92,6 +131,12 @@ export const RootNavigator: React.FC = () => {
       case 'ai_chat':
       case 'teman_akses':
         return <AIChatScreen />;
+      case 'counselor_directory':
+        return <CounselorDirectoryScreen />;
+      case 'counselor_detail':
+        return <CounselorDetailScreen />;
+      case 'service_info':
+        return <ServiceInfoScreen />;
       case 'counselor_booking':
         return <BookingScreen />;
       case 'article_detail':
@@ -102,6 +147,11 @@ export const RootNavigator: React.FC = () => {
       case 'mental_game_hub':
       case 'teman_bermain':
         return <MentalGameHubScreen />;
+      case 'game_category_list':
+        return <GameCategoryListScreen />;
+      case 'game_detail':
+      case 'mental_game_detail':
+        return <GameDetailScreen />;
       case 'mental_game_play':
         return <MentalGamePlayScreen />;
       case 'mental_game_result':
@@ -123,6 +173,8 @@ export const RootNavigator: React.FC = () => {
         return <EditProfileScreen />;
       case 'privacy_settings':
         return <PrivacySettingsScreen />;
+      case 'notification_settings':
+        return <NotificationSettingsScreen />;
       case 'about_app':
         return <AboutAppScreen />;
 

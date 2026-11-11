@@ -23,6 +23,7 @@ export interface PsychGameScene {
   order: number;
   situation: string;
   contextBanner?: string;
+  illustration?: any;
   choices: PsychGameChoice[];
 }
 
@@ -45,18 +46,19 @@ export interface PsychGameCategory {
     superpowers: string[];
     growthAreas: string[];
     recommendedMissions: string[];
+    variant?: 'senang' | 'sedih' | 'harmoni';
   }[];
 }
 
 export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
   // ==========================================
   // GAME 1: BUTTERFLY EFFECT (DECISION-BASED STORY)
-  // Sesuai Screen F01 & F02 BRIEF TEMAN SEBAYA
+  // 8 Scenarios (Sesuai Standar Kuis & Asesmen Psikologi Remaja)
   // ==========================================
   {
     id: 'karakter',
     title: 'Butterfly Effect',
-    subtitle: 'Setiap pilihan memiliki cerita. Lihat bagaimana keputusan kecil dapat membawa hasil yang berbeda.',
+    subtitle: 'Setiap pilihan memiliki cerita. Eksplorasi bagaimana keputusan kecil membawa dampak berbeda.',
     scientificBasis:
       'Diadaptasi dari Model Lima Faktor Kepribadian (Big Five OCEAN) oleh McCrae & Costa serta adaptasi remaja oleh De Fruyt et al. Menilai kecenderungan Openness, Conscientiousness, Extraversion, Agreeableness, dan Emotional Stability.',
     journalReference:
@@ -72,6 +74,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kelasmu terpilih untuk menampilkan karya pada Festival Budaya Sekolah minggu depan. Teman-temanmu bingung memilih antara format drama konvensional atau pertunjukan multimedia interaktif. Apa langkah yang kamu ambil?',
         contextBanner: 'Skenario 1: Ide Festival Kreatif',
+        illustration: require('../../assets/games/thumbnails/thumb_butterfly.jpg'),
         choices: [
           {
             id: 'c1',
@@ -79,11 +82,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Inovatif & Eksploratif',
             energyChange: 5,
             clarityChange: 10,
-            traitScores: { openness: 30, conscientiousness: 15 },
-            feedback:
-              'Kamu menunjukkan keterbukaan tinggi terhadap ide orisinal (High Openness) serta inisiatif proaktif!',
-            learningPoint:
-              'Eksplorasi ide baru memberi warna segar pada kelompok, asalkan diimbangi rencana kerja yang realistis.',
+            traitScores: { openness: 15, conscientiousness: 10 },
+            feedback: 'Kamu menunjukkan keterbukaan tinggi terhadap ide orisinal serta inisiatif proaktif!',
+            learningPoint: 'Eksplorasi ide baru memberi warna segar pada kelompok bila diimbangi rencana kerja realistis.',
           },
           {
             id: 'c2',
@@ -91,11 +92,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Terencana & Disiplin',
             energyChange: 5,
             clarityChange: 15,
-            traitScores: { conscientiousness: 35, stability: 10 },
-            feedback:
-              'Kamu berfokus pada ketelitian dan keandalan eksekusi (High Conscientiousness).',
-            learningPoint:
-              'Struktur kerja yang rapi membuat tim merasa tenang dan memiliki kepastian target.',
+            traitScores: { conscientiousness: 15, stability: 10 },
+            feedback: 'Kamu berfokus pada ketelitian dan keandalan eksekusi.',
+            learningPoint: 'Struktur kerja yang rapi membuat tim merasa tenang dan memiliki kepastian target.',
           },
           {
             id: 'c3',
@@ -103,11 +102,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Empatis & Kolaboratif',
             energyChange: 10,
             clarityChange: 5,
-            traitScores: { agreeableness: 35, extraversion: 15 },
-            feedback:
-              'Kamu mengutamakan harmoni emosional kelompok dan inklusivitas (High Agreeableness).',
-            learningPoint:
-              'Kelompok yang merasa didengar memiliki kohesi dan semangat kerja yang jauh lebih tinggi.',
+            traitScores: { agreeableness: 15, extraversion: 10 },
+            feedback: 'Kamu mengutamakan harmoni emosional kelompok dan inklusivitas.',
+            learningPoint: 'Kelompok yang merasa didengar memiliki kohesi dan semangat kerja yang jauh lebih tinggi.',
           },
         ],
       },
@@ -117,6 +114,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Dua hari menjelang festival, salah satu anggota tim tampak pendiam dan belum menyelesaikan bagian naskahnya karena sedang ada masalah keluarga. Sikapmu?',
         contextBanner: 'Skenario 2: Hambatan Tim & Empati',
+        illustration: require('../../assets/articles/article_komunikasi.jpg'),
         choices: [
           {
             id: 'c1',
@@ -124,23 +122,19 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Pendukung Tulus',
             energyChange: 5,
             clarityChange: 10,
-            traitScores: { agreeableness: 30, stability: 20 },
-            feedback:
-              'Pendekatan empatikmu membangun rasa aman psikologis (Psychological Safety) yang kuat.',
-            learningPoint:
-              'Mendukung teman saat sulit mempererat ikatan dan memulihkan motivasi jauh lebih cepat daripada teguran.',
+            traitScores: { agreeableness: 15, stability: 10 },
+            feedback: 'Pendekatan empatikmu membangun rasa aman psikologis yang kuat.',
+            learningPoint: 'Mendukung teman saat sulit mempererat ikatan dan memulihkan motivasi lebih cepat.',
           },
           {
             id: 'c2',
-            text: 'Mengambil alih naskah secara sistematis dan mengerjakannya sendiri agar proyek tetap tuntas tepat waktu.',
+            text: 'Mengambil alih naskah secara sistematis dan mengerjakannya sendiri agar proyek tuntas tepat waktu.',
             tag: 'Penyelesai Mandiri',
-            energyChange: -10,
+            energyChange: -5,
             clarityChange: 5,
-            traitScores: { conscientiousness: 30, openness: 10 },
-            feedback:
-              'Tanggung jawabmu tinggi, namun waspadai risiko kelelahan jika menanggung beban sendirian.',
-            learningPoint:
-              'Meminta bantuan anggota lain untuk berbagi beban adalah kunci kepemimpinan yang sehat.',
+            traitScores: { conscientiousness: 15, openness: 5 },
+            feedback: 'Tanggung jawabmu tinggi, namun waspadai risiko kelelahan memikul beban sendiri.',
+            learningPoint: 'Meminta bantuan anggota lain untuk berbagi beban adalah kunci kepemimpinan yang sehat.',
           },
           {
             id: 'c3',
@@ -148,11 +142,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Fasilitator Terbuka',
             energyChange: 10,
             clarityChange: 10,
-            traitScores: { extraversion: 25, agreeableness: 25 },
-            feedback:
-              'Kamu mahir memediasi situasi sosial dengan komunikasi terbuka (High Extraversion & Agreeableness).',
-            learningPoint:
-              'Transparansi suportif menghindarkan prasangka dan memperkuat solidaritas tim.',
+            traitScores: { extraversion: 12, agreeableness: 12 },
+            feedback: 'Kamu mahir memediasi situasi sosial dengan komunikasi terbuka.',
+            learningPoint: 'Transparansi suportif menghindarkan prasangka dan memperkuat solidaritas tim.',
           },
         ],
       },
@@ -160,8 +152,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'k1_s3',
         order: 3,
         situation:
-          'Tepat saat pertunjukan dimulai, laptop proyektor mati mendadak dan lampu panggung meredup. Penonton mulai gaduh berbisik. Reaksi spontanmu?',
+          'Tepat saat gladi resik panggung, laptop proyektor mati mendadak dan sound system berdengung keras. Penonton mulai gaduh berbisik. Reaksi spontanmu?',
         contextBanner: 'Skenario 3: Krisis Tak Terduga',
+        illustration: require('../../assets/articles/article_asertif.jpg'),
         choices: [
           {
             id: 'c1',
@@ -169,11 +162,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Tenang & Adaptif',
             energyChange: 5,
             clarityChange: 15,
-            traitScores: { stability: 35, extraversion: 25 },
-            feedback:
-              'Kestabilan emosimu luar biasa tinggi! Kamu mampu meregulasi stres di bawah tekanan.',
-            learningPoint:
-              'Ketenangan seorang anggota mampu menenangkan seluruh orang di ruangan secara menular.',
+            traitScores: { stability: 15, extraversion: 10 },
+            feedback: 'Kestabilan emosimu luar biasa! Mampu meregulasi stres di bawah tekanan.',
+            learningPoint: 'Ketenangan seorang anggota mampu menenangkan seluruh orang di ruangan secara menular.',
           },
           {
             id: 'c2',
@@ -181,11 +172,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Fokus Solutif',
             energyChange: 0,
             clarityChange: 10,
-            traitScores: { conscientiousness: 30, openness: 20 },
-            feedback:
-              'Kamu berorientasi pada penyelesaian masalah taktis yang cepat dan terukur.',
-            learningPoint:
-              'Fokus pada hal yang bisa dikontrol langsung adalah strategi koping terbaik saat krisis.',
+            traitScores: { conscientiousness: 15, openness: 10 },
+            feedback: 'Kamu berorientasi pada penyelesaian masalah taktis yang cepat dan terukur.',
+            learningPoint: 'Fokus pada hal yang bisa dikontrol langsung adalah strategi koping terbaik saat krisis.',
           },
           {
             id: 'c3',
@@ -193,25 +182,174 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Jangkar Emosi',
             energyChange: 5,
             clarityChange: 10,
-            traitScores: { agreeableness: 25, stability: 25 },
-            feedback:
-              'Kamu bertindak sebagai penyeimbang emosi kelompok yang sangat diandalkan teman-temanmu.',
-            learningPoint:
-              'Menguatkan mental tim saat situasi sulit menyelamatkan hasil akhir pertunjukan.',
+            traitScores: { agreeableness: 12, stability: 12 },
+            feedback: 'Kamu bertindak sebagai penyeimbang emosi kelompok yang sangat diandalkan.',
+            learningPoint: 'Menguatkan mental tim saat situasi sulit menyelamatkan hasil akhir pertunjukan.',
+          },
+        ],
+      },
+      {
+        id: 'k1_s4',
+        order: 4,
+        situation:
+          'Terjadi perdebatan sengit antara tim dekorasi dan tim naskah mengenai tema warna backdrop panggung. Waktu persiapan tinggal 3 jam lagi. Bagaimana kamu menengahi?',
+        contextBanner: 'Skenario 4: Menengahi Beda Pendapat',
+        illustration: require('../../assets/articles/article_konflik.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Mengusulkan kompromi visual yang menggabungkan elemen terbaik dari kedua kubu secara harmonis.',
+            tag: 'Penengah Solutif',
+            energyChange: 5,
+            clarityChange: 10,
+            traitScores: { agreeableness: 15, openness: 10 },
+            feedback: 'Kamu mahir menemukan titik temu dari dua sudut pandang berbeda.',
+            learningPoint: 'Kolaborasi yang matang tidak harus ada yang kalah, melainkan saling melengkapi.',
+          },
+          {
+            id: 'c2',
+            text: 'Mengajak voting cepat dalam 5 menit agar keputusan bulat tercapai dan semua bisa lanjut bekerja.',
+            tag: 'Tegas & Efisien',
+            energyChange: 5,
+            clarityChange: 10,
+            traitScores: { conscientiousness: 15, stability: 10 },
+            feedback: 'Keputusan yang cepat menyelamatkan waktu persiapan tim yang terbatas.',
+            learningPoint: 'Dalam kondisi darurat waktu, kepastian arah lebih penting daripada perdebatan tanpa henti.',
+          },
+        ],
+      },
+      {
+        id: 'k1_s5',
+        order: 5,
+        situation:
+          '30 menit sebelum giliran kelasmu tampil, pemeran utama mendadak gemetar hebat dan mengaku tidak sanggup naik ke atas panggung karena demam panggung akut. Apa tindakanmu?',
+        contextBanner: 'Skenario 5: Demam Panggung Sahabat',
+        illustration: require('../../assets/articles/article_regulasi_emosi.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Mengajaknya menepi sejenak, memandu latihan napas 4-7-8, dan meyakinkannya bahwa seluruh tim siap mendukungnya.',
+            tag: 'Regulasi Empatik',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { stability: 15, agreeableness: 12 },
+            feedback: 'Kamu membantu mengembalikan ketenangan sistem sarafnya secara ilmiah dan suportif.',
+            learningPoint: 'Teknik grounding fisik dan afirmasi hangat mampu memutus siklus panik seketika.',
+          },
+          {
+            id: 'c2',
+            text: 'Menyiapkan catatan contekan kecil untuk ia selipkan di properti agar merasa lebih aman saat berdialog.',
+            tag: 'Bantuan Taktis',
+            energyChange: 5,
+            clarityChange: 10,
+            traitScores: { conscientiousness: 12, openness: 10 },
+            feedback: 'Solusi praktismu memberi rasa aman kognitif yang ia butuhkan.',
+            learningPoint: 'Safety net sederhana seringkali cukup untuk mengembalikan kepercayaan diri seseorang.',
+          },
+        ],
+      },
+      {
+        id: 'k1_s6',
+        order: 6,
+        situation:
+          'Di tengah pementasan, seorang teman lupa dialog krusial dan hening selama beberapa detik di hadapan ratusan pasang mata penonton. Respon spontanmu dari samping panggung?',
+        contextBanner: 'Skenario 6: Ujian Improvisasi',
+        illustration: require('../../assets/games/thumbnails/thumb_efficacy.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Masuk secara natural sambil melontarkan dialog pancingan yang membantunya mengingat alur cerita.',
+            tag: 'Cepat Tanggap & Berani',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { openness: 15, extraversion: 12 },
+            feedback: 'Keberanianmu berimprovisasi menyelamatkan momen panggung dengan gemilang!',
+            learningPoint: 'Dalam kerja tim, saling menutupi kekurangan di lapangan adalah bentuk loyalitas tertinggi.',
+          },
+          {
+            id: 'c2',
+            text: 'Menginstruksikan tim sound untuk menaikkan musik latar agar keheningan tidak terasa canggung.',
+            tag: 'Dukungan Latar',
+            energyChange: 5,
+            clarityChange: 10,
+            traitScores: { conscientiousness: 12, stability: 12 },
+            feedback: 'Ketelitianmu mengendalikan atmosfer panggung bekerja sangat efektif.',
+            learningPoint: 'Bantuan tidak selalu harus terlihat di depan layar untuk memberikan dampak besar.',
+          },
+        ],
+      },
+      {
+        id: 'k1_s7',
+        order: 7,
+        situation:
+          'Setelah pertunjukan selesai, penonton bersorak kagum, namun salah satu dewan juri memberi catatan kritis yang cukup tajam tentang alur cerita. Bagaimana caramu menerima umpan balik tersebut?',
+        contextBanner: 'Skenario 7: Menerima Masukan',
+        illustration: require('../../assets/articles/article_mengenal_diri.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Mendengarkan dengan terbuka, mencatat poin evaluasinya untuk bahan belajar karya panggung berikutnya.',
+            tag: 'Growth Mindset',
+            energyChange: 5,
+            clarityChange: 15,
+            traitScores: { openness: 15, stability: 12 },
+            feedback: 'Pola pikir bertumbuhmu membuat kritik menjadi batu loncatan yang berharga.',
+            learningPoint: 'Kritik membangun bukanlah penolakan diri, melainkan peta menuju keahlian yang lebih matang.',
+          },
+          {
+            id: 'c2',
+            text: 'Fokus merayakan kerja keras seluruh tim dulu karena semua telah berjuang maksimal melampaui rasa takut.',
+            tag: 'Apresiasi Usaha',
+            energyChange: 10,
+            clarityChange: 10,
+            traitScores: { agreeableness: 15, extraversion: 10 },
+            feedback: 'Menjaga moral tim setelah berjuang bersama adalah tanda kehangatan emosi.',
+            learningPoint: 'Apresiasi terhadap proses sama pentingnya dengan pencapaian hasil akhir.',
+          },
+        ],
+      },
+      {
+        id: 'k1_s8',
+        order: 8,
+        situation:
+          'Malam hari setelah festival berakhir, grup chat kelasmu dipenuhi curhatan haru dan evaluasi pencapaian bersama. Apa pesan penutup yang ingin kamu sampaikan kepada tim?',
+        contextBanner: 'Skenario 8: Refleksi Perjalanan',
+        illustration: require('../../assets/onboarding/onboarding_growth.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: '"Terima kasih semua! Setiap keringat dan kepanikan kita terbayar lunas. Aku bangga bisa berproses bersama kalian."',
+            tag: 'Pemersatu Tim',
+            energyChange: 15,
+            clarityChange: 15,
+            traitScores: { agreeableness: 15, stability: 15 },
+            feedback: 'Pesanmu menutup rangkaian pengalaman dengan rasa syukur dan kebersamaan yang mendalam.',
+            learningPoint: 'Validasi positif di akhir proyek mempererat ikatan pertemanan hingga jauh ke masa depan.',
+          },
+          {
+            id: 'c2',
+            text: '"Hebat banget kerja sama kita! Istirahat yang cukup malam ini ya, besok kita siap hadapi tantangan baru."',
+            tag: 'Peduli & Berimbang',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { conscientiousness: 12, stability: 15 },
+            feedback: 'Kamu mengingatkan pentingnya pemulihan energi setelah pencapaian besar.',
+            learningPoint: 'Keseimbangan antara bekerja keras dan istirahat berkualitas adalah inti dari resiliensi.',
           },
         ],
       },
     ],
     archetypes: [
       {
-        minScore: 80,
-        title: 'Sang Visioner Tangguh (The Resilient Innovator)',
-        subtitle: 'Kombinasi Keterbukaan Ide Tinggi & Regulasi Emosi Seimbang',
+        minScore: 205,
+        variant: 'senang',
+        title: 'Sang Visioner Kolaboratif (The Collaborative Innovator)',
+        subtitle: 'Eksplorasi Ide Baru & Kolaborasi Tim yang Seimbang',
         description:
-          'Kamu memiliki imajinasi luas, berani mencoba hal baru, serta mampu tetap tenang saat menghadapi perubahan mendadak.',
+          'Pilihanmu mencerminkan keberanian mengeksplorasi ide kreatif dengan tetap menjaga kebersamaan dan ritme kerja kelompok.',
         superpowers: [
-          'Berpikir kreatif di luar batas (Out-of-the-box thinker)',
-          'Regulasi emosi adaptif di situasi menekan',
+          'Berpikir kreatif dan terbuka pada sudut pandang baru',
+          'Menjaga ketenangan kelompok di situasi yang menantang',
           'Mudah memotivasi teman sebaya untuk berkolaborasi',
         ],
         growthAreas: [
@@ -224,11 +362,12 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         ],
       },
       {
-        minScore: 50,
+        minScore: 195,
+        variant: 'harmoni',
         title: 'Sang Penjaga Harmoni (The Empathetic Harmonizer)',
-        subtitle: 'Kekuatan Utama pada Kepedulian Sosial & Rasa Tanggung Jawab',
+        subtitle: 'Kepedulian Sosial & Tanggung Jawab Bersama',
         description:
-          'Kamu adalah pendengar yang hangat, peka terhadap perasaan teman, dan selalu menjaga agar lingkungan di sekitarmu tetap damai.',
+          'Pilihanmu berfokus pada mendengarkan rekan satu tim, meredakan perselisihan, dan menjaga suasana kelompok tetap suportif.',
         superpowers: [
           'Empati interpersonal yang mendalam',
           'Dapat diandalkan dalam menjalankan komitmen',
@@ -245,10 +384,11 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
       },
       {
         minScore: 0,
+        variant: 'harmoni',
         title: 'Sang Pengatur Terpercaya (The Reliable Strategist)',
-        subtitle: 'Ketelitian Tinggi, Realistis, & Berorientasi Solusi',
+        subtitle: 'Kecermatan Berpikir & Solusi Praktis Terarah',
         description:
-          'Kamu berpikir logis, runtut, dan menghargai kepastian. Kamu menjadi fondasi yang membuat segala rencana berjalan aman.',
+          'Pilihanmu berfokus pada rencana nyata, kejelasan langkah, dan mencari jalan keluar yang realistis saat menghadapi kendala.',
         superpowers: [
           'Manajemen tugas yang rapi dan terarah',
           'Fokus solutif tanpa mudah terdistraksi drama',
@@ -268,7 +408,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
 
   // ==========================================
   // GAME 2: NAME THAT FEELING (EMOTIONAL LITERACY)
-  // Sesuai Screen F01 & F03 BRIEF TEMAN SEBAYA
+  // 8 Scenarios (Sesuai Standar Literasi Emosi Remaja)
   // ==========================================
   {
     id: 'resiliensi',
@@ -289,6 +429,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Pukul 21.00 malam, kamu baru ingat ada tugas presentasi penting yang belum selesai untuk besok pagi, sementara kuota internetmu menipis. Energimu drop drastis. Reaksimu?',
         contextBanner: 'Skenario 1: Kejutan Tenggat Waktu',
+        illustration: require('../../assets/games/scenarios/scenario_feelings_1.jpg'),
         choices: [
           {
             id: 'c1',
@@ -296,23 +437,19 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Prioritas & Reappraisal',
             energyChange: -5,
             clarityChange: 15,
-            traitScores: { resilience: 35, problemFocused: 30 },
-            feedback:
-              'Pilihan adaptif! Kamu memilih strategi koping berfokus masalah dan tetap menjaga batas fisik.',
-            learningPoint:
-              'Saat waktu terbatas, menyelesaikan 80% poin esensial jauh lebih sehat daripada panik tanpa hasil.',
+            traitScores: { resilience: 15, problemFocused: 12 },
+            feedback: 'Pilihan adaptif! Kamu memilih strategi koping berfokus masalah dan tetap menjaga batas fisik.',
+            learningPoint: 'Saat waktu terbatas, menyelesaikan poin esensial jauh lebih sehat daripada panik.',
           },
           {
             id: 'c2',
             text: 'Memaksakan diri begadang semalaman suntuk sambil terus merasa bersalah dan cemas.',
             tag: 'Overdrive & Rumination',
-            energyChange: -25,
+            energyChange: -20,
             clarityChange: -10,
-            traitScores: { resilience: 10, rumination: 30 },
-            feedback:
-              'Waspada! Begadang sambil overthinking justru menguras energi otak untuk hari esok.',
-            learningPoint:
-              'Istirahat yang cukup adalah bagian dari persiapan mental, bukan kemalasan.',
+            traitScores: { resilience: 5, rumination: 15 },
+            feedback: 'Waspada! Begadang sambil overthinking justru menguras energi otak untuk hari esok.',
+            learningPoint: 'Istirahat yang cukup adalah bagian dari persiapan mental, bukan kemalasan.',
           },
           {
             id: 'c3',
@@ -320,11 +457,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Pencari Dukungan Sosial',
             energyChange: 5,
             clarityChange: 10,
-            traitScores: { resilience: 30, socialSupport: 30 },
-            feedback:
-              'Mencari dukungan sosial (Social Support Seeking) adalah pilar resiliensi utama!',
-            learningPoint:
-              'Meminta bantuan di saat genting menunjukkan kedewasaan emosional yang tinggi.',
+            traitScores: { resilience: 12, socialSupport: 15 },
+            feedback: 'Mencari dukungan sosial (Social Support Seeking) adalah pilar resiliensi utama!',
+            learningPoint: 'Meminta bantuan di saat genting menunjukkan kedewasaan emosional yang tinggi.',
           },
         ],
       },
@@ -334,6 +469,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kamu membaca komentar kurang menyenangkan di grup percakapan kelas tentang caramu berbicara saat memimpin diskusi. Dadamu terasa sesak. Apa yang kamu lakukan?',
         contextBanner: 'Skenario 2: Dinamika Media Sosial',
+        illustration: require('../../assets/games/scenarios/scenario_feelings_2.jpg'),
         choices: [
           {
             id: 'c1',
@@ -341,35 +477,29 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
             tag: 'Regulasi Kognitif',
             energyChange: 10,
             clarityChange: 15,
-            traitScores: { resilience: 35, emotionRegulation: 30 },
-            feedback:
-              'Luar biasa! Kamu melakukan teknik "Jeda Sebelum Merespons" (Pause & Reflect).',
-            learningPoint:
-              'Opini orang lain adalah pantulan dari mereka, bukan nilai utuh dari dirimu.',
+            traitScores: { resilience: 15, emotionRegulation: 12 },
+            feedback: 'Luar biasa! Kamu melakukan teknik "Jeda Sebelum Merespons" (Pause & Reflect).',
+            learningPoint: 'Opini orang lain adalah pantulan dari mereka, bukan nilai utuh dari dirimu.',
           },
           {
             id: 'c2',
-            text: 'Langsung membalas dengan kalimat pedas di grup untuk membela diri di depan semua orang.',
-            tag: 'Reaksi Impulsif',
+            text: 'Langsung membalas panjang lebar dengan nada emosional untuk membela diri di hadapan semua orang.',
+            tag: 'Reaksi Reaktif',
             energyChange: -15,
-            clarityChange: -15,
-            traitScores: { resilience: 10, reactivity: 30 },
-            feedback:
-              'Reaksi cepat saat marah sering kali memperbesar konflik yang sebenarnya sepele.',
-            learningPoint:
-              'Kemenangan sejati adalah menjaga ketenangan pikiranmu sendiri dari provokasi.',
+            clarityChange: -5,
+            traitScores: { resilience: 5, reactivity: 15 },
+            feedback: 'Merespon saat emosi memuncak seringkali memperkeruh suasana dan memicu penyesalan.',
+            learningPoint: 'Beri jeda 10 menit agar otak rasionalmu kembali mengambil kendali.',
           },
           {
             id: 'c3',
-            text: 'Curhat kepada sahabat terdekat atau konselor sebaya untuk melegakan perasaan yang mengganjal.',
-            tag: 'Ventilasi Aman',
-            energyChange: 10,
+            text: 'Bercerita kepada satu sahabat dekat yang kamu percaya untuk memvalidasi perasaanmu.',
+            tag: 'Penyalur Sehat',
+            energyChange: 5,
             clarityChange: 10,
-            traitScores: { resilience: 25, socialSupport: 25 },
-            feedback:
-              'Menyalurkan emosi di wadah yang aman menghindarkanmu dari stres berkepanjangan.',
-            learningPoint:
-              'Ruang aman untuk bercerita membantu otak memproses emosi luka secara sehat.',
+            traitScores: { resilience: 12, socialSupport: 12 },
+            feedback: 'Mencari tempat aman untuk meluapkan unek-unek membantu menstabilkan detak jantung.',
+            learningPoint: 'Membagikan rasa sakit kepada orang tepat meredakan beban separuhnya.',
           },
         ],
       },
@@ -377,106 +507,244 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'r1_s3',
         order: 3,
         situation:
-          'Hasil ujian keluar dan nilaimu jauh di bawah harapanmu, padahal kamu sudah belajar berhari-hari. Bagaimana pikiran dalam kepalamu berbicara?',
-        contextBanner: 'Skenario 3: Menghadapi Hasil Tak Sesuai',
+          'Saat scrolling media sosial larut malam, kamu melihat feed teman sekelas yang memenangkan lomba dan liburan mewah. Kamu merasa hampa dan tertinggal jauh. Emosi apa ini?',
+        contextBanner: 'Skenario 3: Perbandingan Sosial & FOMO',
+        illustration: require('../../assets/games/scenarios/scenario_feelings_3.jpg'),
         choices: [
           {
             id: 'c1',
-            text: '"Kecewa itu wajar. Nilai ini menunjukkan bagian materi yang perlu kuperbaiki, bukan akhir kemampuanku."',
-            tag: 'Growth Mindset',
-            energyChange: 5,
+            text: 'Mengakui rasa iri itu wajar, lalu menutup aplikasi dan mengingat kembali hal-hal kecil yang kamu syukuri hari ini.',
+            tag: 'Self-Compassion',
+            energyChange: 10,
             clarityChange: 15,
-            traitScores: { resilience: 40, growthMindset: 35 },
-            feedback:
-              'Pola pikir bertumbuh (Growth Mindset) membedakan kegagalan sebagai peristiwa belajar.',
-            learningPoint:
-              'Resiliensi bukan tentang tidak pernah jatuh, melainkan cara kita bangkit kembali.',
+            traitScores: { resilience: 15, mindfulness: 12 },
+            feedback: 'Kamu mengenali emosi tanpa menghakimi diri sendiri (Non-judgmental awareness).',
+            learningPoint: 'Media sosial adalah highlight reel orang lain, bukan tolak ukur kecepatan hidupmu.',
           },
           {
             id: 'c2',
-            text: '"Memang aku tidak berbakat di bidang ini, percuma saja belajar keras."',
-            tag: 'Fixed Mindset',
-            energyChange: -15,
+            text: 'Terus scrolling berjam-jam sambil membandingkan kekurangan dirimu dengan pencapaian mereka.',
+            tag: 'Spiral Perbandingan',
+            energyChange: -20,
             clarityChange: -10,
-            traitScores: { resilience: 5, selfDoubt: 30 },
-            feedback:
-              'Pikiran ini adalah bias kognitif yang mengecilkan potensimu yang sebenarnya.',
-            learningPoint:
-              'Bicaralah pada dirimu seperti kamu berbicara kepada sahabat yang sedang sedih.',
+            traitScores: { resilience: 5, rumination: 15 },
+            feedback: 'Spiral perbandingan ini mengikis harga diri dan mengganggu kualitas tidur malammu.',
+            learningPoint: 'Membandingkan titik awalmu dengan titik puncak orang lain tidak pernah adil.',
+          },
+        ],
+      },
+      {
+        id: 'r1_s4',
+        order: 4,
+        situation:
+          'Nilai ulangan matematika yang sudah kamu pelajari seminggu penuh ternyata jauh di bawah target. Teman sebangkumu mendapat nilai sempurna tanpa banyak belajar. Tindakanmu?',
+        contextBanner: 'Skenario 4: Menghadapi Kekecewaan',
+        illustration: require('../../assets/games/thumbnails/thumb_feelings.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Beri waktu untuk kecewa sejenak, lalu duduk bersama guru atau teman untuk membedah bagian mana yang belum dipahami.',
+            tag: 'Evaluasi Konstruktif',
+            energyChange: 5,
+            clarityChange: 15,
+            traitScores: { resilience: 15, problemFocused: 12 },
+            feedback: 'Pilihan tangguh! Mengubah kekecewaan menjadi aksi belajar nyata.',
+            learningPoint: 'Kegagalan adalah data untuk perbaikan, bukan vonis atas kecerdasanmu.',
           },
           {
-            id: 'c3',
-            text: 'Membahas soal yang salah bersama guru atau teman sebaya agar paham konsepnya.',
-            tag: 'Tindakan Konstruktif',
+            id: 'c2',
+            text: 'Menyobek kertas ujian dan memutuskan untuk tidak mau belajar matematika lagi karena merasa sia-sia.',
+            tag: 'Keputusasaan Menyerah',
+            energyChange: -15,
+            clarityChange: -10,
+            traitScores: { resilience: 5, avoidance: 15 },
+            feedback: 'Reaksi ini wajar saat frustrasi, namun menghambat potensi belajarmu ke depan.',
+            learningPoint: 'Otak kita berkembang paling cepat justru saat berusaha mengurai kesalahan.',
+          },
+        ],
+      },
+      {
+        id: 'r1_s5',
+        order: 5,
+        situation:
+          'Saat sedang berkumpul di kantin bersama teman-teman, ceritamu berulang kali dipotong dan mereka beralih membicarakan topik lain seolah kamu tak terlihat. Bagaimana respon batinmu?',
+        contextBanner: 'Skenario 5: Rasa Terabaikan di Lingkungan',
+        illustration: require('../../assets/articles/article_komunikasi.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Menyadari bahwa situasi kantin memang berisik, lalu menunggu momen tenang untuk melanjutkan atau bercerita ke satu teman yang mendengarkan.',
+            tag: 'Ketenangan Sosial',
             energyChange: 5,
             clarityChange: 10,
-            traitScores: { resilience: 30, problemFocused: 30 },
-            feedback:
-              'Mengubah rasa kecewa menjadi aksi nyata adalah tanda ketahanan mental tinggi.',
-            learningPoint:
-              'Langkah kecil untuk memahami kesalahan jauh lebih berharga daripada penyesalan.',
+            traitScores: { resilience: 12, stability: 12 },
+            feedback: 'Kamu tidak terburu-buru mengambil kesimpulan negatif tentang dirimu sendiri.',
+            learningPoint: 'Ketidakpekaan orang lain seringkali bukan karena kebencian, melainkan distraksi situasi.',
+          },
+          {
+            id: 'c2',
+            text: 'Langsung pergi meninggalkan meja dengan wajah masam tanpa pamit.',
+            tag: 'Menarik Diri Agresif',
+            energyChange: -10,
+            clarityChange: -5,
+            traitScores: { resilience: 5, reactivity: 12 },
+            feedback: 'Menarik diri secara tiba-tiba meninggalkan tanda tanya dan kesalahpahaman baru.',
+            learningPoint: 'Komunikasi asertif yang tenang jauh lebih ampuh menyampaikan rasa tidak nyamanmu.',
+          },
+        ],
+      },
+      {
+        id: 'r1_s6',
+        order: 6,
+        situation:
+          'Sahabatmu mengajak pergi main ke mall sepulang sekolah, padahal baterai sosialmu sudah habis dan tubuhmu terasa sangat letih ingin istirahat di rumah. Bagaimana kamu menyampaikannya?',
+        contextBanner: 'Skenario 6: Menjaga Batas Energi Diri',
+        illustration: require('../../assets/games/scenarios/scenario_feelings_6.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: '"Mau banget sebenarnya jalan sama kamu, tapi energiku hari ini beneran drop. Kita reschedule ke akhir pekan ya!"',
+            tag: 'Asertif & Hangat',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { resilience: 15, boundaries: 15 },
+            feedback: 'Sangat sehat! Menolak ajakan tanpa merusak kehangatan hubungan pertemanan.',
+            learningPoint: 'Menghormati batas kapasitas tubuh sendiri adalah bentuk pertanggungjawaban tertinggi.',
+          },
+          {
+            id: 'c2',
+            text: 'Memaksakan diri ikut karena takut dianggap sombong, meski sepanjang jalan merasa tersiksa dan lelah.',
+            tag: 'People Pleasing',
+            energyChange: -20,
+            clarityChange: -10,
+            traitScores: { resilience: 5, peoplePleasing: 15 },
+            feedback: 'Mengorbankan diri demi menyenangkan orang lain berujung pada kelelahan batin.',
+            learningPoint: 'Sahabat sejati akan selalu memahami saat kamu membutuhkan waktu untuk pulih.',
+          },
+        ],
+      },
+      {
+        id: 'r1_s7',
+        order: 7,
+        situation:
+          'Teman yang sempat berselisih paham denganmu datang mendekat dan dengan tulus meminta maaf atas perkataan kasarnya tempo hari. Respon hatimu?',
+        contextBanner: 'Skenario 7: Rekonsiliasi & Memaafkan',
+        illustration: require('../../assets/onboarding/onboarding_counseling.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Menerima permintaan maafnya dengan lapang dada dan menghargai keberaniannya untuk mengakui kesalahan.',
+            tag: 'Keluasan Hati',
+            energyChange: 15,
+            clarityChange: 15,
+            traitScores: { resilience: 15, forgiveness: 15 },
+            feedback: 'Memaafkan melepaskan racun kepahitan dari dalam dirimu sendiri.',
+            learningPoint: 'Memaafkan bukan berarti melupakan, melainkan memilih damai daripada memelihara luka.',
+          },
+          {
+            id: 'c2',
+            text: 'Menolak berbicara dengannya dan berniat menyebarkan kesalahannya ke teman-teman lain.',
+            tag: 'Dendam Bertahan',
+            energyChange: -15,
+            clarityChange: -10,
+            traitScores: { resilience: 5, bitterness: 15 },
+            feedback: 'Menyimpan amarah membakar diri sendiri perlahan-lahan.',
+            learningPoint: 'Keluasan hati membuka ruang untuk hubungan yang lebih dewasa dan kuat.',
+          },
+        ],
+      },
+      {
+        id: 'r1_s8',
+        order: 8,
+        situation:
+          'Kamu berhasil melewati minggu ujian yang penuh tekanan dengan kepala tegak tanpa menyerah. Bagaimana kamu memberi apresiasi dan kasih sayang pada dirimu sendiri hari ini?',
+        contextBanner: 'Skenario 8: Self-Love & Apresiasi Diri',
+        illustration: require('../../assets/onboarding/onboarding_growth.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Melakukan hal yang membuat rileks: mandi air hangat, mendengarkan musik favorit, dan tidur tanpa beban alarm.',
+            tag: 'Pemulihan Utuh',
+            energyChange: 15,
+            clarityChange: 15,
+            traitScores: { resilience: 15, selfCare: 15 },
+            feedback: 'Perayaan pemulihan yang indah dan bermakna bagi jiwa dan ragamu.',
+            learningPoint: 'Tubuh yang dirawat dengan penuh kasih akan selalu siap menemanimu melangkah lebih jauh.',
+          },
+          {
+            id: 'c2',
+            text: 'Langsung memforsir diri memikirkan target berikutnya tanpa memberi jeda bernapas sedetik pun.',
+            tag: 'Non-stop Pressure',
+            energyChange: -10,
+            clarityChange: 5,
+            traitScores: { resilience: 8, overdrive: 12 },
+            feedback: 'Jangan lupa bahwa jeda istirahat adalah bagian esensial dari siklus pertumbuhan.',
+            learningPoint: 'Pohon tidak bisa berbuah lebat jika akarnya tidak pernah diberi waktu menyerap air.',
           },
         ],
       },
     ],
     archetypes: [
       {
-        minScore: 75,
-        title: 'Benteng Baja (High Resilience Champion)',
-        subtitle: 'Ketahanan Mental Tinggi & Regulasi Emosi Adaptif',
+        minScore: 195,
+        variant: 'senang',
+        title: 'Penjelajah Emosi Bijak (The Mindful Explorer)',
+        subtitle: 'Memberi Jeda & Merespons Emosi Secara Sadar',
         description:
-          'Kamu memiliki daya lentur psikologis yang sangat baik. Tekanan dan kegagalan tidak mematahkan semangatmu, melainkan menjadi bahan bakar untuk belajar.',
+          'Pilihanmu mencerminkan kebiasaan memberi jeda sejenak saat emosi hadir, memvalidasi perasaan tanpa terburu-buru bereaksi, dan memilih respons yang bijak.',
         superpowers: [
-          'Mampu melihat sisi positif saat situasi genting (Positive Reappraisal)',
-          'Tidak mudah terpengaruh oleh provokasi media sosial',
-          'Pola pikir bertumbuh yang kokoh',
+          'Peka mengenali perubahan sinyal tubuh dan emosi',
+          'Mampu memberi jeda sebelum merespons situasi menegangkan',
+          'Terbiasa mencari sudut pandang yang lebih jernih',
         ],
         growthAreas: [
-          'Ingat bahwa tidak apa-apa untuk merasa lelah dan beristirahat',
-          'Jangan merasa harus selalu tampak kuat di hadapan orang lain',
+          'Tetap izinkan diri merasa lelah tanpa harus selalu tampak kuat',
+          'Sediakan waktu tenang untuk istirahat pikiran secara rutin',
         ],
         recommendedMissions: [
-          'Berikan apresiasi pada tubuhmu yang telah berjuang hari ini',
-          'Bagikan tips ketenanganmu kepada teman yang sedang cemas',
+          'Luangkan 2 menit hening untuk memeriksa apa yang dirasakan tubuh',
+          'Tuliskan satu hal yang membuatmu merasa lega hari ini',
         ],
       },
       {
-        minScore: 45,
-        title: 'Tunas Lentur (Emerging Resilient)',
-        subtitle: 'Sedang Mengembangkan Strategi Koping yang Stabil',
+        minScore: 175,
+        variant: 'harmoni',
+        title: 'Pengamat Rasa (The Emotional Observer)',
+        subtitle: 'Mengenali Beragam Spektrum Rasa dalam Keseharian',
         description:
-          'Kamu sudah memiliki kesadaran emosi yang baik, namun terkadang masih overwhelmed ketika beberapa masalah datang bersamaan.',
+          'Kamu mulai peka mengenali berbagai emosi seperti lelah sosial, cemas, dan kecewa saat menghadapi dinamika sehari-hari.',
         superpowers: [
-          'Sensitif terhadap kondisi diri',
-          'Mau mencari teman berbagi dan terbuka pada solusi',
-          'Memiliki tekad untuk memperbaiki situasi',
+          'Jujur terhadap perasaan yang sedang dirasakan',
+          'Terbuka untuk mendengarkan masukan dan sudut pandang baru',
+          'Memiliki rasa ingin tahu untuk memahami diri lebih baik',
         ],
         growthAreas: [
-          'Kurangi kebiasaan memikirkan skenario terburuk berulang kali (rumination)',
-          'Latihlah pernapasan teratur saat mendadak panik',
+          'Kurangi kebiasaan memutar ulang kekhawatiran berulang kali',
+          'Latih pernapasan perlahan saat dada terasa sesak atau deg-degan',
         ],
         recommendedMissions: [
-          'Gunakan fitur Teman Mood setiap hari untuk mendeteksi pemicu stres',
-          'Coba latihan pernapasan Box Breathing 3 menit saat mulai cemas',
+          'Gunakan fitur Teman Mood untuk mencatat suasana hatimu hari ini',
+          'Coba latihan pernapasan santai 3 menit saat mulai merasa tegang',
         ],
       },
       {
         minScore: 0,
-        title: 'Jiwa Perlu Pemulihan (Resting Soul)',
-        subtitle: 'Kapasitas Batin Sedang Terbebani & Butuh Ruang Aman',
+        variant: 'sedih',
+        title: 'Pencari Ruang Teduh (The Self-Care Seeker)',
+        subtitle: 'Mendengarkan Sinyal Lelah & Memberi Ruang Istirahat',
         description:
-          'Beban pikiranmu saat ini sedang cukup tinggi. Ini adalah sinyal alami bahwa tubuh dan batinmu membutuhkan jeda serta dukungan dari sekitar.',
+          'Skenario yang kamu lalui mengingatkan pentingnya mendengarkan batas tubuh dan baterai sosial, serta berani mengambil jeda saat merasa lelah.',
         superpowers: [
           'Kepekaan perasaan yang mendalam',
-          'Kejujuran mengakui keterbatasan diri',
+          'Keberanian menyadari kapan tubuh membutuhkan jeda',
         ],
         growthAreas: [
-          'Hindari memikul beban sendirian di dalam hati',
-          'Segera manfaatkan ruang curhat Teman Cerita atau konselor sebaya',
+          'Jangan ragu berbagi cerita kepada teman atau orang yang dipercaya',
+          'Ingat bahwa beristirahat adalah bagian penting dari merawat diri',
         ],
         recommendedMissions: [
-          'Luangkan waktu 1 sesi curhat di Teman Cerita bersama asisten AI/konselor',
-          'Tidur 1 jam lebih awal malam ini untuk merestart sistem saraf',
+          'Cobalah tidur lebih awal malam ini untuk memulihkan energi tubuh',
+          'Luangkan waktu di Teman Cerita jika ada hal yang ingin kamu luapkan',
         ],
       },
     ],
@@ -484,7 +752,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
 
   // ==========================================
   // GAME 3: DIGITAL DILEMMA (DIGITAL WELLBEING)
-  // Sesuai Screen F01 & F04 BRIEF TEMAN SEBAYA
+  // 8 Scenarios (Sesuai Standar Kesejahteraan Digital Remaja)
   // ==========================================
   {
     id: 'relasi',
@@ -503,44 +771,29 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'rel_s1',
         order: 1,
         situation:
-          'Sahabatmu membatalkan janji belajar bersama di menit-menit terakhir untuk ketiga kalinya dalam bulan ini tanpa alasan yang jelas. Bagaimana kamu merespon?',
-        contextBanner: 'Skenario 1: Batasan Waktu & Komunikasi',
+          'Pukul 23.30 malam, saat matamu sudah mengantuk, ponselmu terus bergetar karena obrolan seru di grup pertemanan. Kamu merasa takut ketinggalan obrolan (FOMO). Pilihanmu?',
+        contextBanner: 'Skenario 1: Menjaga Kualitas Tidur',
+        illustration: require('../../assets/articles/article_tidur_sehat.jpg'),
         choices: [
           {
             id: 'c1',
-            text: 'Menyampaikan dengan tenang: "Aku menghargai waktumu, tapi aku merasa kurang dihargai kalau dibatalkan mendadak. Ada apa sebenarnya?"',
-            tag: 'Komunikasi Asertif',
-            energyChange: 5,
+            text: 'Mengaktifkan mode "Jangan Ganggu" (Do Not Disturb), menaruh HP jauh dari kasur, dan tidur tepat waktu.',
+            tag: 'Disiplin Tidur Sehat',
+            energyChange: 15,
             clarityChange: 15,
-            traitScores: { assertive: 35, empathy: 20 },
-            feedback:
-              'Pilihan asertif yang sempurna! Menyampaikan perasaan tanpa menyerang lawan bicara.',
-            learningPoint:
-              'Batasan yang sehat bukan tentang menjauh, melainkan menjaga agar relasi tetap awet dan saling menghargai.',
+            traitScores: { digitalDiscipline: 15, selfCare: 15 },
+            feedback: 'Keputusan brilian! Tidur berkualitas adalah fondasi kesehatan mental nomor satu.',
+            learningPoint: 'Obrolan di grup bisa dibaca besok pagi, namun waktu tidur malam tidak bisa digantikan.',
           },
           {
             id: 'c2',
-            text: 'Memendam rasa kesal, berkata "Nggak apa-apa kok", lalu menyindirnya di status media sosial.',
-            tag: 'Pasif-Agresif',
-            energyChange: -15,
+            text: 'Memaksakan mata tetap terbuka mengikuti obrolan sampai jam 2 pagi meski kepala terasa pusing.',
+            tag: 'Korban FOMO',
+            energyChange: -20,
             clarityChange: -15,
-            traitScores: { passiveAggressive: 35 },
-            feedback:
-              'Sindiran media sosial sering menimbulkan kesalahpahaman baru dan merusak rasa percaya.',
-            learningPoint:
-              'Bicaralah langsung secara privat untuk menjaga marwah pertemanan kalian.',
-          },
-          {
-            id: 'c3',
-            text: 'Menanyakan apakah dia sedang menghadapi masa sulit dan menawarkan waktu lain yang lebih luang.',
-            tag: 'Empati Tinggi',
-            energyChange: 5,
-            clarityChange: 10,
-            traitScores: { empathy: 35, warmth: 25 },
-            feedback:
-              'Sikap berprasangka baik yang hangat membantunya merasa tidak dihakimi.',
-            learningPoint:
-              'Kadang teman kita membatalkan janji bukan karena benci, tapi karena kelelahan emosional.',
+            traitScores: { digitalDiscipline: 5, fomo: 15 },
+            feedback: 'Kurang tidur merusak fokus belajar dan memicu ketidakstabilan mood esok hari.',
+            learningPoint: 'FOMO hanyalah ilusi kognitif yang memanipulasi rasa cemasmu.',
           },
         ],
       },
@@ -548,44 +801,29 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'rel_s2',
         order: 2,
         situation:
-          'Di kantin, salah satu teman mulai menggosipkan rahasia pribadi orang lain yang tidak ada di meja. Semua orang tertawa. Sikapmu?',
-        contextBanner: 'Skenario 2: Tekanan Teman Sebaya (Peer Pressure)',
+          'Seseorang membuat unggahan tanpa nama (menfess) yang menyindir teman dekatmu dengan tuduhan palsu. Grup mulai ramai membicarakannya. Apa sikapmu?',
+        contextBanner: 'Skenario 2: Menyikapi Rumor Maya',
+        illustration: require('../../assets/articles/article_detoks.jpg'),
         choices: [
           {
             id: 'c1',
-            text: 'Mengalihkan topik pembicaraan dengan santai ke hal positif tanpa harus mempermalukan siapapun.',
-            tag: 'Peredam Elegan',
-            energyChange: 5,
+            text: 'Tidak ikut menyebarkan, mengajak teman-teman berhenti bergosip, dan menghubungi sahabatmu untuk memberi dukungan mental.',
+            tag: 'Pelindung Etis',
+            energyChange: 10,
             clarityChange: 15,
-            traitScores: { socialTact: 35, integrity: 30 },
-            feedback:
-              'Strategi diplomatis yang cerdas untuk menghentikan pembicaraan beracun secara elegan.',
-            learningPoint:
-              'Kamu tidak harus konfrontatif untuk menjadi agen kebaikan di lingkaran pertemananmu.',
+            traitScores: { digitalIntegrity: 15, empathy: 15 },
+            feedback: 'Integritas digitalmu sangat tinggi! Berani memutus rantai cyberbullying.',
+            learningPoint: 'Menolak menjadi penonton bisu adalah wujud nyata kepedulian pertemanan.',
           },
           {
             id: 'c2',
-            text: 'Ikut tertawa dan menambahi gosip agar tidak dianggap aneh atau sok suci oleh kelompok.',
-            tag: 'Konformitas Pasif',
+            text: 'Ikut mem-forward postingan ke grup lain untuk bertanya apakah gosip itu benar atau salah.',
+            tag: 'Penyebar Tidak Sadar',
             energyChange: -10,
             clarityChange: -10,
-            traitScores: { conformity: 30 },
-            feedback:
-              'Mengorbankan integritas demi diterima kelompok sering meninggalkan rasa bersalah batin.',
-            learningPoint:
-              'Pertemanan sejati menghargai nilai-nilai kebaikanmu, bukan konformitas buta.',
-          },
-          {
-            id: 'c3',
-            text: 'Berkata sopan: "Eh kayaknya kita jangan bahas dia pas orangnya nggak ada deh, nggak adil buat dia."',
-            tag: 'Keberanian Moral',
-            energyChange: 10,
-            clarityChange: 10,
-            traitScores: { integrity: 40, assertive: 30 },
-            feedback:
-              'Keberanian moral yang luar biasa! Sikap ini menginspirasi teman lain yang sebenarnya juga tidak setuju.',
-            learningPoint:
-              'Satu suara berani sering kali cukup untuk mengubah budaya kelompok menjadi lebih aman.',
+            traitScores: { digitalIntegrity: 5, bystander: 12 },
+            feedback: 'Meneruskan rumor tanpa konfirmasi justru memperluas dampak luka psikologis korban.',
+            learningPoint: 'Saring sebelum sharing adalah prinsip etika digital yang wajib dipegang teguh.',
           },
         ],
       },
@@ -593,109 +831,238 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'rel_s3',
         order: 3,
         situation:
-          'Seorang teman curhat sambil menangis tentang masalah berat di rumahnya. Kamu sendiri sebenarnya sedang lelah dan ada urusan lain. Sikapmu?',
-        contextBanner: 'Skenario 3: Empati Berbatas (Compassion Fatigue)',
+          'Teman-teman satu geng bermain game online mengajakmu mabar push rank semalaman sebelum hari ujian dimulai. Mereka bilang "cuma 1 ronde kok". Responmu?',
+        contextBanner: 'Skenario 3: Godaan Gaming vs Prioritas',
+        illustration: require('../../assets/games/thumbnails/thumb_dilemma.jpg'),
         choices: [
           {
             id: 'c1',
-            text: 'Menemaninya 15 menit dengan penuh kehadiran, mendengarkan, lalu jujur bahwa kamu harus pergi dan berjanji menghubunginya lagi nanti malam.',
-            tag: 'Empati Berbatas Sehat',
-            energyChange: 5,
+            text: '"Malam ini aku skip dulu ya guys, mau fokus review materi ujian. Besok kelar ujian kita mabar puas-puas!"',
+            tag: 'Tegas & Berkomitmen',
+            energyChange: 10,
             clarityChange: 15,
-            traitScores: { empathy: 35, boundaries: 35 },
-            feedback:
-              'Kombinasi ideal antara cinta kasih dan batasan diri (Compassionate Boundaries).',
-            learningPoint:
-              'Kamu tidak bisa menuangkan air dari teko yang kosong. Merawat diri memungkinkanmu merawat orang lain dengan tulus.',
+            traitScores: { digitalDiscipline: 15, priority: 15 },
+            feedback: 'Ketegasan yang sangat keren! Kamu tahu kapan harus bermain dan kapan harus fokus.',
+            learningPoint: 'Menunda kesenangan sesaat (delayed gratification) adalah kunci keberhasilan jangka panjang.',
           },
           {
             id: 'c2',
-            text: 'Mengabaikan urusanmu sendiri dan mendengarkannya berjam-jam sampai energimu habis total.',
-            tag: 'Penyelamat Berlebihan',
-            energyChange: -25,
-            clarityChange: -5,
-            traitScores: { selfSacrifice: 35 },
-            feedback:
-              'Niatmu mulia, namun waspadai sindrom penyelamat (savior complex) yang merugikan kesehatan mentalmu.',
-            learningPoint:
-              'Teman membutuhkan kehadiran yang stabil, bukan pengorbanan yang berujung kelelahan kronis.',
+            text: 'Ikut login dan akhirnya kebablasan bermain 5 ronde hingga larut malam.',
+            tag: 'Prokrastinasi Digital',
+            energyChange: -15,
+            clarityChange: -15,
+            traitScores: { digitalDiscipline: 5, procrastination: 15 },
+            feedback: '"Cuma 1 ronde" adalah jebakan klasik yang mengorbankan kesiapan ujianmu.',
+            learningPoint: 'Tetapkan batasan timer sebelum membuka aplikasi hiburan apapun.',
           },
+        ],
+      },
+      {
+        id: 'rel_s4',
+        order: 4,
+        situation:
+          'Komentarmu yang berniat baik pada suatu postingan diserang secara agresif oleh netizen asing dengan kata-kata kasar. Jarimu gatal ingin membalas dendam. Langkahmu?',
+        contextBanner: 'Skenario 4: Menghadapi Provokasi Netizen',
+        illustration: require('../../assets/articles/article_asertif.jpg'),
+        choices: [
           {
-            id: 'c3',
-            text: 'Menghubungkannya dengan konselor sebaya PIK-R atau layanan Teman Cerita agar ia mendapat pendampingan yang tepat.',
-            tag: 'Jembatan Bantuan',
+            id: 'c1',
+            text: 'Memilih untuk tidak membalas, menghapus komentar jika perlu, lalu memblokir akun yang toksik demi kedamaian pikiran.',
+            tag: 'Bijak Emosional',
             energyChange: 10,
             clarityChange: 15,
-            traitScores: { resourcefulness: 35, empathy: 25 },
-            feedback:
-              'Langkah paling bertanggung jawab saat masalah teman sudah di luar kapasitas kemampuanmu.',
-            learningPoint:
-              'Menghubungkan teman ke bantuan profesional adalah bentuk kasih sayang tertinggi.',
+            traitScores: { digitalDiscipline: 15, emotionalStability: 15 },
+            feedback: 'Kedewasaan digital tingkat tinggi! Tidak memberi makan api provokasi di internet.',
+            learningPoint: 'Kamu tidak berkewajiban menghadiri setiap perdebatan yang mengundangmu.',
+          },
+          {
+            id: 'c2',
+            text: 'Membalas komentarnya dengan kata-kata yang tak kalah pedas dan adu argumen sampai malam.',
+            tag: 'Perang Komentar',
+            energyChange: -20,
+            clarityChange: -15,
+            traitScores: { digitalDiscipline: 5, reactivity: 15 },
+            feedback: 'Adu argumen di kolom komentar publik hanya membuang energi berhargamu sia-sia.',
+            learningPoint: 'Ketenangan batinmu jauh lebih berharga daripada memenangkan debat maya.',
+          },
+        ],
+      },
+      {
+        id: 'rel_s5',
+        order: 5,
+        situation:
+          'Seseorang meminta password akun media sosialmu dengan alasan "bukti keterbukaan dan rasa percaya dalam pertemanan". Bagaimana caramu meresponnya?',
+        contextBanner: 'Skenario 5: Privasi & Keamanan Akun',
+        illustration: require('../../assets/articles/article_konflik.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: '"Rasa saling percaya gak diukur dari password akun. Password itu privasi keamanan pribadi masing-masing."',
+            tag: 'Batas Privasi Sehat',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { boundaries: 15, assertiveness: 15 },
+            feedback: 'Batasan privasi digital yang sangat kuat dan patut diacungi jempol!',
+            learningPoint: 'Hubungan yang sehat didasari oleh rasa saling menghormati ruang pribadi.',
+          },
+          {
+            id: 'c2',
+            text: 'Memberikannya karena merasa tidak enak dan takut dituduh menyembunyikan sesuatu.',
+            tag: 'Kompromi Berbahaya',
+            energyChange: -10,
+            clarityChange: -10,
+            traitScores: { boundaries: 5, peoplePleasing: 15 },
+            feedback: 'Menyerahkan kata sandi membuka risiko pelanggaran privasi dan penyalahgunaan data.',
+            learningPoint: 'Keamanan digital pribadimu tidak boleh dinegosiasikan demi menyenangkan orang lain.',
+          },
+        ],
+      },
+      {
+        id: 'rel_s6',
+        order: 6,
+        situation:
+          'Algoritma media sosialmu menampilkan konten yang memuat tanda-tanda keputusasaan mendalam dari seseorang yang kamu kenal di sekolah. Tindakan pertamamu?',
+        contextBanner: 'Skenario 6: Kewaspadaan Sosial & Kepedulian',
+        illustration: require('../../assets/articles/article_regulasi_emosi.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Menghubunginya secara pribadi untuk menanyakan kabar, atau memberitahu guru BK / konselor sebaya untuk pendampingan aman.',
+            tag: 'Penyelamat Empatik',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { empathy: 15, actionOrientation: 15 },
+            feedback: 'Kepekaanmu bisa menyelamatkan nyawa seseorang yang sedang terluka batin.',
+            learningPoint: 'Tanda krisis di media sosial adalah panggilan minta tolong yang nyata.',
+          },
+          {
+            id: 'c2',
+            text: 'Mengabaikannya dan menganggap ia hanya sedang cari perhatian di medsos.',
+            tag: 'Pengabaian Apatis',
+            energyChange: -5,
+            clarityChange: -5,
+            traitScores: { empathy: 5, apathy: 12 },
+            feedback: 'Mengabaikan sinyal bahaya memperkecil peluang intervensi dini yang menyelamatkan.',
+            learningPoint: 'Lebih baik peduli dan salah duga, daripada abai dan menyesal kemudian.',
+          },
+        ],
+      },
+      {
+        id: 'rel_s7',
+        order: 7,
+        situation:
+          'Temanmu mengirim pesan "P" berkali-kali dan marah karena kamu tidak membalas chat dalam 10 menit saat kamu sedang makan malam bersama keluarga. Apa yang kamu jelaskan?',
+        contextBanner: 'Skenario 7: Ekspektasi Balas Cepat',
+        illustration: require('../../assets/articles/article_komunikasi.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: '"Maaf ya tadi aku lagi makan malam bareng keluarga tanpa pegang HP. Kalau ada hal penting yang darurat, bisa telepon langsung."',
+            tag: 'Komunikasi Real-Life',
+            energyChange: 10,
+            clarityChange: 15,
+            traitScores: { assertiveness: 15, presence: 15 },
+            feedback: 'Kamu menghargai kehadiran nyata di dunia fisik tanpa mengabaikan teman.',
+            learningPoint: 'Kita berhak menikmati momen offline tanpa rasa bersalah harus selalu online 24/7.',
+          },
+          {
+            id: 'c2',
+            text: 'Meminta maaf berulang kali sambil panik dan merasa bersalah sepanjang sisa malam.',
+            tag: 'Kecemasan Respons',
+            energyChange: -15,
+            clarityChange: -10,
+            traitScores: { assertiveness: 5, anxiety: 15 },
+            feedback: 'Kecemasan balas cepat ini membuatmu terbelenggu notifikasi tanpa henti.',
+            learningPoint: 'Balas cepat bukanlah tolok ukur ketulusan kasih sayang dalam persahabatan.',
+          },
+        ],
+      },
+      {
+        id: 'rel_s8',
+        order: 8,
+        situation:
+          'Kamu menyadari screen time harianmu mencapai 7 jam dan membuat matamu lelah serta sulit fokus belajar. Komitmen digital wellbeing apa yang ingin kamu mulai hari ini?',
+        contextBanner: 'Skenario 8: Komitmen Detoks Digital',
+        illustration: require('../../assets/onboarding/onboarding_mood.jpg'),
+        choices: [
+          {
+            id: 'c1',
+            text: 'Memasang batasan screen time 1 jam sebelum tidur dan menggantinya dengan membaca buku atau journaling emosi.',
+            tag: 'Kebiasaan Seimbang',
+            energyChange: 15,
+            clarityChange: 15,
+            traitScores: { digitalDiscipline: 15, selfCare: 15 },
+            feedback: 'Komitmen yang sangat terukur dan realistis untuk meningkatkan kesehatan mentalmu!',
+            learningPoint: 'Mengatur jarak dengan gawai memberi ruang bagi pikiranmu untuk bernapas lega.',
+          },
+          {
+            id: 'c2',
+            text: 'Menghapus semua akun media sosial secara ekstrem hanya untuk mengunduhnya kembali esok lusa.',
+            tag: 'Ekstremisme Sementara',
+            energyChange: -5,
+            clarityChange: 5,
+            traitScores: { digitalDiscipline: 8, inconsistency: 12 },
+            feedback: 'Langkah ekstrem seringkali tidak bertahan lama. Mulailah dari langkah bertahap yang konsisten.',
+            learningPoint: 'Kunci kebiasaan sehat adalah keberlanjutan (sustainability), bukan aksi drastis sesaat.',
           },
         ],
       },
     ],
     archetypes: [
       {
-        minScore: 75,
-        title: 'Mercusuar Empati (The Empathetic Beacon)',
-        subtitle: 'Kecerdasan Interpersonal Tinggi & Memiliki Batasan Sehat',
+        minScore: 205,
+        variant: 'senang',
+        title: 'Master Navigasi Digital (Digital Zen Master)',
+        subtitle: 'Keseimbangan Sehat antara Dunia Nyata & Maya',
         description:
-          'Kamu memiliki radar sosial yang peka, mampu mendengarkan tanpa menghakimi, sekaligus berani menjaga batas diri agar tidak terkuras oleh lingkungan beracun.',
+          'Kamu memahami batasan sehat dalam penggunaan gawai: memprioritaskan istirahat tidur, menjaga privasi, dan berinteraksi online secara bijak.',
         superpowers: [
-          'Komunikasi asertif yang menyejukkan hati',
-          'Mampu menjadi pendengar aktif yang menyembuhkan',
-          'Kekuatan batasan personal yang sehat',
+          'Mampu menyaring notifikasi dan menghindari jebakan FOMO',
+          'Konsisten menjaga batasan privasi dan waktu istirahat',
+          'Menjaga etika komunikasi dan empati di ruang digital',
         ],
         growthAreas: [
-          'Ingat bahwa tidak semua masalah orang lain harus kamu selesaikan',
-          'Terima bahwa kadang ada orang yang belum siap menerima kebaikanmu',
+          'Bagikan kebiasaan digital sehatmu kepada teman sebaya',
         ],
         recommendedMissions: [
-          'Kirimkan 1 pesan apresiasi tulus kepada orang tua atau sahabatmu hari ini',
-          'Jadwalkan 30 menit me-time tanpa ponsel untuk recharge energi batin',
+          'Ajak temanmu berbincang santai tanpa memegang ponsel saat istirahat',
         ],
       },
       {
-        minScore: 45,
-        title: 'Jembatan Harmoni (The Balanced Diplomat)',
-        subtitle: 'Peka Terhadap Perasaan Orang Lain & Menghindari Konflik',
+        minScore: 180,
+        variant: 'harmoni',
+        title: 'Penjelajah Sadar (Mindful Netizen)',
+        subtitle: 'Kesadaran Batasan Digital yang Terus Bertumbuh',
         description:
-          'Kamu sangat menghargai kedamaian di kelompok. Kadang kamu ragu mengungkapkan ketidaksetujuan karena khawatir membuat teman kecewa.',
+          'Kamu menyadari dampak waktu layar dan perbandingan sosial di media sosial, serta berusaha menjaga interaksi daring tetap positif.',
         superpowers: [
-          'Kemampuan adaptasi sosial yang luwes',
-          'Menghargai keberagaman sudut pandang teman',
-          'Ramah dan mudah diterima di berbagai lingkaran pertemanan',
+          'Peka saat mulai merasa lelah atau jenuh scrolling gawai',
+          'Menghargai etika pertemanan di media sosial',
         ],
         growthAreas: [
-          'Latihlah mengungkapkan pendapat asertifmu secara berkala',
-          'Jangan merasa bersalah jika kamu berbeda pandangan dari mayoritas',
+          'Biasakan menjauhkan ponsel menjelang jam tidur malam',
         ],
         recommendedMissions: [
-          'Coba katakan "Maaf, aku belum bisa bantu sekarang" saat kamu benar-benar lelah',
-          'Gunakan teknik I-Message saat merasa ada hal yang mengganjal',
+          'Coba matikan notifikasi media sosial 1 jam sebelum tidur malam ini',
         ],
       },
       {
         minScore: 0,
-        title: 'Petualang Batasan Diri (The Boundary Explorer)',
-        subtitle: 'Sedang Belajar Menyeimbangkan Kebutuhan Diri & Lingkungan',
+        variant: 'sedih',
+        title: 'Pencari Ketenangan Diri (The Digital Rest Seeker)',
+        subtitle: 'Menyadari Pentingnya Jeda Sehat dari Notifikasi',
         description:
-          'Kamu sering merasakan lelah sosial (social burnout) akibat tekanan kelompok atau kebingungan membedakan mana empati dan mana pengorbanan berlebih.',
+          'Skenario ini memberi pengingat berharga bahwa ruang digital terkadang bising, dan meluangkan waktu offline sangat membantu menyegarkan pikiran.',
         superpowers: [
-          'Kejujuran batin untuk terus berkembang',
-          'Keinginan kuat memiliki lingkaran pertemanan yang aman dan positif',
+          'Keinginan untuk mencari ketenangan dan kenyamanan batin',
         ],
         growthAreas: [
-          'Pahami bahwa kamu berhak menetapkan batasan tanpa merasa egois',
-          'Jauhi lingkaran yang memicu drama atau gosip berulang',
+          'Kurangi konsumsi konten yang memicu rasa cemas atau minder',
         ],
         recommendedMissions: [
-          'Baca modul psikoedukasi "Seni Menetapkan Boundaries Remaja" di Teman Belajar',
-          'Konsultasikan dinamika pertemananmu dengan Konselor Sebaya di Teman Cerita',
+          'Letakkan ponsel di luar jangkauan saat sedang makan atau beristirahat',
         ],
       },
     ],
   },
 ];
-

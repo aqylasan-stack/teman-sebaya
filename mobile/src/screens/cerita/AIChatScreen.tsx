@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
-import { ShieldCheck, Info } from 'lucide-react-native';
+import { Info } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ContextualHeader } from '../../components/layout/ContextualHeader';
 import { ChatBubble } from '../../components/chat/ChatBubble';
@@ -21,116 +22,115 @@ export const AIChatScreen: React.FC = () => {
   const { chatMessages, sendAiMessage, screenParams, goBack } = useApp();
   const scrollRef = useRef<any>(null);
 
+  // Check if AI is currently preparing a response
+  const isAiTyping =
+    chatMessages.length > 0 &&
+    chatMessages[chatMessages.length - 1].sender === 'user';
+
   useEffect(() => {
-    // Auto scroll to bottom when new messages arrive
-    setTimeout(() => {
+    // Auto scroll to bottom when new messages arrive or when AI begins typing
+    const timer = setTimeout(() => {
       scrollRef.current?.scrollToEnd({ animated: true });
-    }, 150);
-  }, [chatMessages]);
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [chatMessages, isAiTyping]);
 
   const hasRelaxationPrompt =
     screenParams?.startRelaxation ||
     chatMessages.some((m) => m.isBreathingPrompt);
 
-  const [showMoodPermission, setShowMoodPermission] = React.useState(true);
-
   return (
-    <View style={styles.container}>
-      <ContextualHeader
-        title="Teman Akses"
-        subtitle="Teman Digitalmu · Asisten AI"
-        showCrisisButton
-        onBack={goBack}
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Header: Back button, Thoriq avatar, and Teman Akses title */}
+        <ContextualHeader
+          title="Teman Akses"
+          subtitle="Thoriq · Teman Digitalmu"
+          avatarSource={require('../../../assets/mascot/thoriq_avatar.png')}
+          onBack={goBack}
+        />
 
-      {/* Ethical Transparency Banner (Screen H01 BRIEF TEMAN SEBAYA) */}
-      <View style={styles.disclaimerBar}>
-        <Info size={14} color={colors.textMuted} />
-        <Text style={styles.disclaimerText}>
-          Teman Akses menggunakan AI. Ia bukan manusia, psikolog, atau layanan darurat, dan tidak dapat memberikan diagnosis.
-        </Text>
-      </View>
+        {/* Ethical Transparency Disclaimer Banner */}
+        <View style={styles.disclaimerBar}>
+          <Info size={14} color={colors.textMuted} style={styles.disclaimerIcon} />
+          <Text style={styles.disclaimerText}>
+            Teman Akses menggunakan AI. Ia bukan manusia, psikolog, atau layanan darurat, dan tidak dapat memberikan diagnosis.
+          </Text>
+        </View>
 
-      <KeyboardAvoidingView
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          ref={scrollRef as any}
-          style={styles.messagesScroll}
-          contentContainerStyle={styles.messagesContent}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          style={styles.keyboardContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
-          {/* Mood Data Permission Prompt (Screen H04 BRIEF TEMAN SEBAYA) */}
-          {showMoodPermission && (
-            <View style={styles.moodPermissionBox}>
-              <Text style={styles.moodPermissionTitle}>Izin Akses Catatan Mood</Text>
-              <Text style={styles.moodPermissionText}>
-                Apakah kamu ingin Teman Akses menggunakan ringkasan catatan mood untuk membantu memberikan respons yang lebih relevan?
-              </Text>
-              <View style={styles.moodPermissionButtons}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowMoodPermission(false)}
-                  style={styles.permissionAllowBtn}
-                >
-                  <Text style={styles.permissionAllowText}>Izinkan</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowMoodPermission(false)}
-                  style={styles.permissionDismissBtn}
-                >
-                  <Text style={styles.permissionDismissText}>Tidak Sekarang</Text>
-                </TouchableOpacity>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.messagesScroll}
+            contentContainerStyle={styles.messagesContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Quick Prompts if conversation is starting */}
+            {chatMessages.length <= 1 && (
+              <QuickPromptChips onSelectPrompt={(p) => sendAiMessage(p)} />
+            )}
+
+            {/* Conversation Messages */}
+            {chatMessages.map((msg) => (
+              <ChatBubble key={msg.id} message={msg} />
+            ))}
+
+            {/* Loading / Typing State Indicator */}
+            {isAiTyping && (
+              <View style={styles.typingContainer}>
+                <View style={styles.typingBubble}>
+                  <Text style={styles.typingText}>Mengetik...</Text>
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-          {/* Quick Prompts if only 1 message (Screen H02 Suggested Prompts) */}
-          {chatMessages.length <= 1 && (
-            <QuickPromptChips onSelectPrompt={(p) => sendAiMessage(p)} />
-          )}
+            {/* Interactive Relaxation Exercise Card */}
+            {hasRelaxationPrompt && (
+              <RelaxationCard
+                onComplete={() => {
+                  sendAiMessage('Aku sudah selesai latihan napas, terasa lebih tenang sekarang.');
+                }}
+              />
+            )}
+          </ScrollView>
 
-          {/* Messages */}
-          {chatMessages.map((msg) => (
-            <ChatBubble key={msg.id} message={msg} />
-          ))}
-
-          {/* Interactive Relaxation Exercise Card */}
-          {hasRelaxationPrompt && (
-            <RelaxationCard
-              onComplete={() => {
-                sendAiMessage('Aku sudah selesai latihan napas, terasa lebih tenang sekarang.');
-              }}
-            />
-          )}
-        </ScrollView>
-
-        {/* Input Bar */}
-        <ChatInputBar onSendMessage={(text) => sendAiMessage(text)} />
-      </KeyboardAvoidingView>
-    </View>
+          {/* Bottom Chat Input Composer */}
+          <ChatInputBar onSendMessage={(text) => sendAiMessage(text)} />
+        </KeyboardAvoidingView>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
-    backgroundColor: colors.canvas,
+    backgroundColor: '#F8FAFC',
   },
   disclaimerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.surface,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
-    paddingVertical: 8,
+    borderBottomColor: '#E2E8F0',
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+  },
+  disclaimerIcon: {
+    marginRight: 8,
   },
   disclaimerText: {
-    fontSize: 10.5,
+    fontSize: 11,
+    lineHeight: 16,
     color: colors.textMuted,
     flex: 1,
   },
@@ -141,56 +141,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messagesContent: {
-    paddingHorizontal: spacing.layout.screenPaddingHorizontal,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 20,
   },
-  moodPermissionBox: {
-    backgroundColor: colors.brandBlue[50],
-    borderWidth: 1,
-    borderColor: colors.brandBlue[100],
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  moodPermissionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.brandBlue[700],
-    marginBottom: 4,
-  },
-  moodPermissionText: {
-    fontSize: 11.5,
-    lineHeight: 16,
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  moodPermissionButtons: {
+  typingContainer: {
+    width: '100%',
+    marginVertical: 4,
     flexDirection: 'row',
-    gap: spacing.sm,
+    justifyContent: 'flex-start',
   },
-  permissionAllowBtn: {
-    backgroundColor: colors.brandBlue[600],
-    paddingVertical: 6,
+  typingBubble: {
     paddingHorizontal: 14,
-    borderRadius: borderRadius.full,
-  },
-  permissionAllowText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  permissionDismissBtn: {
-    backgroundColor: colors.surface,
+    paddingVertical: 9,
+    borderRadius: 16,
+    borderBottomLeftRadius: 4,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: colors.borderLight,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: borderRadius.full,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  permissionDismissText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: colors.textSecondary,
+  typingText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    color: colors.textMuted,
   },
 });

@@ -24,13 +24,18 @@ import {
   youthEvents,
 } from '../data/seedData';
 import { buildCurrentWeekStats } from '../utils/date';
+import { generateAiChatResponse } from '../services/aiChatService';
 
 interface AppContextProps {
   // Navigation
   currentScreen: ScreenType;
   currentTab: TabType;
   screenParams: Record<string, any>;
+  screenStack: ScreenType[];
   navigateTo: (screen: ScreenType, params?: Record<string, any>) => void;
+  replace: (screen: ScreenType, params?: Record<string, any>) => void;
+  popTo: (screen: ScreenType, params?: Record<string, any>) => void;
+  resetTo: (screen: ScreenType, params?: Record<string, any>) => void;
   switchTab: (tab: TabType, params?: Record<string, any>) => void;
   goBack: () => void;
 
@@ -139,8 +144,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     {
       id: 'msg_001',
       sender: 'ai',
-      senderName: 'Teman Akses',
-      text: 'Halo, Teman! Terima kasih sudah mampir. Ruang ini adalah tempat aman untukmu bercerita atau meluapkan pikiran tanpa dihakimi. Apa yang sedang kamu rasakan hari ini?',
+      senderName: 'Thoriq',
+      text: 'Hai! Aku Thoriq dari Teman Akses. Di sini kamu bisa cerita apa saja dengan santai tanpa takut dihakimi. Ada hal yang lagi kamu rasakan atau ingin kamu ceritakan hari ini?',
       timestamp: '08:30',
     },
   ]);
@@ -165,6 +170,50 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setCurrentScreen(screen);
   };
 
+  const replace = (screen: ScreenType, params: Record<string, any> = {}) => {
+    setScreenStack((prev) => {
+      if (prev.length <= 1) return [screen];
+      return [...prev.slice(0, -1), screen];
+    });
+    setScreenParams(params);
+    setCurrentScreen(screen);
+  };
+
+  const popTo = (screen: ScreenType, params: Record<string, any> = {}) => {
+    setScreenStack((prev) => {
+      // Find matching screen or alias ('teman_bermain' / 'mental_game_hub')
+      const isTarget = (s: ScreenType) =>
+        s === screen ||
+        ((screen === 'teman_bermain' || screen === 'mental_game_hub') &&
+          (s === 'teman_bermain' || s === 'mental_game_hub'));
+
+      let targetIdx = -1;
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (isTarget(prev[i])) {
+          targetIdx = i;
+          break;
+        }
+      }
+
+      if (targetIdx !== -1) {
+        // Return up to target index, dropping all intermediate/subsequent screens
+        return prev.slice(0, targetIdx + 1);
+      }
+
+      // If target screen was not in stack, keep root 'main' if present, then target
+      if (prev.includes('main')) {
+        return ['main', screen];
+      }
+      return [screen];
+    });
+    setScreenParams(params);
+    setCurrentScreen(screen);
+  };
+
+  const resetTo = (screen: ScreenType, params: Record<string, any> = {}) => {
+    popTo(screen, params);
+  };
+
   const switchTab = (tab: TabType, params?: Record<string, any>) => {
     setCurrentTab(tab);
     setCurrentScreen('main');
@@ -183,6 +232,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setCurrentScreen(prevScreen);
     } else {
       setCurrentScreen('main');
+      setScreenStack(['main']);
     }
   };
 
@@ -544,49 +594,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     setChatMessages((prev) => [...prev, userMsg]);
 
-    // Empathetic, safeguarding AI response
+    // Empathetic, safeguarding contextual AI response
     setTimeout(() => {
-      let aiReply =
-        'Terima kasih sudah mau berbagi. Wajar sekali merasa begitu saat banyak hal bertumpuk di pikiranmu. Tarik napas perlahan... Apakah kamu ingin menceritakan hal yang membebani, atau mau coba latihan pernapasan singkat dulu?';
-      let isBreathing = false;
-      let isCrisis = false;
+      setChatMessages((prev) => {
+        const userName = user?.nickname || user?.pseudonym || 'Kamu';
+        const aiResult = generateAiChatResponse(userText, prev, userName);
 
-      const lower = userText.toLowerCase();
-      if (
-        lower.includes('mati') ||
-        lower.includes('bunuh diri') ||
-        lower.includes('tak sanggup lagi') ||
-        lower.includes('melukai') ||
-        lower.includes('darurat')
-      ) {
-        aiReply =
-          'Aku mendengar betapa beratnya situasi yang sedang kamu hadapi saat ini. Keselamatan dan dirimu sangat berharga. Sebagai asisten AI, aku memiliki keterbatasan dan ingin memastikan kamu mendapatkan pendampingan nyata yang aman. Silakan hubungi layanan darurat SEJIWA 119 Ext 8 atau konselor sebaya kami.';
-        isCrisis = true;
-      } else if (
-        lower.includes('napas') ||
-        lower.includes('cemas') ||
-        lower.includes('panik') ||
-        lower.includes('relaksasi')
-      ) {
-        aiReply =
-          'Mari luangkan 1 menit untuk menenangkan diri bersama. Ikuti ritme pernapasan terpandu di bawah ini agar detak jantungmu kembali rileks.';
-        isBreathing = true;
-      } else if (lower.includes('sekolah') || lower.includes('tugas') || lower.includes('lelah')) {
-        aiReply =
-          'Beban akademik dan ekspektasi lingkungan memang sering kali membuat pundak terasa berat. Ingatlah bahwa nilaimu tidak menentukan seluruh harga dirimu sebagai manusia. Kamu sudah berjuang sebaik mungkin hari ini.';
-      }
+        const aiMsg: ChatMessage = {
+          id: `msg_${Date.now()}_a`,
+          sender: 'ai',
+          senderName: 'Thoriq',
+          text: aiResult.replyText,
+          timestamp: timeFormatted,
+          isBreathingPrompt: aiResult.isBreathingPrompt,
+          isCrisisNotice: aiResult.isCrisisNotice,
+          recommendedArticleId: aiResult.recommendedArticleId,
+          recommendedArticleTitle: aiResult.recommendedArticleTitle,
+        };
 
-      const aiMsg: ChatMessage = {
-        id: `msg_${Date.now()}_a`,
-        sender: 'ai',
-        senderName: 'Teman Akses',
-        text: aiReply,
-        timestamp: timeFormatted,
-        isBreathingPrompt: isBreathing,
-        isCrisisNotice: isCrisis,
-      };
-
-      setChatMessages((prev) => [...prev, aiMsg]);
+        return [...prev, aiMsg];
+      });
     }, 600);
   };
 
@@ -629,7 +656,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         currentScreen,
         currentTab,
         screenParams,
+        screenStack,
         navigateTo,
+        replace,
+        popTo,
+        resetTo,
         switchTab,
         goBack,
         isAuthenticated,

@@ -1,11 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { Users, ShieldCheck, Calendar, MapPin, CheckCircle2, Camera } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+} from 'react-native';
+import {
+  ShieldCheck,
+  CheckCircle2,
+  MapPin,
+  Clock,
+  Users,
+} from 'lucide-react-native';
+import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { ContextualHeader } from '../../components/layout/ContextualHeader';
-import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { useApp } from '../../state/AppContext';
 
@@ -14,7 +24,7 @@ export const SupportifScreen: React.FC = () => {
 
   const communityImages: Record<string, any> = {
     com_001: require('../../../assets/community/pikr_group.jpg'),
-    com_002: require('../../../assets/community/genre_workshop.jpg'),
+    com_002: require('../../../assets/community/genre_gathering.jpg'),
     com_003: require('../../../assets/community/genre_activity_1.jpg'),
   };
 
@@ -24,74 +34,84 @@ export const SupportifScreen: React.FC = () => {
       title: 'Workshop GenRe Karawang',
       date: '28 Oktober 2026',
       image: require('../../../assets/community/genre_workshop.jpg'),
-      tag: 'Forum GenRe',
+      context: 'Forum GenRe',
     },
     {
       id: 'g2',
       title: 'Konseling Sebaya PIK-R',
       date: '15 September 2026',
       image: require('../../../assets/community/pikr_group.jpg'),
-      tag: 'PIK-R Karawang',
+      context: 'PIK-R Karawang',
     },
     {
       id: 'g3',
       title: 'Sosialisasi Literasi Remaja',
       date: '12 Agustus 2026',
       image: require('../../../assets/community/genre_activity_1.jpg'),
-      tag: 'Edukasi Emosi',
+      context: 'Edukasi Emosi',
     },
     {
       id: 'g4',
       title: 'Temu Kawan & Aksi Peduli',
       date: '24 Juli 2026',
       image: require('../../../assets/community/genre_activity_2.jpg'),
-      tag: 'Aksi Remaja',
+      context: 'Aksi Remaja',
     },
     {
       id: 'g5',
       title: 'Temu Akbar GenRe Karawang',
       date: '10 Juli 2026',
       image: require('../../../assets/community/genre_gathering.jpg'),
-      tag: 'Forum GenRe',
+      context: 'Forum GenRe',
     },
     {
       id: 'g6',
       title: 'Sesi Berbagi Bersama Konselor',
       date: '28 Juni 2026',
       image: require('../../../assets/community/foto_thoriq_counseling.jpg'),
-      tag: 'Konseling Sebaya',
+      context: 'Konseling Sebaya',
     },
   ];
+
+  // Distinguish organizational partner (Forum GenRe) from school/support groups
+  const genreOrg = communityList.find((c) => c.type === 'Forum GenRe');
+  const peerCommunities = communityList.filter((c) => c.type !== 'Forum GenRe');
 
   return (
     <ScreenContainer
       header={<ContextualHeader title="Teman Supportif" onBack={goBack} />}
+      contentContainerStyle={styles.screenContainer}
     >
-      <View style={styles.header}>
+      {/* ============================================================== */}
+      {/* 1. EDITORIAL HEADER & SAFEGUARDING TRUST PLEDGE               */}
+      {/* ============================================================== */}
+      <View style={styles.headerBlock}>
+        <Text style={styles.kicker}>JEJARING SEBAYA & KOMUNITAS</Text>
         <Text style={styles.title}>Komunitas Sebaya & Aksi Positif</Text>
         <Text style={styles.subtitle}>
           Temukan ruang positif untuk belajar, berbagi cerita, dan bertumbuh bersama.
         </Text>
       </View>
 
-      {/* Safeguarding Notice Banner */}
-      <Card variant="tintGreen" style={styles.noticeCard}>
-        <View style={styles.noticeRow}>
-          <ShieldCheck size={20} color={colors.brandGreen[600]} />
-          <Text style={styles.noticeText}>
-            Semua kelompok didampingi oleh Pembina & Konselor Sebaya bersertifikasi BKKBN.
-            Ruang aman tanpa diskriminasi.
-          </Text>
+      {/* Keamanan Komunitas — Terintegrasi Natural sebagai Trust Pledge */}
+      <View style={styles.trustBanner}>
+        <View style={styles.trustIconWrap}>
+          <ShieldCheck size={16} color={colors.brandGreen[600]} />
         </View>
-      </Card>
+        <Text style={styles.trustText}>
+          Semua kelompok didampingi oleh Pembina & Konselor Sebaya bersertifikasi BKKBN. Ruang aman tanpa diskriminasi.
+        </Text>
+      </View>
 
-      {/* Real Photo Gallery of Youth Activities */}
-      <View style={styles.sectionHeader}>
-        <View style={styles.titleWithIcon}>
-          <Camera size={16} color={colors.brandBlue[600]} />
-          <Text style={styles.sectionTitle}>Dokumentasi Kegiatan Remaja</Text>
-        </View>
-        <Text style={styles.sectionMeta}>Karawang</Text>
+      {/* ============================================================== */}
+      {/* 2. DOKUMENTASI KEGIATAN REMAJA (EDITORIAL PHOTO GALLERY)      */}
+      {/* ============================================================== */}
+      <View style={styles.sectionHeaderWrap}>
+        <Text style={styles.kicker}>DOKUMENTASI VISUAL</Text>
+        <Text style={styles.sectionHeading}>Dokumentasi Kegiatan Remaja</Text>
+        <Text style={styles.sectionSub}>
+          Momen nyata konseling, lokakarya, dan aksi peduli sebaya di Karawang
+        </Text>
       </View>
 
       <ScrollView
@@ -100,278 +120,543 @@ export const SupportifScreen: React.FC = () => {
         contentContainerStyle={styles.galleryScroll}
       >
         {galleryActivities.map((item) => (
-          <View key={item.id} style={styles.galleryCard}>
+          <View key={item.id} style={styles.galleryItem}>
             <Image
               source={item.image}
-              style={styles.galleryImage}
+              style={styles.galleryPhoto}
               resizeMode="cover"
             />
-            <View style={styles.galleryMeta}>
-              <Badge label={item.tag} variant="blue" style={styles.galleryBadge} />
-              <Text style={styles.galleryTitle} numberOfLines={1}>
+            <View style={styles.galleryCaption}>
+              <Text style={styles.galleryTitle} numberOfLines={2}>
                 {item.title}
               </Text>
-              <Text style={styles.galleryDate}>{item.date}</Text>
+              <Text style={styles.galleryMeta}>
+                {item.date} · {item.context}
+              </Text>
             </View>
           </View>
         ))}
       </ScrollView>
 
-      {/* Community Groups Section */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Kelompok Komunitas Binaan</Text>
-      </View>
+      {/* ============================================================== */}
+      {/* 3. FORUM GENRE (ORGANISASI MITRA DENGAN HIERARKI EDITORIAL)   */}
+      {/* ============================================================== */}
+      {genreOrg && (
+        <View style={styles.genreSection}>
+          <View style={styles.genreHeader}>
+            <Text style={styles.kicker}>ORGANISASI & MITRA STRATEGIS</Text>
+            <Text style={styles.sectionHeading}>{genreOrg.name}</Text>
+          </View>
 
-      <View style={styles.list}>
-        {communityList.map((grp) => {
-          const imgSource = communityImages[grp.id] || communityImages.com_001;
+          <Image
+            source={communityImages.com_002}
+            style={styles.genreHeroPhoto}
+            resizeMode="cover"
+          />
 
-          return (
-            <Card key={grp.id} style={styles.groupCard}>
-              {/* Photo Cover */}
-              <Image
-                source={imgSource}
-                style={styles.groupCoverImage}
-                resizeMode="cover"
-              />
+          <Text style={styles.genreDescription}>{genreOrg.description}</Text>
 
-              <View style={styles.groupContent}>
-                <View style={styles.groupHeader}>
-                  <View style={styles.groupMain}>
-                    <Text style={styles.groupName}>{grp.name}</Text>
-                    <Text style={styles.groupSchedule}>🗓️ {grp.meetingSchedule}</Text>
-                  </View>
-                  <Badge
-                    label={grp.badge}
-                    variant={
-                      grp.type === 'PIK-R'
-                        ? 'blue'
-                        : grp.type === 'Forum GenRe'
-                        ? 'green'
-                        : 'violet'
-                    }
-                  />
-                </View>
-
-                <Text style={styles.groupDesc}>{grp.description}</Text>
-
-                <View style={styles.groupFooter}>
-                  <View style={styles.membersCountRow}>
-                    <Users size={14} color={colors.textMuted} />
-                    <Text style={styles.membersCountText}>
-                      {grp.memberCount} Anggota Aktif
-                    </Text>
-                  </View>
-
-                  <Button
-                    title={grp.isJoined ? 'Telah Bergabung' : 'Gabung Obrolan'}
-                    variant={grp.isJoined ? 'outline' : 'primary'}
-                    size="sm"
-                    iconLeft={
-                      grp.isJoined ? (
-                        <CheckCircle2 size={14} color={colors.brandGreen[600]} />
-                      ) : undefined
-                    }
-                    onPress={() => toggleJoinCommunity(grp.id)}
-                  />
-                </View>
-              </View>
-            </Card>
-          );
-        })}
-      </View>
-
-      {/* Upcoming Events Section */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Agenda Kegiatan Remaja Karawang</Text>
-      </View>
-
-      <View style={styles.list}>
-        {eventsList.map((ev) => (
-          <Card key={ev.id} variant="tintBlue" style={styles.eventCard}>
-            <Text style={styles.eventTitle}>{ev.title}</Text>
-            <View style={styles.eventMetaRow}>
-              <Calendar size={13} color={colors.brandBlue[600]} />
-              <Text style={styles.eventMetaText}>
-                {ev.date} · {ev.time}
+          <View style={styles.genreMetaRow}>
+            <View style={styles.genreMetaCol}>
+              <Text style={styles.genreMetaLabel}>JADWAL KEGIATAN</Text>
+              <Text style={styles.genreMetaValue}>{genreOrg.meetingSchedule}</Text>
+            </View>
+            <View style={styles.genreMetaCol}>
+              <Text style={styles.genreMetaLabel}>KOLABORASI</Text>
+              <Text style={styles.genreMetaValue}>
+                {genreOrg.memberCount} Pemuda Tergabung
               </Text>
             </View>
-            <View style={styles.eventMetaRow}>
-              <MapPin size={13} color={colors.brandBlue[600]} />
-              <Text style={styles.eventMetaText}>{ev.location}</Text>
-            </View>
-            <Text style={styles.eventDesc}>{ev.description}</Text>
-          </Card>
-        ))}
+          </View>
+
+          <View style={styles.genreActionWrap}>
+            <Button
+              title={
+                genreOrg.isJoined
+                  ? 'Telah Terhubung dengan Forum GenRe'
+                  : 'Gabung Jaringan Forum GenRe'
+              }
+              variant={genreOrg.isJoined ? 'outline' : 'primary'}
+              size="md"
+              fullWidth
+              iconLeft={
+                genreOrg.isJoined ? (
+                  <CheckCircle2 size={16} color={colors.brandGreen[600]} />
+                ) : undefined
+              }
+              onPress={() => toggleJoinCommunity(genreOrg.id)}
+            />
+          </View>
+        </View>
+      )}
+
+      {/* ============================================================== */}
+      {/* 4. KELOMPOK KOMUNITAS BINAAN (PEER & SUPPORT GROUPS)          */}
+      {/* ============================================================== */}
+      <View style={styles.communitiesSection}>
+        <View style={styles.sectionHeaderWrap}>
+          <Text style={styles.kicker}>RUANG SHARING & PEER SUPPORT</Text>
+          <Text style={styles.sectionHeading}>Kelompok Komunitas Binaan</Text>
+          <Text style={styles.sectionSub}>
+            Ruang konseling sebaya dan pendampingan psikologis terdekat
+          </Text>
+        </View>
+
+        <View style={styles.communitiesList}>
+          {peerCommunities.map((grp, index) => {
+            const imgSource = communityImages[grp.id] || communityImages.com_001;
+            const isLast = index === peerCommunities.length - 1;
+
+            return (
+              <View
+                key={grp.id}
+                style={[styles.communityItem, !isLast && styles.communityItemBorder]}
+              >
+                <Image
+                  source={imgSource}
+                  style={styles.communityPhoto}
+                  resizeMode="cover"
+                />
+
+                <View style={styles.communityContent}>
+                  <Text style={styles.communityName}>{grp.name}</Text>
+
+                  {/* Status verifikasi valid tanpa badge neon */}
+                  {grp.badge && (
+                    <View style={styles.verificationRow}>
+                      <CheckCircle2 size={13} color={colors.brandBlue[600]} />
+                      <Text style={styles.verificationText}>{grp.badge}</Text>
+                    </View>
+                  )}
+
+                  <Text style={styles.communitySchedule}>
+                    Jadwal Temu: {grp.meetingSchedule}
+                  </Text>
+
+                  <Text style={styles.communityDescription}>{grp.description}</Text>
+
+                  <View style={styles.communityFooterRow}>
+                    <View style={styles.memberCountBlock}>
+                      <Users size={14} color={colors.textMuted} />
+                      <Text style={styles.memberCountText}>
+                        {grp.memberCount} Remaja Aktif
+                      </Text>
+                    </View>
+
+                    <Button
+                      title={grp.isJoined ? 'Telah Bergabung' : 'Gabung Obrolan'}
+                      variant={grp.isJoined ? 'outline' : 'primary'}
+                      size="sm"
+                      iconLeft={
+                        grp.isJoined ? (
+                          <CheckCircle2 size={14} color={colors.brandGreen[600]} />
+                        ) : undefined
+                      }
+                      onPress={() => toggleJoinCommunity(grp.id)}
+                    />
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* ============================================================== */}
+      {/* 5. AGENDA & LOKAKARYA REMAJA (EDITORIAL CALENDAR)             */}
+      {/* ============================================================== */}
+      <View style={styles.eventsSection}>
+        <View style={styles.sectionHeaderWrap}>
+          <Text style={styles.kicker}>AGENDA MENDATANG</Text>
+          <Text style={styles.sectionHeading}>Agenda & Lokakarya Remaja</Text>
+          <Text style={styles.sectionSub}>
+            Kegiatan pengembangan diri dan pelatihan konseling sebaya di Karawang
+          </Text>
+        </View>
+
+        <View style={styles.eventsList}>
+          {eventsList.map((ev, index) => {
+            const dateParts = ev.date.split(' ');
+            const day = dateParts[0] || '15';
+            const month = (dateParts[1] || 'NOV').toUpperCase();
+            const isLast = index === eventsList.length - 1;
+
+            return (
+              <View
+                key={ev.id}
+                style={[styles.eventRow, !isLast && styles.eventRowBorder]}
+              >
+                {/* Kolom Tanggal Kalender Editorial */}
+                <View style={styles.eventDateCol}>
+                  <Text style={styles.eventDay}>{day}</Text>
+                  <Text style={styles.eventMonth}>{month}</Text>
+                </View>
+
+                {/* Kolom Informasi Acara */}
+                <View style={styles.eventContentCol}>
+                  <Text style={styles.eventTitle}>{ev.title}</Text>
+
+                  <View style={styles.eventDetailLine}>
+                    <Clock size={12} color={colors.textMuted} />
+                    <Text style={styles.eventDetailText}>{ev.time}</Text>
+                  </View>
+
+                  <View style={styles.eventDetailLine}>
+                    <MapPin size={12} color={colors.textMuted} />
+                    <Text style={styles.eventDetailText}>{ev.location}</Text>
+                  </View>
+
+                  <Text style={styles.eventOrganizer}>
+                    Penyelenggara: {ev.organizer}
+                  </Text>
+
+                  <Text style={styles.eventDescription}>{ev.description}</Text>
+
+                  <View style={styles.eventStatusWrap}>
+                    <Text style={styles.eventQuotaText}>{ev.quota}</Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
       </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
-    marginVertical: spacing.md,
+  screenContainer: {
+    paddingHorizontal: 0,
+    paddingTop: spacing.xs,
+    paddingBottom: 64,
+    backgroundColor: colors.canvas,
+  },
+
+  /* ============================================================== */
+  /* HEADER & PLEDGE STYLES                                         */
+  /* ============================================================== */
+  headerBlock: {
+    paddingHorizontal: 20,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+  },
+  kicker: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: colors.brandBlue[600],
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: colors.textPrimary,
+    lineHeight: 28,
   },
   subtitle: {
-    ...typography.bodyRegular,
+    fontSize: 13,
     color: colors.textSecondary,
-    marginTop: 2,
+    lineHeight: 19,
+    marginTop: 4,
   },
-  noticeCard: {
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  noticeRow: {
+  trustBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 12,
+    backgroundColor: colors.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.borderLight,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
-  noticeText: {
-    fontSize: 11.5,
-    color: colors.brandGreen[700],
-    lineHeight: 16,
+  trustIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.brandGreen[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trustText: {
     flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.textSecondary,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing.layout.sectionGap,
-    marginBottom: spacing.sm,
+
+  /* ============================================================== */
+  /* SECTION HEADER REUSABLE                                        */
+  /* ============================================================== */
+  sectionHeaderWrap: {
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
-  titleWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  sectionTitle: {
-    fontSize: 15,
+  sectionHeading: {
+    fontSize: 18,
     fontWeight: '700',
     color: colors.textPrimary,
+    lineHeight: 24,
   },
-  sectionMeta: {
-    fontSize: 11,
+  sectionSub: {
+    fontSize: 12.5,
     color: colors.textMuted,
+    lineHeight: 17,
+    marginTop: 2,
   },
+
+  /* ============================================================== */
+  /* DOKUMENTASI KEGIATAN (EDITORIAL GALLERY)                       */
+  /* ============================================================== */
   galleryScroll: {
-    gap: spacing.md,
-    paddingVertical: spacing.xs,
-    paddingBottom: spacing.md,
+    paddingHorizontal: 20,
+    gap: 14,
+    paddingTop: 4,
+    paddingBottom: 6,
   },
-  galleryCard: {
-    width: 220,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    overflow: 'hidden',
+  galleryItem: {
+    width: 250,
   },
-  galleryImage: {
-    width: '100%',
-    height: 120,
+  galleryPhoto: {
+    width: 250,
+    height: 155,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceAlt,
   },
-  galleryMeta: {
-    padding: spacing.md,
-  },
-  galleryBadge: {
-    marginBottom: 4,
+  galleryCaption: {
+    paddingTop: 8,
+    paddingHorizontal: 2,
   },
   galleryTitle: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    lineHeight: 18,
+  },
+  galleryMeta: {
+    fontSize: 11.5,
+    color: colors.textMuted,
+    marginTop: 3,
+  },
+
+  /* ============================================================== */
+  /* FORUM GENRE (ORGANISASI MITRA)                                 */
+  /* ============================================================== */
+  genreSection: {
+    marginTop: 28,
+    paddingTop: 24,
+    marginHorizontal: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderLight,
+  },
+  genreHeader: {
+    marginBottom: 10,
+  },
+  genreHeroPhoto: {
+    width: '100%',
+    height: 180,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceAlt,
+  },
+  genreDescription: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.textSecondary,
+    marginTop: 12,
+  },
+  genreMetaRow: {
+    flexDirection: 'row',
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderLight,
+    gap: 16,
+  },
+  genreMetaCol: {
+    flex: 1,
+  },
+  genreMetaLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textMuted,
+    letterSpacing: 0.6,
+  },
+  genreMetaValue: {
     fontSize: 12.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginTop: 3,
+    lineHeight: 17,
+  },
+  genreActionWrap: {
+    marginTop: 14,
+  },
+
+  /* ============================================================== */
+  /* KELOMPOK KOMUNITAS BINAAN                                      */
+  /* ============================================================== */
+  communitiesSection: {
+    marginTop: 32,
+    paddingTop: 24,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderLight,
+  },
+  communitiesList: {
+    marginTop: 6,
+    paddingHorizontal: 20,
+  },
+  communityItem: {
+    paddingBottom: 24,
+    marginBottom: 20,
+  },
+  communityItemBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderLight,
+  },
+  communityPhoto: {
+    width: '100%',
+    height: 160,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceAlt,
+  },
+  communityContent: {
+    paddingTop: 12,
+  },
+  communityName: {
+    fontSize: 16,
     fontWeight: '700',
     color: colors.textPrimary,
+    lineHeight: 22,
   },
-  galleryDate: {
-    fontSize: 10.5,
+  verificationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 4,
+  },
+  verificationText: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    color: colors.brandBlue[600],
+  },
+  communitySchedule: {
+    fontSize: 12,
     color: colors.textMuted,
-    marginTop: 2,
+    marginTop: 4,
   },
-  list: {
-    gap: spacing.md,
-    marginBottom: spacing.layout.sectionGap,
+  communityDescription: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: colors.textSecondary,
+    marginTop: 6,
   },
-  groupCard: {
-    padding: 0,
-    overflow: 'hidden',
-  },
-  groupCoverImage: {
-    width: '100%',
-    height: 140,
-  },
-  groupContent: {
-    padding: spacing.md,
-  },
-  groupHeader: {
+  communityFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderLight,
+  },
+  memberCountBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  memberCountText: {
+    fontSize: 11.5,
+    color: colors.textMuted,
+  },
+
+  /* ============================================================== */
+  /* AGENDA & LOKAKARYA REMAJA                                      */
+  /* ============================================================== */
+  eventsSection: {
+    marginTop: 16,
+    paddingTop: 24,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.borderLight,
+  },
+  eventsList: {
+    marginTop: 8,
+    paddingHorizontal: 20,
+  },
+  eventRow: {
+    flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 4,
+    gap: 14,
+    paddingBottom: 20,
+    marginBottom: 18,
   },
-  groupMain: {
+  eventRowBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderLight,
+  },
+  eventDateCol: {
+    width: 44,
+    alignItems: 'center',
+    paddingVertical: 8,
+    backgroundColor: colors.brandBlue[50],
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.brandBlue[100],
+  },
+  eventDay: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.brandBlue[700],
+    lineHeight: 22,
+  },
+  eventMonth: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: colors.brandBlue[600],
+    letterSpacing: 0.5,
+    marginTop: 1,
+  },
+  eventContentCol: {
     flex: 1,
-    paddingRight: spacing.sm,
   },
-  groupName: {
+  eventTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: colors.textPrimary,
+    lineHeight: 19,
   },
-  groupSchedule: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  groupDesc: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 17,
-    marginVertical: spacing.xs,
-  },
-  groupFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceAlt,
-    paddingTop: spacing.xs,
-    marginTop: 4,
-  },
-  membersCountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  membersCountText: {
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  eventCard: {
-    padding: spacing.md,
-    gap: 4,
-  },
-  eventTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  eventMetaRow: {
+  eventDetailLine: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    marginTop: 4,
   },
-  eventMetaText: {
+  eventDetailText: {
     fontSize: 11.5,
-    color: colors.brandBlue[700],
+    color: colors.textMuted,
+    flex: 1,
   },
-  eventDesc: {
-    fontSize: 11.5,
+  eventOrganizer: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.brandBlue[600],
+    marginTop: 4,
+  },
+  eventDescription: {
+    fontSize: 12,
+    lineHeight: 17,
     color: colors.textSecondary,
-    lineHeight: 16,
-    marginTop: 2,
+    marginTop: 6,
+  },
+  eventStatusWrap: {
+    marginTop: 6,
+  },
+  eventQuotaText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.textMuted,
   },
 });

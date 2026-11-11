@@ -24,6 +24,7 @@ export type ScreenType =
   | 'mood_analysis'
   | 'ai_chat'
   | 'teman_akses'
+  | 'service_info'
   | 'counselor_directory'
   | 'counselor_detail'
   | 'counselor_booking'
@@ -38,6 +39,9 @@ export type ScreenType =
   | 'test_result'
   | 'mental_game_hub'
   | 'teman_bermain'
+  | 'game_category_list'
+  | 'game_detail'
+  | 'mental_game_detail'
   | 'mental_game_play'
   | 'mental_game_result'
   | 'community_pikr'
@@ -46,6 +50,7 @@ export type ScreenType =
   | 'teman_supportif'
   | 'edit_profile'
   | 'privacy_settings'
+  | 'notification_settings'
   | 'about_app';
 
 export interface NavigationState {

@@ -1,266 +1,231 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Compass, ShieldCheck, Heart, ArrowRight, Clock, BookOpen } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StatusBar,
+} from 'react-native';
+import { ArrowLeft, Clock, Play } from 'lucide-react-native';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { ContextualHeader } from '../../components/layout/ContextualHeader';
-import { Card } from '../../components/common/Card';
-import { PSYCH_GAME_CATEGORIES, PsychGameCategory } from '../../data/gamePsychData';
+import {
+  GAMES_CATALOG,
+  GameItem,
+} from '../../data/gameCatalogData';
 import { useApp } from '../../state/AppContext';
+
+// ============================================================================
+// MAIN COMPONENT: TEMAN BERMAIN (Screen F01 - Game Dashboard Brief Specification)
+// ============================================================================
 
 export const MentalGameHubScreen: React.FC = () => {
   const { navigateTo, goBack } = useApp();
-  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('semua');
 
-  const handleStartGame = (category: PsychGameCategory) => {
-    navigateTo('mental_game_play', { categoryId: category.id });
+  const handleSelectGame = (game: GameItem) => {
+    // Membuka Halaman Pengantar / Detail Permainan (Screen F02 / F03 / F04)
+    navigateTo('game_detail', {
+      gameId: game.id,
+      categoryId: game.categoryId,
+    });
   };
-
-  const getCategoryIcon = (id: string) => {
-    switch (id) {
-      case 'karakter':
-        return Compass;
-      case 'resiliensi':
-        return ShieldCheck;
-      case 'relasi':
-        return Heart;
-      default:
-        return BookOpen;
-    }
-  };
-
-  const filteredCategories =
-    activeCategoryFilter === 'semua'
-      ? PSYCH_GAME_CATEGORIES
-      : PSYCH_GAME_CATEGORIES.filter((c) => c.id === activeCategoryFilter);
 
   return (
-    <ScreenContainer
-      header={<ContextualHeader title="Teman Bermain" onBack={goBack} />}
-    >
-      {/* 1. Header & Introduction (Sesuai Screen F01 BRIEF TEMAN SEBAYA) */}
-      <View style={styles.introHeader}>
-        <Text style={styles.headingTitle}>Teman Bermain</Text>
-        <Text style={styles.headingSubtitle}>
+    <View style={styles.screen}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* ============================================================== */}
+      {/* 1. TOP HEADER (Brief F01: Header "Teman Bermain" + Copy)        */}
+      {/* ============================================================== */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={goBack}
+          style={styles.backButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityLabel="Kembali ke Beranda"
+        >
+          <ArrowLeft size={24} color="#0F172A" strokeWidth={2.4} />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>Teman Bermain</Text>
+        <Text style={styles.headerSubtitle}>
           Belajar tidak selalu harus serius. Yuk, kenali dirimu lewat permainan.
         </Text>
       </View>
 
-      {/* 2. Category Filter Tabs */}
-      <View style={styles.categoryFilterRow}>
-        {[
-          { id: 'semua', label: 'Semua Permainan' },
-          { id: 'karakter', label: 'Butterfly Effect' },
-          { id: 'resiliensi', label: 'Name That Feeling' },
-          { id: 'relasi', label: 'Digital Dilemma' },
-        ].map((tab) => {
-          const isActive = activeCategoryFilter === tab.id;
-          return (
-            <TouchableOpacity
-              key={tab.id}
-              activeOpacity={0.7}
-              onPress={() => setActiveCategoryFilter(tab.id)}
-              style={[styles.filterPill, isActive && styles.filterPillActive]}
-            >
-              <Text style={[styles.filterPillText, isActive && styles.filterPillTextActive]}>
-                {tab.label}
+      {/* ============================================================== */}
+      {/* 2. THREE OFFICIAL GAMES (Brief F01: Butterfly, Feelings, Dilemma)*/}
+      {/* ============================================================== */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+      >
+        {GAMES_CATALOG.map((game) => (
+          <TouchableOpacity
+            key={game.id}
+            activeOpacity={0.88}
+            onPress={() => handleSelectGame(game)}
+            style={styles.gameCard}
+            accessibilityRole="button"
+            accessibilityLabel={`Mainkan ${game.title}`}
+          >
+            {/* Left: Square 3D Character Thumbnail */}
+            <Image
+              source={game.thumbnail}
+              style={styles.thumbnailImage}
+              resizeMode="cover"
+            />
+
+            {/* Right: Content Column */}
+            <View style={styles.gameContentCol}>
+              <Text style={styles.gameTitle} numberOfLines={1}>
+                {game.title}
               </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+              <Text style={styles.gameSubtitle} numberOfLines={2}>
+                {game.subtitle}
+              </Text>
 
-      {/* 3. Available Game Scenarios List */}
-      <View style={styles.scenariosList}>
-        {filteredCategories.map((category) => {
-          const Icon = getCategoryIcon(category.id);
-
-          return (
-            <Card
-              key={category.id}
-              style={styles.scenarioCard}
-              onPress={() => handleStartGame(category)}
-            >
-              <View style={styles.cardHeaderRow}>
-                <View style={[styles.iconContainer, { backgroundColor: category.themeBg }]}>
-                  <Icon size={22} color={category.themeColor} strokeWidth={2} />
+              {/* Bottom Meta & Mainkan Action */}
+              <View style={styles.cardBottomRow}>
+                <View style={styles.durationBadge}>
+                  <Clock size={12} color="#64748B" style={{ marginRight: 4 }} />
+                  <Text style={styles.durationText}>~{game.durationMinutes} Menit</Text>
                 </View>
-                <View style={styles.cardHeaderInfo}>
-                  <Text style={styles.cardCategoryLabel}>{category.badgeLabel}</Text>
-                  <Text style={styles.cardTitle}>{category.title}</Text>
+
+                <View style={styles.playButton}>
+                  <Play size={10} color="#FFFFFF" fill="#FFFFFF" style={{ marginRight: 4 }} />
+                  <Text style={styles.playButtonText}>Mainkan</Text>
                 </View>
               </View>
-
-              <Text style={styles.cardDescription}>{category.subtitle}</Text>
-
-              {/* Meta & Action Row */}
-              <View style={styles.cardFooter}>
-                <View style={styles.metaRow}>
-                  <Clock size={13} color={colors.textMuted} />
-                  <Text style={styles.metaText}>{category.durationMinutes} menit</Text>
-                  <Text style={styles.metaDot}>•</Text>
-                  <Text style={styles.metaText}>{category.scenes.length} skenario</Text>
-                </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => handleStartGame(category)}
-                  style={styles.playButton}
-                >
-                  <Text style={styles.playButtonText}>Mulai Skenario</Text>
-                  <ArrowRight size={14} color={colors.brandBlue[600]} />
-                </TouchableOpacity>
-              </View>
-            </Card>
-          );
-        })}
-      </View>
-
-      {/* 4. Trust & Safeguarding Note */}
-      <View style={styles.safeNotice}>
-        <ShieldCheck size={16} color={colors.textMuted} />
-        <Text style={styles.safeNoticeText}>
-          Eksplorasi mandiri untuk refleksi diri positif, bukan diagnosis medis psikiatri.
-        </Text>
-      </View>
-    </ScreenContainer>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
+// ============================================================================
+// STYLESHEET (Clean Minimalist Matching Brief & Design System)
+// ============================================================================
+
 const styles = StyleSheet.create({
-  introHeader: {
-    marginVertical: spacing.md,
+  screen: {
+    flex: 1,
+    backgroundColor: '#F8FAFC', // Slate 50
   },
-  headingTitle: {
-    fontSize: 22,
+
+  /* Header Section */
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 14,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  headerTitle: {
+    fontSize: 26,
     fontWeight: '800',
-    color: colors.textPrimary,
-    lineHeight: 28,
-    marginBottom: spacing.xs,
+    color: '#0F172A',
+    letterSpacing: -0.5,
   },
-  headingSubtitle: {
-    ...typography.bodyRegular,
-    fontSize: 13.5,
-    color: colors.textSecondary,
-    lineHeight: 20,
+  headerSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginTop: 4,
   },
-  categoryFilterRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginBottom: spacing.lg,
-  },
-  filterPill: {
-    paddingVertical: 7,
+
+  /* List Section */
+  listContent: {
     paddingHorizontal: 16,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
+    paddingTop: 16,
+    paddingBottom: 40,
+    gap: 14,
   },
-  filterPillActive: {
-    backgroundColor: colors.brandBlue[600],
-    borderColor: colors.brandBlue[600],
-  },
-  filterPillText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  filterPillTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  scenariosList: {
-    gap: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  scenarioCard: {
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  },
-  cardHeaderRow: {
+  gameCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
+  thumbnailImage: {
+    width: 86,
+    height: 86,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+  },
+  gameContentCol: {
+    flex: 1,
+    marginLeft: 14,
     justifyContent: 'center',
   },
-  cardHeaderInfo: {
-    flex: 1,
-  },
-  cardCategoryLabel: {
-    fontSize: 11,
+  gameTitle: {
+    fontSize: 16.5,
     fontWeight: '700',
-    color: colors.brandBlue[600],
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    color: '#0F172A',
+    marginBottom: 3,
+    letterSpacing: -0.2,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.textPrimary,
+  gameSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    lineHeight: 17,
+    marginBottom: 8,
   },
-  cardDescription: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 19,
-    marginVertical: spacing.xs,
-  },
-  cardFooter: {
+  cardBottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing.sm,
-    paddingTop: spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: colors.surfaceAlt,
   },
-  metaRow: {
+  durationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  metaText: {
-    fontSize: 11.5,
-    color: colors.textMuted,
-  },
-  metaDot: {
-    fontSize: 11.5,
-    color: colors.borderMedium,
-    marginHorizontal: 2,
+  durationText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
   },
   playButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
   playButtonText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.brandBlue[600],
-  },
-  safeNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.xxl,
-  },
-  safeNoticeText: {
     fontSize: 11.5,
-    color: colors.textMuted,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 });
