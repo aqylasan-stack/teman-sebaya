@@ -83,7 +83,7 @@ export const BelajarScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      style={{ backgroundColor: colors.accentAmber[600] }}
+      style={{ backgroundColor: colors.brandBlue[600] }}
       contentContainerStyle={styles.containerContent}
       withBottomNav
       floatingOverlay={

@@ -37,11 +37,11 @@ const GAME_THEMES: Record<
 > = {
   karakter: {
     name: 'Butterfly Effect',
-    color: '#7C3AED', // accentViolet[600]
-    darkColor: '#6D28D9',
-    softBg: '#F5F3FF',
-    badgeBorder: '#DDD6FE',
-    textColor: '#5B21B6',
+    color: '#2563EB', // brandBlue[600]
+    darkColor: '#1D4ED8',
+    softBg: '#EFF6FF',
+    badgeBorder: '#BFDBFE',
+    textColor: '#1E40AF',
   },
   resiliensi: {
     name: 'Name That Feeling',
@@ -53,11 +53,11 @@ const GAME_THEMES: Record<
   },
   relasi: {
     name: 'Digital Dilemma',
-    color: '#2563EB', // brandBlue[600]
-    darkColor: '#1D4ED8',
-    softBg: '#EFF6FF',
-    badgeBorder: '#BFDBFE',
-    textColor: '#1E40AF',
+    color: '#7C3AED', // accentViolet[600]
+    darkColor: '#6D28D9',
+    softBg: '#F5F3FF',
+    badgeBorder: '#DDD6FE',
+    textColor: '#5B21B6',
   },
 };
 
@@ -237,39 +237,40 @@ export const MentalGamePlayScreen: React.FC = () => {
       </View>
 
       {/* ============================================================== */}
-      {/* 2. TOP CONTROL BAR (On Patterned Background)                   */}
-      {/* ============================================================== */}
-      <View
-        style={[
-          styles.topControlBar,
-          { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 12) : insets.top + 6 },
-        ]}
-      >
-        <View style={styles.counterPill}>
-          <Text style={styles.counterText}>
-            {category.title} · {currentSceneIdx + 1}/{category.scenes.length}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleExitGame}
-          style={styles.closeCircleBtn}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityRole="button"
-          accessibilityLabel="Keluar dari permainan"
-        >
-          <X size={18} color="#0F172A" strokeWidth={2.4} />
-        </TouchableOpacity>
-      </View>
-
-      {/* ============================================================== */}
-      {/* 3. SCROLL CONTENT: LAYERED MAIN CONTENT PANEL                  */}
+      {/* 2. SCROLL CONTENT: UNIFIED LAYERED GAMEPLAY                    */}
       {/* ============================================================== */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop:
+              Platform.OS === 'android'
+                ? Math.max(insets.top, 12)
+                : insets.top + 6,
+          },
+        ]}
       >
+        {/* Top Control Bar (Pill Counter + Close Button) */}
+        <View style={styles.topControlBar}>
+          <View style={styles.counterPill}>
+            <Text style={styles.counterText}>
+              {category.title} · {currentSceneIdx + 1}/{category.scenes.length}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleExitGame}
+            style={styles.closeCircleBtn}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Keluar dari permainan"
+          >
+            <X size={18} color="#0F172A" strokeWidth={2.4} />
+          </TouchableOpacity>
+        </View>
+
         {/* ============================================================ */}
         {/* MAIN CONTENT PANEL (SOLID, OPAQUE, LAYERED OVER BACKGROUND)  */}
         {/* ============================================================ */}
@@ -284,25 +285,15 @@ export const MentalGamePlayScreen: React.FC = () => {
             />
           </View>
 
-          {/* B. Scenario Kicker Badge */}
-          <View style={styles.contextBadgeRow}>
-            <View
-              style={[
-                styles.contextBadge,
-                {
-                  backgroundColor: theme.softBg,
-                  borderColor: theme.badgeBorder,
-                },
-              ]}
+          {/* B. Scenario Title (Clean typography without container pill or border) */}
+          <View style={styles.scenarioTitleRow}>
+            <Text
+              style={[styles.scenarioTitleText, { color: theme.textColor }]}
+              numberOfLines={1}
             >
-              <Text
-                style={[styles.contextBadgeText, { color: theme.textColor }]}
-                numberOfLines={1}
-              >
-                {currentScene.contextBanner ||
-                  `${category.badgeLabel} · Skenario ${currentSceneIdx + 1}`}
-              </Text>
-            </View>
+              {currentScene.contextBanner ||
+                `${category.badgeLabel} · Skenario ${currentSceneIdx + 1}`}
+            </Text>
           </View>
 
           {/* C. Dedicated 3D Scenario Artwork */}
@@ -324,7 +315,12 @@ export const MentalGamePlayScreen: React.FC = () => {
               </Text>
             ) : null}
 
-            <Text style={styles.promptQuestion}>
+            <Text
+              style={[
+                styles.promptQuestion,
+                { color: theme.darkColor || theme.textColor || theme.color },
+              ]}
+            >
               {sceneText.prompt}
             </Text>
           </View>
@@ -460,7 +456,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 320,
+    height: 360,
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
     overflow: 'hidden',
@@ -472,8 +468,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 10,
-    zIndex: 10,
+    paddingBottom: 14,
   },
   counterPill: {
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
@@ -505,7 +500,6 @@ const styles = StyleSheet.create({
 
   /* Scroll Content */
   scrollContent: {
-    paddingTop: 8,
     paddingBottom: 32,
   },
 
@@ -538,22 +532,20 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
   },
 
-  /* Context Badge (Scenario Category & Order) */
-  contextBadgeRow: {
+  /* Scenario Title (Plain text hierarchy without pill/border container) */
+  scenarioTitleRow: {
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
+    marginTop: 2,
   },
-  contextBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  contextBadgeText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    letterSpacing: 0.1,
+  scenarioTitleText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    lineHeight: 18,
+    letterSpacing: -0.1,
+    textAlign: 'center',
   },
 
   /* Dedicated Scenario Artwork */
@@ -589,8 +581,7 @@ const styles = StyleSheet.create({
   },
   promptQuestion: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A', // Slate 900 Focal Point
+    fontWeight: '700',
     textAlign: 'center',
     lineHeight: 23,
     letterSpacing: -0.2,

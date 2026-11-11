@@ -399,7 +399,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Pukul 21.00 malam, kamu baru ingat ada tugas presentasi penting yang belum selesai untuk besok pagi, sementara kuota internetmu menipis. Energimu drop drastis. Reaksimu?',
         contextBanner: 'Skenario 1: Kejutan Tenggat Waktu',
-        illustration: require('../../assets/games/scenarios/scenario_feelings_1.jpg'),
+        illustration: require('../../assets/games/emotion/soal1.png'),
         choices: [
           {
             id: 'c1',
@@ -439,7 +439,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kamu membaca komentar kurang menyenangkan di grup percakapan kelas tentang caramu berbicara saat memimpin diskusi. Dadamu terasa sesak. Apa yang kamu lakukan?',
         contextBanner: 'Skenario 2: Dinamika Media Sosial',
-        illustration: require('../../assets/games/scenarios/scenario_feelings_2.jpg'),
+        illustration: require('../../assets/games/emotion/soal2.png'),
         choices: [
           {
             id: 'c1',
@@ -479,7 +479,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Saat scrolling media sosial larut malam, kamu melihat feed teman sekelas yang memenangkan lomba dan liburan mewah. Kamu merasa hampa dan tertinggal jauh. Emosi apa ini?',
         contextBanner: 'Skenario 3: Perbandingan Sosial & FOMO',
-        illustration: require('../../assets/games/scenarios/scenario_feelings_3.jpg'),
+        illustration: require('../../assets/games/emotion/soal3.png'),
         choices: [
           {
             id: 'c1',
@@ -509,7 +509,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Nilai ulangan matematika yang sudah kamu pelajari seminggu penuh ternyata jauh di bawah target. Teman sebangkumu mendapat nilai sempurna tanpa banyak belajar. Tindakanmu?',
         contextBanner: 'Skenario 4: Menghadapi Kekecewaan',
-        illustration: require('../../assets/games/thumbnails/thumb_feelings.jpg'),
+        illustration: require('../../assets/games/emotion/soal4.png'),
         choices: [
           {
             id: 'c1',
@@ -539,7 +539,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Saat sedang berkumpul di kantin bersama teman-teman, ceritamu berulang kali dipotong dan mereka beralih membicarakan topik lain seolah kamu tak terlihat. Bagaimana respon batinmu?',
         contextBanner: 'Skenario 5: Rasa Terabaikan di Lingkungan',
-        illustration: require('../../assets/articles/article_komunikasi.jpg'),
+        illustration: require('../../assets/games/emotion/soal5.png'),
         choices: [
           {
             id: 'c1',
@@ -569,7 +569,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Sahabatmu mengajak pergi main ke mall sepulang sekolah, padahal baterai sosialmu sudah habis dan tubuhmu terasa sangat letih ingin istirahat di rumah. Bagaimana kamu menyampaikannya?',
         contextBanner: 'Skenario 6: Menjaga Batas Energi Diri',
-        illustration: require('../../assets/games/scenarios/scenario_feelings_6.jpg'),
+        illustration: require('../../assets/games/emotion/soal6.png'),
         choices: [
           {
             id: 'c1',
@@ -599,7 +599,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Teman yang sempat berselisih paham denganmu datang mendekat dan dengan tulus meminta maaf atas perkataan kasarnya tempo hari. Respon hatimu?',
         contextBanner: 'Skenario 7: Rekonsiliasi & Memaafkan',
-        illustration: require('../../assets/onboarding/onboarding_counseling.jpg'),
+        illustration: require('../../assets/games/emotion/soal7.png'),
         choices: [
           {
             id: 'c1',
@@ -629,7 +629,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kamu berhasil melewati minggu ujian yang penuh tekanan dengan kepala tegak tanpa menyerah. Bagaimana kamu memberi apresiasi dan kasih sayang pada dirimu sendiri hari ini?',
         contextBanner: 'Skenario 8: Self-Love & Apresiasi Diri',
-        illustration: require('../../assets/onboarding/onboarding_growth.jpg'),
+        illustration: require('../../assets/games/emotion/soal8.png'),
         choices: [
           {
             id: 'c1',

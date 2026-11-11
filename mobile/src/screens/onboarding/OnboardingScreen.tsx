@@ -9,9 +9,9 @@ import {
   Easing,
   StatusBar,
   Platform,
+  Image,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Smile, MessageCircle, BookOpen } from 'lucide-react-native';
 import { useApp } from '../../state/AppContext';
 
 const { width, height } = Dimensions.get('window');
@@ -35,7 +35,7 @@ export const OnboardingScreen: React.FC = () => {
         'Luangkan waktu sejenak untuk memahami apa yang sedang kamu rasakan hari ini.',
       themeColor: '#2563EB', // Brand Blue konsisten sesuai FigCraft & Design System
       skyColor: '#EFF6FF', // Soft Sky Blue selaras dengan Brand Identity Teman Sebaya
-      icon: 'Smile' as const,
+      image: require('../../../assets/onboarding/onboarding1.png'),
     },
     {
       id: 'cerita',
@@ -44,7 +44,7 @@ export const OnboardingScreen: React.FC = () => {
         'Konselor sebaya dan tenaga profesional siap mendengarkan tanpa menghakimi.',
       themeColor: '#2563EB', // Brand Blue konsisten
       skyColor: '#EFF6FF', // Soft Sky Blue
-      icon: 'MessageCircle' as const,
+      image: require('../../../assets/onboarding/onboarding2.png'),
     },
     {
       id: 'belajar',
@@ -53,7 +53,7 @@ export const OnboardingScreen: React.FC = () => {
         'Kumpulan artikel psikoedukasi, simulasi interaktif, dan komunitas remaja positif.',
       themeColor: '#2563EB', // Brand Blue konsisten
       skyColor: '#EFF6FF', // Soft Sky Blue
-      icon: 'BookOpen' as const,
+      image: require('../../../assets/onboarding/onboarding3.png'),
     },
   ];
 
@@ -142,7 +142,7 @@ export const OnboardingScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Clean Vector Icon (Foto 3D telah dihapus) */}
+        {/* 3D Character Illustration */}
         <Animated.View
           style={[
             styles.illustrationWrapper,
@@ -152,17 +152,11 @@ export const OnboardingScreen: React.FC = () => {
             },
           ]}
         >
-          <View style={styles.iconCircle}>
-            {current.icon === 'Smile' && (
-              <Smile size={64} color="#2563EB" strokeWidth={1.8} />
-            )}
-            {current.icon === 'MessageCircle' && (
-              <MessageCircle size={64} color="#2563EB" strokeWidth={1.8} />
-            )}
-            {current.icon === 'BookOpen' && (
-              <BookOpen size={64} color="#2563EB" strokeWidth={1.8} />
-            )}
-          </View>
+          <Image
+            source={current.image}
+            style={styles.illustrationImage}
+            resizeMode="cover"
+          />
         </Animated.View>
 
         {/* Shallow Horizontal Elliptical Curve Boundary to Bottom Canvas */}
@@ -248,19 +242,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  /* Top Section (~48% height) */
+  /* Top Section (~50% height) */
   topArea: {
     width: width,
-    height: Math.round(height * 0.48),
+    height: Math.round(height * 0.50),
     position: 'relative',
     overflow: 'hidden',
   },
   topBar: {
     position: 'absolute',
-    top: 50,
+    top: Platform.OS === 'android' ? 36 : 50,
     right: 20,
     zIndex: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderRadius: 16,
     paddingHorizontal: 4,
     paddingVertical: 2,
@@ -281,27 +275,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
 
-  /* Clean Vector Icon Presentation */
+  /* 3D Character Illustration Presentation (Full Edge-to-Edge Artwork) */
   illustrationWrapper: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 36,
+    width: '100%',
+    height: '100%',
   },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#DBEAFE',
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+  illustrationImage: {
+    width: '100%',
+    height: '100%',
   },
 
   /* Shallow Elliptical Curve Divider (Bentuk Elips Horizontal Dipertahankan) */
@@ -324,7 +305,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 28,
-    paddingTop: 42, // Menyesuaikan posisi teks mengikuti posisi baru ilustrasi
+    paddingTop: 24,
     paddingBottom: 36,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -332,7 +313,7 @@ const styles = StyleSheet.create({
   textContainer: {
     alignItems: 'center',
     paddingHorizontal: 8,
-    marginTop: 10, // Spacing seimbang antara lengkungan kurva elips dan heading
+    marginTop: 6,
   },
   titleText: {
     fontSize: 24,

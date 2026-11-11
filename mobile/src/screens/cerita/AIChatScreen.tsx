@@ -7,8 +7,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  SafeAreaView,
+  StatusBar,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Info } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ContextualHeader } from '../../components/layout/ContextualHeader';
@@ -19,6 +20,7 @@ import { ChatInputBar } from '../../components/chat/ChatInputBar';
 import { useApp } from '../../state/AppContext';
 
 export const AIChatScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const { chatMessages, sendAiMessage, screenParams, goBack } = useApp();
   const scrollRef = useRef<any>(null);
 
@@ -40,23 +42,28 @@ export const AIChatScreen: React.FC = () => {
     chatMessages.some((m) => m.isBreathingPrompt);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Header: Back button, Thoriq avatar, and Teman Akses title */}
-        <ContextualHeader
-          title="Teman Akses"
-          subtitle="Thoriq · Teman Digitalmu"
-          avatarSource={require('../../../assets/mascot/thoriq_avatar.png')}
-          onBack={goBack}
-        />
+    <View style={styles.screen}>
+      <StatusBar barStyle="light-content" />
 
-        {/* Ethical Transparency Disclaimer Banner */}
-        <View style={styles.disclaimerBar}>
-          <Info size={14} color={colors.textMuted} style={styles.disclaimerIcon} />
-          <Text style={styles.disclaimerText}>
-            Teman Akses menggunakan AI. Ia bukan manusia, psikolog, atau layanan darurat, dan tidak dapat memberikan diagnosis.
-          </Text>
-        </View>
+      {/* Top Safe Area Bar with Brand Blue */}
+      <View style={{ height: insets.top, backgroundColor: colors.brandBlue[600] }} />
+
+      {/* Header: Back button, Thoriq avatar, and Teman Akses title */}
+      <ContextualHeader
+        title="Teman Akses"
+        subtitle="Thoriq · Teman Digitalmu"
+        avatarSource={require('../../../assets/mascot/thoriq_avatar.png')}
+        onBack={goBack}
+        variant="blue"
+      />
+
+      {/* Ethical Transparency Disclaimer Banner */}
+      <View style={styles.disclaimerBar}>
+        <Info size={14} color={colors.textMuted} style={styles.disclaimerIcon} />
+        <Text style={styles.disclaimerText}>
+          Teman Akses menggunakan AI. Ia bukan manusia, psikolog, atau layanan darurat, dan tidak dapat memberikan diagnosis.
+        </Text>
+      </View>
 
         <KeyboardAvoidingView
           style={styles.keyboardContainer}
@@ -102,17 +109,12 @@ export const AIChatScreen: React.FC = () => {
           {/* Bottom Chat Input Composer */}
           <ChatInputBar onSendMessage={(text) => sendAiMessage(text)} />
         </KeyboardAvoidingView>
-      </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
+  screen: {
     flex: 1,
     backgroundColor: '#F8FAFC',
   },

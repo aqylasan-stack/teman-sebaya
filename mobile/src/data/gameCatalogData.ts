@@ -96,7 +96,7 @@ export const GAMES_CATALOG: GameItem[] = [
     badgeLabel: 'Emotional Literacy',
     themeColor: '#059669',
     themeBg: '#ECFDF5',
-    thumbnail: require('../../assets/games/thumbnails/thumb_feelings.jpg'),
+    thumbnail: require('../../assets/games/emotion/cover.png'),
     targetTraits: ['Granularity Emosi', 'Empati Sebaya', 'Self-Awareness'],
     isAvailable: true,
   },

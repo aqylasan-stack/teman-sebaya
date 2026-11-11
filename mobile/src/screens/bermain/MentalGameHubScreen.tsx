@@ -33,7 +33,7 @@ export const MentalGameHubScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      style={{ backgroundColor: colors.accentViolet[600] }}
+      style={{ backgroundColor: colors.brandBlue[600] }}
       contentContainerStyle={styles.containerContent}
     >
       {/* ============================================================== */}
@@ -115,8 +115,10 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     paddingBottom: 40,
     backgroundColor: '#F8FAFC', // Slate 50
+    flexGrow: 1,
   },
   bodyContent: {
+    flex: 1,
     paddingHorizontal: 16,
     paddingTop: 18,
     gap: 14,

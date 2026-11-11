@@ -68,10 +68,10 @@ const EMOTION_CONFIGS: Record<string, EmotionConfig> = {
     themeCardBg: '#FEF9C3',
     accentColor: '#EAB308', // True warm golden yellow (Yellow 500, Hue 45.4°)
     titleColor: '#A16207', // Deep golden yellow for clear contrast on light bg
-    ctaTextColor: '#78350F', // Dark warm amber/brown for contrast on bright yellow button/chip
+    ctaTextColor: '#FFFFFF',
     glowColor: '#FEF08A',
     chipActiveBg: '#EAB308',
-    chipActiveText: '#78350F',
+    chipActiveText: '#FFFFFF',
     solidBg: '#FEF08A', // Solid warm sunny yellow (Yellow 200, Hue 52.8°)
     borderColor: '#FDE047', // Yellow 300
     selectedBorderColor: '#EAB308', // Rich golden yellow
@@ -789,14 +789,18 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             />
           </View>
 
-          {/* Emotion Meta Pill */}
-          <View style={styles.subEmotionPillWrap}>
-            <View style={styles.subEmotionPill}>
-              <Text style={styles.subEmotionPillText}>
-                Refleksi: {currentConfig.name} · {selectedSubEmotion}
-              </Text>
-            </View>
-          </View>
+          {/* Emotion Meta Label (Clean Typography, Unboxed, Dynamic Emotion Color) */}
+          <Text
+            style={[
+              styles.subEmotionLabel,
+              {
+                color:
+                  currentConfig.titleColor || currentConfig.accentColor,
+              },
+            ]}
+          >
+            {currentConfig.name} · {selectedSubEmotion}
+          </Text>
 
           {/* Main Affirmation Quote */}
           <View style={styles.quoteCard}>
@@ -816,8 +820,8 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             style={[
               styles.shareButton,
               {
-                backgroundColor: currentConfig.solidBg,
-                borderColor: currentConfig.selectedBorderColor,
+                backgroundColor: currentConfig.accentColor,
+                borderColor: currentConfig.accentColor,
               },
             ]}
             activeOpacity={0.8}
@@ -826,12 +830,15 @@ export const DailyMoodCheckinScreen: React.FC = () => {
             <Text
               style={[
                 styles.shareButtonText,
-                { color: currentConfig.textColor },
+                { color: currentConfig.ctaTextColor || '#FFFFFF' },
               ]}
             >
               Bagikan
             </Text>
-            <Share2 size={16} color={currentConfig.textColor} />
+            <Share2
+              size={16}
+              color={currentConfig.ctaTextColor || '#FFFFFF'}
+            />
           </TouchableOpacity>
 
           {/* User Feedback Section */}
@@ -1360,27 +1367,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.lg,
   },
-  subEmotionPillWrap: {
+  subEmotionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    letterSpacing: 0.2,
     marginBottom: spacing.lg,
-  },
-  subEmotionPill: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(15, 23, 42, 0.08)',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: borderRadius.full,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  subEmotionPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    letterSpacing: 0.3,
   },
   quoteCard: {
     width: '100%',

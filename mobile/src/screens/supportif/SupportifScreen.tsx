@@ -7,10 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {
-  ShieldCheck,
   CheckCircle2,
-  MapPin,
-  Clock,
   Users,
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
@@ -20,7 +17,7 @@ import { Button } from '../../components/common/Button';
 import { useApp } from '../../state/AppContext';
 
 export const SupportifScreen: React.FC = () => {
-  const { communityList, toggleJoinCommunity, eventsList, goBack } = useApp();
+  const { communityList, toggleJoinCommunity, goBack } = useApp();
 
   const communityImages: Record<string, any> = {
     com_001: require('../../../assets/community/pikr_group.jpg'),
@@ -79,7 +76,7 @@ export const SupportifScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      style={{ backgroundColor: colors.accentPeach[600] }}
+      style={{ backgroundColor: colors.brandBlue[600] }}
       contentContainerStyle={styles.screenContainer}
     >
       {/* ============================================================== */}
@@ -106,19 +103,9 @@ export const SupportifScreen: React.FC = () => {
       {/* 2. BODY CONTENT CANVAS                                         */}
       {/* ============================================================== */}
       <View style={styles.bodyContent}>
-        {/* Keamanan Komunitas — Terintegrasi Natural sebagai Trust Pledge */}
-        <View style={styles.trustBanner}>
-          <View style={styles.trustIconWrap}>
-            <ShieldCheck size={16} color={colors.brandGreen[600]} />
-          </View>
-          <Text style={styles.trustText}>
-            Semua kelompok didampingi oleh Pembina & Konselor Sebaya bersertifikasi BKKBN. Ruang aman tanpa diskriminasi.
-          </Text>
-        </View>
-
-      {/* ============================================================== */}
-      {/* 2. DOKUMENTASI KEGIATAN REMAJA (EDITORIAL PHOTO GALLERY)      */}
-      {/* ============================================================== */}
+        {/* ============================================================== */}
+        {/* 2. DOKUMENTASI KEGIATAN REMAJA (EDITORIAL PHOTO GALLERY)      */}
+        {/* ============================================================== */}
       <View style={styles.sectionHeaderWrap}>
         <Text style={styles.kicker}>DOKUMENTASI VISUAL</Text>
         <Text style={styles.sectionHeading}>Dokumentasi Kegiatan Remaja</Text>
@@ -274,66 +261,6 @@ export const SupportifScreen: React.FC = () => {
           })}
         </View>
       </View>
-
-      {/* ============================================================== */}
-      {/* 5. AGENDA & LOKAKARYA REMAJA (EDITORIAL CALENDAR)             */}
-      {/* ============================================================== */}
-      <View style={styles.eventsSection}>
-        <View style={styles.sectionHeaderWrap}>
-          <Text style={styles.kicker}>AGENDA MENDATANG</Text>
-          <Text style={styles.sectionHeading}>Agenda & Lokakarya Remaja</Text>
-          <Text style={styles.sectionSub}>
-            Kegiatan pengembangan diri dan pelatihan konseling sebaya di Karawang
-          </Text>
-        </View>
-
-        <View style={styles.eventsList}>
-          {eventsList.map((ev, index) => {
-            const dateParts = ev.date.split(' ');
-            const day = dateParts[0] || '15';
-            const month = (dateParts[1] || 'NOV').toUpperCase();
-            const isLast = index === eventsList.length - 1;
-
-            return (
-              <View
-                key={ev.id}
-                style={[styles.eventRow, !isLast && styles.eventRowBorder]}
-              >
-                {/* Kolom Tanggal Kalender Editorial */}
-                <View style={styles.eventDateCol}>
-                  <Text style={styles.eventDay}>{day}</Text>
-                  <Text style={styles.eventMonth}>{month}</Text>
-                </View>
-
-                {/* Kolom Informasi Acara */}
-                <View style={styles.eventContentCol}>
-                  <Text style={styles.eventTitle}>{ev.title}</Text>
-
-                  <View style={styles.eventDetailLine}>
-                    <Clock size={12} color={colors.textMuted} />
-                    <Text style={styles.eventDetailText}>{ev.time}</Text>
-                  </View>
-
-                  <View style={styles.eventDetailLine}>
-                    <MapPin size={12} color={colors.textMuted} />
-                    <Text style={styles.eventDetailText}>{ev.location}</Text>
-                  </View>
-
-                  <Text style={styles.eventOrganizer}>
-                    Penyelenggara: {ev.organizer}
-                  </Text>
-
-                  <Text style={styles.eventDescription}>{ev.description}</Text>
-
-                  <View style={styles.eventStatusWrap}>
-                    <Text style={styles.eventQuotaText}>{ev.quota}</Text>
-                  </View>
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      </View>
       </View>
     </ScreenContainer>
   );
@@ -378,33 +305,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 19,
     marginTop: 4,
-  },
-  trustBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.surface,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.borderLight,
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  trustIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.brandGreen[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trustText: {
-    flex: 1,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.textSecondary,
   },
 
   /* ============================================================== */
@@ -588,93 +488,6 @@ const styles = StyleSheet.create({
   },
   memberCountText: {
     fontSize: 11.5,
-    color: colors.textMuted,
-  },
-
-  /* ============================================================== */
-  /* AGENDA & LOKAKARYA REMAJA                                      */
-  /* ============================================================== */
-  eventsSection: {
-    marginTop: 16,
-    paddingTop: 24,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.borderLight,
-  },
-  eventsList: {
-    marginTop: 8,
-    paddingHorizontal: 20,
-  },
-  eventRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 14,
-    paddingBottom: 20,
-    marginBottom: 18,
-  },
-  eventRowBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.borderLight,
-  },
-  eventDateCol: {
-    width: 44,
-    alignItems: 'center',
-    paddingVertical: 8,
-    backgroundColor: colors.brandBlue[50],
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.brandBlue[100],
-  },
-  eventDay: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.brandBlue[700],
-    lineHeight: 22,
-  },
-  eventMonth: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: colors.brandBlue[600],
-    letterSpacing: 0.5,
-    marginTop: 1,
-  },
-  eventContentCol: {
-    flex: 1,
-  },
-  eventTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    lineHeight: 19,
-  },
-  eventDetailLine: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  eventDetailText: {
-    fontSize: 11.5,
-    color: colors.textMuted,
-    flex: 1,
-  },
-  eventOrganizer: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: colors.brandBlue[600],
-    marginTop: 4,
-  },
-  eventDescription: {
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.textSecondary,
-    marginTop: 6,
-  },
-  eventStatusWrap: {
-    marginTop: 6,
-  },
-  eventQuotaText: {
-    fontSize: 11,
-    fontWeight: '500',
     color: colors.textMuted,
   },
 });

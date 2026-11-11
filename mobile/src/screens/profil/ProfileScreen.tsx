@@ -37,7 +37,6 @@ export const ProfileScreen: React.FC = () => {
     switchTab,
     articles,
     openLogoutDialog,
-    openCrisisModal,
     bookings,
   } = useApp();
 
@@ -171,13 +170,18 @@ export const ProfileScreen: React.FC = () => {
   ];
 
   // Section Group 3: Bantuan dan Informasi
-  const helpMenuItems = [
+  const helpMenuItems: Array<{
+    id: string;
+    title: string;
+    subtitle?: string;
+    icon: any;
+    action?: () => void;
+    isDanger?: boolean;
+  }> = [
     {
       id: 'help_center',
       title: 'Pusat Bantuan',
-      subtitle: 'Hotline Krisis SEJIWA 119 & panduan darurat',
       icon: FilledHelpCircle,
-      action: () => openCrisisModal(),
     },
     {
       id: 'about_teman_sebaya',
@@ -194,9 +198,9 @@ export const ProfileScreen: React.FC = () => {
     items: Array<{
       id: string;
       title: string;
-      subtitle: string;
+      subtitle?: string;
       icon: any;
-      action: () => void;
+      action?: () => void;
       isDanger?: boolean;
     }>
   ) => {
@@ -214,12 +218,14 @@ export const ProfileScreen: React.FC = () => {
             const isLast = index === items.length - 1;
             const isDanger = item.isDanger;
             const iconColor = isDanger ? colors.crisis.dangerText : colors.brandBlue[600];
+            const isClickable = typeof item.action === 'function';
 
             return (
               <TouchableOpacity
                 key={item.id}
-                activeOpacity={0.65}
-                onPress={item.action}
+                activeOpacity={isClickable ? 0.65 : 1}
+                onPress={isClickable ? item.action : undefined}
+                disabled={!isClickable}
                 style={[
                   styles.menuRow,
                   !isLast && styles.menuRowBorder,
@@ -250,21 +256,25 @@ export const ProfileScreen: React.FC = () => {
                   >
                     {item.title}
                   </Text>
-                  <Text
-                    style={[
-                      styles.menuSubtitle,
-                      isDanger && styles.menuDangerSubtitle,
-                    ]}
-                  >
-                    {item.subtitle}
-                  </Text>
+                  {item.subtitle ? (
+                    <Text
+                      style={[
+                        styles.menuSubtitle,
+                        isDanger && styles.menuDangerSubtitle,
+                      ]}
+                    >
+                      {item.subtitle}
+                    </Text>
+                  ) : null}
                 </View>
 
-                {/* Trailing Chevron */}
-                <ChevronRight
-                  size={18}
-                  color={isDanger ? colors.crisis.dangerText : colors.textPlaceholder}
-                />
+                {/* Trailing Chevron — only if clickable */}
+                {isClickable ? (
+                  <ChevronRight
+                    size={18}
+                    color={isDanger ? colors.crisis.dangerText : colors.textPlaceholder}
+                  />
+                ) : null}
               </TouchableOpacity>
             );
           })}

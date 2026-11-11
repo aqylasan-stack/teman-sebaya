@@ -35,25 +35,25 @@ export const MoodCard: React.FC = () => {
     switch (emotion) {
       case 'Bahagia':
         return {
-          bgColor: colors.accentAmber[50],
-          borderColor: colors.accentAmber[500],
-          textColor: colors.accentAmber[600],
+          bgColor: '#FEF08A',
+          borderColor: '#FACC15',
+          textColor: '#854D0E',
           badgeBg: '#FEF3C7',
           badgeText: '#92400E',
         };
       case 'Sedih':
         return {
-          bgColor: colors.brandBlue[50],
-          borderColor: colors.brandBlue[500],
-          textColor: colors.brandBlue[600],
-          badgeBg: '#DBEAFE',
+          bgColor: '#DBEAFE',
+          borderColor: '#93C5FD',
+          textColor: '#1E40AF',
+          badgeBg: '#BFDBFE',
           badgeText: '#1E40AF',
         };
       case 'Marah':
         return {
-          bgColor: colors.crisis.dangerBg,
-          borderColor: colors.crisis.dangerBorder,
-          textColor: colors.crisis.dangerText,
+          bgColor: '#FECACA',
+          borderColor: '#F87171',
+          textColor: '#991B1B',
           badgeBg: '#FEE2E2',
           badgeText: '#991B1B',
         };
@@ -61,9 +61,9 @@ export const MoodCard: React.FC = () => {
       case 'Tenang':
       default:
         return {
-          bgColor: '#FDFBF7',
-          borderColor: '#D8C4B0',
-          textColor: '#8A6642',
+          bgColor: '#EDE3D5',
+          borderColor: '#CBB49C',
+          textColor: '#5A3E26',
           badgeBg: '#F5EDE4',
           badgeText: '#705030',
         };

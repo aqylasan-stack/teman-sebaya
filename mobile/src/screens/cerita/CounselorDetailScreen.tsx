@@ -102,7 +102,7 @@ export const CounselorDetailScreen: React.FC = () => {
                 </Text>
               </View>
               <View style={styles.statChip}>
-                <Briefcase size={13} color="#D97706" />
+                <Briefcase size={13} color="#D97706" fill="#D97706" />
                 <Text style={styles.statChipText}>
                   {counselor.experience || '1 - 3 Tahun'}
                 </Text>
@@ -122,7 +122,7 @@ export const CounselorDetailScreen: React.FC = () => {
             <View style={styles.reviewsHeader}>
               <Text style={styles.sectionTitle}>Ulasan Klien</Text>
               <View style={styles.ratingBadge}>
-                <ThumbsUp size={13} color="#0284C7" />
+                <ThumbsUp size={12} color="#0284C7" fill="#0284C7" />
                 <Text style={styles.ratingBadgeText}>
                   {counselor.positiveRatingPct || 98}% ( {counselor.reviewCount} Review )
                 </Text>
@@ -340,14 +340,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
-    backgroundColor: '#EAF5FC',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9', // Neutral Slate 100
   },
   ratingBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11.5,
+    fontWeight: '600',
     color: '#0284C7',
   },
   reviewsList: {

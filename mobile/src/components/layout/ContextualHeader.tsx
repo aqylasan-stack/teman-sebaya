@@ -4,13 +4,14 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { useApp } from '../../state/AppContext';
 
-interface ContextualHeaderProps {
+export interface ContextualHeaderProps {
   title: string;
   subtitle?: string;
   onBack?: () => void;
   showCrisisButton?: boolean;
   rightAction?: React.ReactNode;
   avatarSource?: ImageSourcePropType;
+  variant?: 'default' | 'blue';
 }
 
 export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
@@ -20,8 +21,10 @@ export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
   showCrisisButton = false,
   rightAction,
   avatarSource,
+  variant = 'default',
 }) => {
   const { goBack, openCrisisModal } = useApp();
+  const isBlue = variant === 'blue';
 
   const handleBack = () => {
     if (onBack) {
@@ -32,30 +35,42 @@ export const ContextualHeader: React.FC<ContextualHeaderProps> = ({
   };
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, isBlue && styles.headerBlue]}>
       {/* Back button */}
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={handleBack}
-        style={styles.backButton}
+        style={[styles.backButton, isBlue && styles.backButtonBlue]}
+        accessibilityRole="button"
+        accessibilityLabel="Kembali"
       >
-        <ArrowLeft size={20} color={colors.textPrimary} />
+        <ArrowLeft
+          size={20}
+          color={isBlue ? colors.brandBlue[600] : colors.textPrimary}
+          strokeWidth={2.4}
+        />
       </TouchableOpacity>
 
       {/* Avatar (if provided) */}
       {avatarSource && (
-        <View style={styles.avatarContainer}>
+        <View style={[styles.avatarContainer, isBlue && styles.avatarContainerBlue]}>
           <Image source={avatarSource} style={styles.avatarImage} resizeMode="cover" />
         </View>
       )}
 
       {/* Title & subtitle */}
       <View style={styles.titleContainer}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text
+          style={[styles.title, isBlue && styles.titleBlue]}
+          numberOfLines={1}
+        >
           {title}
         </Text>
         {subtitle && (
-          <Text style={styles.subtitle} numberOfLines={1}>
+          <Text
+            style={[styles.subtitle, isBlue && styles.subtitleBlue]}
+            numberOfLines={1}
+          >
             {subtitle}
           </Text>
         )}
@@ -154,6 +169,30 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 36,
+  },
+  headerBlue: {
+    backgroundColor: colors.brandBlue[600],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.brandBlue[700],
+  },
+  backButtonBlue: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  avatarContainerBlue: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.85)',
+  },
+  titleBlue: {
+    color: '#FFFFFF',
+  },
+  subtitleBlue: {
+    color: 'rgba(255, 255, 255, 0.88)',
   },
 });
 

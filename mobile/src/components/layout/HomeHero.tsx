@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { Bell, Clock, ArrowRight } from 'lucide-react-native';
+import { Bell, ArrowRight } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '../../theme';
 import { useApp } from '../../state/AppContext';
 import { PrimaryEmotion } from '../../types';
@@ -18,6 +19,7 @@ interface MoodOption {
   image: any;
   bgColor: string;
   borderColor: string;
+  textColor: string;
 }
 
 const MOOD_OPTIONS: MoodOption[] = [
@@ -27,6 +29,7 @@ const MOOD_OPTIONS: MoodOption[] = [
     image: require('../../../assets/emojis/emoji_bahagia.png'),
     bgColor: '#FEF9C3', // Warm sunny yellow tint
     borderColor: '#FDE047',
+    textColor: '#854D0E',
   },
   {
     key: 'Biasa Saja',
@@ -34,20 +37,23 @@ const MOOD_OPTIONS: MoodOption[] = [
     image: require('../../../assets/emojis/emoji_biasa.png'),
     bgColor: '#F5EDE4', // Calm warm beige tint
     borderColor: '#D8C5B0',
+    textColor: '#705030',
   },
   {
     key: 'Sedih',
     label: 'Sedih',
     image: require('../../../assets/emojis/emoji_sedih.png'),
-    bgColor: '#DBEAFE', // Soft blue tint
-    borderColor: '#93C5FD',
+    bgColor: '#EFF6FF', // Soft royal blue tint
+    borderColor: '#BFDBFE',
+    textColor: '#1E40AF',
   },
   {
     key: 'Marah',
     label: 'Marah',
     image: require('../../../assets/emojis/emoji_marah.png'),
     bgColor: '#FEE2E2', // Soft coral red tint
-    borderColor: '#FCA5A5',
+    borderColor: '#FECACA',
+    textColor: '#991B1B',
   },
 ];
 
@@ -59,6 +65,7 @@ const MOOD_OPTIONS: MoodOption[] = [
  * 3. Daily Mood Interaction: Replaces search bar with cohesive 4-emotion interactive dock or actual recorded mood summary.
  */
 export const HomeHero: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const { user, todayMood, dailyMoodStatus, navigateTo, switchTab } = useApp();
 
   // Dynamic time-based greeting word based on local device time
@@ -97,25 +104,45 @@ export const HomeHero: React.FC = () => {
     switch (emotion) {
       case 'Bahagia':
         return {
-          bg: '#FEF9C3',
-          border: '#FDE047',
+          bg: '#FEF08A',
+          border: '#FACC15',
+          textHighlight: '#B45309', // Warm amber-gold
+          pillBg: '#FEF9C3',
+          pillBorder: '#FDE047',
+          pillText: '#854D0E',
+          cardBorder: '#FEF08A',
         };
       case 'Sedih':
         return {
           bg: '#DBEAFE',
           border: '#93C5FD',
+          textHighlight: '#2563EB', // Calm royal blue
+          pillBg: '#EFF6FF',
+          pillBorder: '#BFDBFE',
+          pillText: '#1D4ED8',
+          cardBorder: '#DBEAFE',
         };
       case 'Marah':
         return {
-          bg: '#FEE2E2',
-          border: '#FCA5A5',
+          bg: '#FECACA',
+          border: '#F87171',
+          textHighlight: '#DC2626', // Crimson red
+          pillBg: '#FEE2E2',
+          pillBorder: '#FECACA',
+          pillText: '#991B1B',
+          cardBorder: '#FECACA',
         };
       case 'Biasa Saja':
       case 'Tenang':
       default:
         return {
-          bg: '#F5EDE4',
-          border: '#D8C5B0',
+          bg: '#EDE3D5',
+          border: '#CBB49C',
+          textHighlight: '#705030', // Warm neutral earth brown
+          pillBg: '#F5EDE4',
+          pillBorder: '#D8C5B0',
+          pillText: '#705030',
+          cardBorder: '#E7DDD3',
         };
     }
   };
@@ -136,7 +163,7 @@ export const HomeHero: React.FC = () => {
     : null;
 
   return (
-    <View style={styles.heroWrapper}>
+    <View style={[styles.heroWrapper, { paddingTop: insets.top + 8 }]}>
       {/* Background Line-Art Pattern */}
       <HomePattern opacity={0.16} />
 
@@ -182,41 +209,29 @@ export const HomeHero: React.FC = () => {
       {/* ============================================================== */}
       {isCheckedIn ? (
         /* KONDISI A: SUDAH CHECK-IN -> Tampilkan Kartu Status Ringkas & Elegan */
-        <View style={styles.moodCardContainer}>
-          <View style={styles.completedHeaderRow}>
-            <View style={styles.statusIndicatorRow}>
-              <View style={styles.greenIndicatorDot} />
-              <Text style={styles.completedStatusTitle}>Mood Hari Ini Tercatat</Text>
-            </View>
-            <View style={styles.timeBadgeRow}>
-              <Clock size={11} color="#64748B" style={{ marginRight: 4 }} />
-              <Text style={styles.timeBadgeText}>
-                {todayMood.timeString || 'Hari Ini'}
-              </Text>
-            </View>
-          </View>
-
+        <View
+          style={[
+            styles.moodCardContainer,
+            currentTheme?.cardBorder ? { borderColor: currentTheme.cardBorder } : null,
+          ]}
+        >
           <View style={styles.completedContentRow}>
-            <View
-              style={[
-                styles.completedEmojiCircle,
-                {
-                  backgroundColor: currentTheme?.bg || '#FEF9C3',
-                  borderColor: currentTheme?.border || '#FDE047',
-                },
-              ]}
-            >
-              <Image
-                source={getEmotionImage(todayMood.primaryEmotion)}
-                style={styles.completedEmojiImg}
-                resizeMode="contain"
-              />
-            </View>
+            {/* Bersih tanpa lingkaran/glow latar belakang di belakang emoji */}
+            <Image
+              source={getEmotionImage(todayMood.primaryEmotion)}
+              style={styles.completedEmojiImg}
+              resizeMode="contain"
+            />
 
             <View style={styles.completedTextCol}>
               <Text style={styles.completedPrimaryText}>
                 Kamu merasa{' '}
-                <Text style={styles.primaryEmotionHighlight}>
+                <Text
+                  style={[
+                    styles.primaryEmotionHighlight,
+                    { color: currentTheme?.textHighlight || colors.brandBlue[600] },
+                  ]}
+                >
                   {todayMood.primaryEmotion}
                 </Text>
               </Text>
@@ -236,11 +251,24 @@ export const HomeHero: React.FC = () => {
                   selectedEmotion: todayMood.primaryEmotion,
                 })
               }
-              style={styles.modifyPillBtn}
+              style={[
+                styles.modifyPillBtn,
+                {
+                  backgroundColor: currentTheme?.pillBg || '#EFF6FF',
+                  borderColor: currentTheme?.pillBorder || '#BFDBFE',
+                },
+              ]}
               accessibilityRole="button"
               accessibilityLabel="Ubah catatan mood hari ini"
             >
-              <Text style={styles.modifyPillText}>Ubah</Text>
+              <Text
+                style={[
+                  styles.modifyPillText,
+                  { color: currentTheme?.pillText || '#2563EB' },
+                ]}
+              >
+                Ubah
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -270,9 +298,14 @@ export const HomeHero: React.FC = () => {
             {MOOD_OPTIONS.map((item) => (
               <TouchableOpacity
                 key={item.key}
-                activeOpacity={0.75}
+                activeOpacity={0.78}
                 onPress={() => handleSelectEmotion(item.key)}
-                style={styles.emotionItemBtn}
+                style={[
+                  styles.emotionItemBtn,
+                  {
+                    backgroundColor: item.bgColor,
+                  },
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel={`Catat mood ${item.label}`}
               >
@@ -281,7 +314,13 @@ export const HomeHero: React.FC = () => {
                   style={styles.dockEmojiImage}
                   resizeMode="contain"
                 />
-                <Text style={styles.emotionLabelText} numberOfLines={1}>
+                <Text
+                  style={[
+                    styles.emotionLabelText,
+                    { color: item.textColor },
+                  ]}
+                  numberOfLines={1}
+                >
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -296,19 +335,19 @@ export const HomeHero: React.FC = () => {
 const styles = StyleSheet.create({
   /* Hero Main Container: Brand Blue with Pattern & Curved Bottom Edges */
   heroWrapper: {
-    backgroundColor: colors.brandBlue[600], // #2563EB - Samakan dengan warna tombol brand
+    backgroundColor: colors.brandBlue[600], // #2563EB - Primary Brand Blue
     position: 'relative',
     overflow: 'hidden',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 22,
+    paddingBottom: 20,
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
+    elevation: 3,
   },
 
   /* 1. Identity Bar */
@@ -316,41 +355,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   brandLogo: {
-    width: 92,
-    height: 52,
+    width: 86,
+    height: 44,
   },
 
   /* Notification Button: Clean Elevated Circular Button */
   notificationBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#FFFFFF',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 2,
     position: 'relative',
   },
   notificationDot: {
     position: 'absolute',
-    top: 10,
-    right: 11,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: 8,
+    right: 9,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: '#EF4444',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
@@ -358,34 +397,34 @@ const styles = StyleSheet.create({
 
   /* 2. Hero Headline */
   headlineBlock: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   timeGreetingText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '500',
     color: 'rgba(255, 255, 255, 0.90)',
-    marginBottom: 6,
+    marginBottom: 4,
     letterSpacing: 0.1,
   },
   mainHeadlineText: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 22,
+    fontWeight: '700',
     color: '#FFFFFF',
-    lineHeight: 32,
-    letterSpacing: -0.4,
+    lineHeight: 29,
+    letterSpacing: -0.3,
   },
 
   /* 3. Daily Mood Integrated Card Container */
   moodCardContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    borderRadius: 20,
+    paddingVertical: 13,
+    paddingHorizontal: 15,
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.10,
-    shadowRadius: 14,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.4)',
   },
@@ -395,11 +434,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   dockPromptText: {
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#475569',
   },
   dockDetailLink: {
@@ -409,7 +448,7 @@ const styles = StyleSheet.create({
   },
   dockDetailLinkText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#2563EB',
   },
   emotionsRow: {
@@ -422,75 +461,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 9,
     paddingHorizontal: 2,
-    borderRadius: 16,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderRadius: 14,
   },
   dockEmojiImage: {
-    width: 34,
-    height: 34,
-    marginBottom: 6,
+    width: 32,
+    height: 32,
+    marginBottom: 5,
   },
   emotionLabelText: {
     fontSize: 11.5,
-    fontWeight: '700',
+    fontWeight: '500',
     color: '#334155',
   },
 
   /* Sudah Check-in Completed Card Styles */
-  completedHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-  },
-  statusIndicatorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  greenIndicatorDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#10B981',
-    marginRight: 6,
-  },
-  completedStatusTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#15803D',
-  },
-  timeBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeBadgeText: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '500',
-  },
   completedContentRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  completedEmojiCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    marginRight: 12,
-  },
   completedEmojiImg: {
-    width: 30,
-    height: 30,
+    width: 36,
+    height: 36,
+    marginRight: 12,
   },
   completedTextCol: {
     flex: 1,
@@ -498,30 +492,27 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   completedPrimaryText: {
-    fontSize: 14.5,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '500',
     color: '#0F172A',
     marginBottom: 2,
   },
   primaryEmotionHighlight: {
-    color: '#2563EB',
-    fontWeight: '800',
+    fontWeight: '700',
   },
   completedSubText: {
     fontSize: 11.5,
+    fontWeight: '400',
     color: '#64748B',
   },
   modifyPillBtn: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: '#EFF6FF',
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
   },
   modifyPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2563EB',
+    fontSize: 11.5,
+    fontWeight: '600',
   },
 });

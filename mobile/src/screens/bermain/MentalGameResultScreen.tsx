@@ -7,7 +7,10 @@ import {
   ScrollView,
   Share,
   Image,
+  StatusBar,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import {
   ChevronUp,
@@ -21,12 +24,16 @@ import {
   Layers,
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
-import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import {
   PSYCH_GAME_CATEGORIES,
   PsychGameCategory,
 } from '../../data/gamePsychData';
 import { useApp } from '../../state/AppContext';
+import {
+  ButterflyEffectPattern,
+  NameThatFeelingPattern,
+  DigitalDilemmaPattern,
+} from '../../components/gameplay/GameplayPatterns';
 
 // ============================================================================
 // GAME-SPECIFIC REFLECTIVE LEARNING GENERATOR (Non-Clinical, Pedagogical)
@@ -137,27 +144,30 @@ interface ResultThemeTokens {
   shadow: string;
 }
 
-const RESULT_THEMES: Record<'senang' | 'harmoni' | 'sedih', ResultThemeTokens> = {
-  senang: {
-    primary: '#2563EB',      // Brand Blue 600
-    primaryDark: '#1D4ED8',  // Brand Blue 700
-    primaryLight: '#EFF6FF', // Brand Blue 50
-    primaryBorder: '#BFDBFE',// Brand Blue 200
+const CATEGORY_THEMES: Record<
+  'karakter' | 'resiliensi' | 'relasi',
+  ResultThemeTokens
+> = {
+  karakter: {
+    primary: '#2563EB',      // brandBlue[600]
+    primaryDark: '#1D4ED8',  // brandBlue[700]
+    primaryLight: '#EFF6FF', // brandBlue[50]
+    primaryBorder: '#BFDBFE',// brandBlue[200]
     shadow: '#2563EB',
   },
-  harmoni: {
-    primary: '#2563EB',      // Unified Brand Blue 600
-    primaryDark: '#1D4ED8',  // Brand Blue 700
-    primaryLight: '#EFF6FF', // Brand Blue 50
-    primaryBorder: '#BFDBFE',// Brand Blue 200
-    shadow: '#2563EB',
+  resiliensi: {
+    primary: '#059669',      // brandGreen[600]
+    primaryDark: '#047857',  // brandGreen[700]
+    primaryLight: '#ECFDF5', // brandGreen[50]
+    primaryBorder: '#A7F3D0',// brandGreen[200]
+    shadow: '#059669',
   },
-  sedih: {
-    primary: '#2563EB',      // Unified Brand Blue 600
-    primaryDark: '#1D4ED8',  // Brand Blue 700
-    primaryLight: '#EFF6FF', // Brand Blue 50
-    primaryBorder: '#BFDBFE',// Brand Blue 200
-    shadow: '#2563EB',
+  relasi: {
+    primary: '#7C3AED',      // accentViolet[600]
+    primaryDark: '#6D28D9',  // accentViolet[700]
+    primaryLight: '#F5F3FF', // accentViolet[50]
+    primaryBorder: '#DDD6FE',// accentViolet[200]
+    shadow: '#7C3AED',
   },
 };
 
@@ -166,6 +176,7 @@ const RESULT_THEMES: Record<'senang' | 'harmoni' | 'sedih', ResultThemeTokens> =
 // ============================================================================
 
 export const MentalGameResultScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const { screenParams, popTo, switchTab } = useApp();
   const [isSaved, setIsSaved] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -218,8 +229,22 @@ export const MentalGameResultScreen: React.FC = () => {
     (archetype.variant as 'senang' | 'sedih' | 'harmoni') ||
     (totalScore >= 180 ? 'senang' : 'sedih');
 
-  // Harmonized dynamic color tokens across the screen
-  const currentTheme = RESULT_THEMES[badgeVariant] || RESULT_THEMES.senang;
+  // Harmonized dynamic color tokens based on active game category
+  const currentTheme =
+    CATEGORY_THEMES[categoryId] || CATEGORY_THEMES.relasi;
+
+  const renderPattern = () => {
+    switch (categoryId) {
+      case 'karakter':
+        return <ButterflyEffectPattern opacity={0.18} />;
+      case 'resiliensi':
+        return <NameThatFeelingPattern opacity={0.18} />;
+      case 'relasi':
+        return <DigitalDilemmaPattern opacity={0.18} />;
+      default:
+        return <DigitalDilemmaPattern opacity={0.18} />;
+    }
+  };
 
   // Evaluate whether result is high/optimal (good) or developmental (growth needed)
   const isGoodResult =
@@ -305,9 +330,32 @@ export const MentalGameResultScreen: React.FC = () => {
   };
 
   return (
-    <ScreenContainer scrollable={false}>
+    <View style={styles.screen}>
+      <StatusBar barStyle="light-content" />
+
+      {/* ================================================================== */}
+      {/* 1. DOMINANT HERO BACKGROUND WITH CONTEXTUAL LINE-ART PATTERN       */}
+      {/* ================================================================== */}
+      <View
+        style={[
+          styles.heroBackgroundArea,
+          { backgroundColor: currentTheme.primary },
+        ]}
+      >
+        {renderPattern()}
+      </View>
+
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop:
+              Platform.OS === 'android'
+                ? Math.max(insets.top, 16) + 12
+                : insets.top + 12,
+            paddingBottom: spacing.xxl + insets.bottom,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* ================================================================== */}
@@ -562,7 +610,7 @@ export const MentalGameResultScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 };
 
@@ -571,23 +619,40 @@ export const MentalGameResultScreen: React.FC = () => {
 // ============================================================================
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#F8FAFC', // Slate 50 Canvas (Design System 2.3)
+    position: 'relative',
+  },
+
+  /* Dominant Colored Hero Area with Curved Bottom Edge behind the card */
+  heroBackgroundArea: {
+    position: 'absolute',
+    top: -200,
+    left: 0,
+    right: 0,
+    height: 540, // 200px overscroll buffer + 340px visible hero behind card
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
+  },
+
   scrollContent: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
-    backgroundColor: '#F8FAFC', // Slate 50 Canvas (Design System 2.3)
   },
 
   /* MAIN CARD */
   mainCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
     overflow: 'hidden',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 16,
+    elevation: 4,
   },
 
   /* Top Banner */

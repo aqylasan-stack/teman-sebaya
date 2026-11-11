@@ -45,47 +45,53 @@ const EMOTION_THEMES: Record<
     softBg: string;
     borderColor: string;
     textColor: string;
+    titleColor: string;
     image: any;
   }
 > = {
   Bahagia: {
     label: 'Bahagia',
     color: '#EAB308',
-    softBg: '#FFFDF0',
-    borderColor: '#FEF08A',
+    softBg: '#FEF08A', // Solid, vibrant sunny yellow fill (NOT washed out pale #FEF9C3)
+    borderColor: '#FACC15',
     textColor: '#854D0E',
+    titleColor: '#713F12',
     image: require('../../../assets/emojis/emoji_bahagia.png'),
   },
   Sedih: {
     label: 'Sedih',
     color: '#2563EB',
-    softBg: '#F6FAFF',
-    borderColor: '#BFDBFE',
+    softBg: '#DBEAFE', // Solid, distinct royal blue fill (NOT transparent-looking #EFF6FF)
+    borderColor: '#93C5FD',
     textColor: '#1E40AF',
+    titleColor: '#1E3A8A',
     image: require('../../../assets/emojis/emoji_sedih.png'),
   },
   Marah: {
     label: 'Marah',
     color: '#DC2626',
-    softBg: '#FEF7F7',
-    borderColor: '#FECACA',
+    softBg: '#FECACA', // Solid, distinct coral-red fill (NOT pale #FEE2E2)
+    borderColor: '#F87171',
     textColor: '#991B1B',
+    titleColor: '#7F1D1D',
     image: require('../../../assets/emojis/emoji_marah.png'),
   },
   'Biasa Saja': {
     label: 'Biasa Saja',
     color: '#8C6E54',
-    softBg: '#FDFBF9',
-    borderColor: '#E8DCCE',
-    textColor: '#705030',
+    softBg: '#EDE3D5', // Solid, distinct warm earthy stone-tan fill (NOT washed out #F5EDE4)
+    borderColor: '#CBB49C',
+    textColor: '#5A3E26',
+    titleColor: '#422C19',
     image: require('../../../assets/emojis/emoji_biasa.png'),
   },
   Tenang: {
     label: 'Biasa Saja',
     color: '#8C6E54',
-    softBg: '#FDFBF9',
-    borderColor: '#E8DCCE',
-    textColor: '#705030',
+    softBg: '#EDE3D5',
+    borderColor: '#CBB49C',
+    textColor: '#5A3E26',
+    titleColor: '#422C19',
     image: require('../../../assets/emojis/emoji_biasa.png'),
   },
 };
@@ -131,7 +137,7 @@ export const MoodScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      style={{ backgroundColor: colors.brandGreen[600] }}
+      style={{ backgroundColor: colors.brandBlue[600] }}
       contentContainerStyle={styles.containerContent}
       withBottomNav
     >
@@ -173,8 +179,10 @@ export const MoodScreen: React.FC = () => {
               MOOD HARI INI
             </Text>
             <View style={styles.todayHeaderRight}>
-              <Text style={styles.todayEditLink}>Lihat Detail</Text>
-              <ChevronRight size={13} color={colors.brandBlue[600]} />
+              <Text style={[styles.todayEditLink, { color: todayTheme.textColor }]}>
+                Lihat Detail
+              </Text>
+              <ChevronRight size={13} color={todayTheme.textColor} />
             </View>
           </View>
 
@@ -190,14 +198,19 @@ export const MoodScreen: React.FC = () => {
               <Text
                 style={[
                   styles.todayEmotionTitle,
-                  { color: todayTheme.color },
+                  { color: todayTheme.titleColor || todayTheme.color },
                 ]}
               >
                 {todayTheme.label}
               </Text>
 
               {todayMood.secondaryEmotions.length > 0 && (
-                <Text style={styles.todaySubEmotionText}>
+                <Text
+                  style={[
+                    styles.todaySubEmotionText,
+                    { color: todayTheme.textColor },
+                  ]}
+                >
                   {todayMood.secondaryEmotions[0]}
                 </Text>
               )}
@@ -226,28 +239,46 @@ export const MoodScreen: React.FC = () => {
             Pilih satu emosi yang paling menggambarkan perasaanmu:
           </Text>
 
-          {/* 4 Emoji Standalone Touchables */}
+          {/* 4 Emotion Cards with Borderless Tinted Background */}
           <View style={styles.quickEmojisRow}>
-            {QUICK_EMOTIONS.map((item) => (
-              <TouchableOpacity
-                key={item.name}
-                activeOpacity={0.7}
-                style={styles.quickEmojiItem}
-                onPress={() =>
-                  navigateTo('daily_mood_checkin', {
-                    selectedEmotion: item.name,
-                    initialStage: 2,
-                  })
-                }
-              >
-                <Image
-                  source={item.image}
-                  style={styles.quickEmojiImg}
-                  resizeMode="contain"
-                />
-                <Text style={styles.quickEmojiLabel}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {QUICK_EMOTIONS.map((item) => {
+              const theme = EMOTION_THEMES[item.name] || DEFAULT_THEME;
+              return (
+                <TouchableOpacity
+                  key={item.name}
+                  activeOpacity={0.78}
+                  style={[
+                    styles.quickEmojiItem,
+                    {
+                      backgroundColor: theme.softBg,
+                    },
+                  ]}
+                  onPress={() =>
+                    navigateTo('daily_mood_checkin', {
+                      selectedEmotion: item.name,
+                      initialStage: 2,
+                    })
+                  }
+                  accessibilityRole="button"
+                  accessibilityLabel={`Catat mood ${item.label}`}
+                >
+                  <Image
+                    source={item.image}
+                    style={styles.quickEmojiImg}
+                    resizeMode="contain"
+                  />
+                  <Text
+                    style={[
+                      styles.quickEmojiLabel,
+                      { color: theme.textColor },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       )}
@@ -492,14 +523,14 @@ const styles = StyleSheet.create({
   },
   todayCard: {
     borderRadius: borderRadius.lg,
-    borderWidth: 1,
+    borderWidth: 1.5,
     padding: spacing.lg,
     marginBottom: spacing.layout.sectionGap,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 1,
+    elevation: 2,
   },
   todayCardHeader: {
     flexDirection: 'row',
@@ -519,8 +550,7 @@ const styles = StyleSheet.create({
   },
   todayEditLink: {
     fontSize: 11.5,
-    fontWeight: '600',
-    color: colors.brandBlue[600],
+    fontWeight: '700',
   },
   todayHeroRow: {
     flexDirection: 'row',
@@ -541,13 +571,13 @@ const styles = StyleSheet.create({
   },
   todaySubEmotionText: {
     fontSize: 13.5,
-    fontWeight: '500',
-    color: colors.textSecondary,
+    fontWeight: '600',
     marginTop: 2,
   },
   todayTimeText: {
     fontSize: 11.5,
-    color: colors.textMuted,
+    fontWeight: '500',
+    color: '#475569',
     marginTop: 4,
   },
   todayNoteWrap: {
@@ -598,21 +628,24 @@ const styles = StyleSheet.create({
   quickEmojisRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 8,
   },
   quickEmojiItem: {
     alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
-    paddingVertical: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 2,
+    borderRadius: 16,
   },
   quickEmojiImg: {
-    width: 42,
-    height: 42,
+    width: 38,
+    height: 38,
     marginBottom: 6,
   },
   quickEmojiLabel: {
     fontSize: 11.5,
-    fontWeight: '600',
-    color: colors.textSecondary,
+    fontWeight: '700',
   },
   sectionWrap: {
     marginBottom: spacing.layout.sectionGap,

@@ -28,10 +28,21 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   withBottomNav = false,
 }) => {
   const insets = useSafeAreaInsets();
+  const topBarBg = (style as any)?.backgroundColor;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }, style]}>
-      {header}
+    <View style={[styles.container, { backgroundColor: colors.canvas }]}>
+      {/* Fixed Contextual Header (if provided by detail/sub-screens) */}
+      {header && (
+        <View
+          style={{
+            paddingTop: insets.top,
+            backgroundColor: topBarBg || colors.surface,
+          }}
+        >
+          {header}
+        </View>
+      )}
 
       {scrollable ? (
         <ScrollView
@@ -43,12 +54,26 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
           ]}
           showsVerticalScrollIndicator={false}
         >
+          {/* Top Overscroll Bounce Filler (Seamlessly matches Hero Header background) */}
+          {topBarBg && (
+            <View
+              style={{
+                position: 'absolute',
+                top: -1000,
+                left: 0,
+                right: 0,
+                height: 1000,
+                backgroundColor: topBarBg,
+              }}
+            />
+          )}
           {children}
         </ScrollView>
       ) : (
         <View
           style={[
             styles.nonScrollContent,
+            !header && { paddingTop: insets.top },
             withBottomNav && { paddingBottom: 92 + insets.bottom },
             contentContainerStyle,
           ]}
@@ -71,6 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: spacing.layout.screenPaddingHorizontal,
     paddingTop: spacing.layout.screenPaddingTop,
     paddingBottom: spacing.layout.screenPaddingBottom,

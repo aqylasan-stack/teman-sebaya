@@ -7,6 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { ArrowLeft, Info, X, CheckCircle2 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '../../theme';
 import { Modal } from '../common/Modal';
 import {
@@ -53,34 +54,34 @@ const FEATURE_THEMES: Record<
   }
 > = {
   mood: {
-    bg: colors.brandGreen[600], // #059669
+    bg: colors.brandBlue[600],
     badgeBg: 'rgba(255, 255, 255, 0.18)',
     badgeBorder: 'rgba(255, 255, 255, 0.32)',
-    accentColor: colors.brandGreen[600],
+    accentColor: colors.brandBlue[600],
   },
   cerita: {
-    bg: colors.brandBlue[600], // #2563EB
+    bg: colors.brandBlue[600],
     badgeBg: 'rgba(255, 255, 255, 0.18)',
     badgeBorder: 'rgba(255, 255, 255, 0.32)',
     accentColor: colors.brandBlue[600],
   },
   belajar: {
-    bg: colors.accentAmber[600], // #D97706
+    bg: colors.brandBlue[600],
     badgeBg: 'rgba(255, 255, 255, 0.18)',
     badgeBorder: 'rgba(255, 255, 255, 0.32)',
-    accentColor: colors.accentAmber[600],
+    accentColor: colors.brandBlue[600],
   },
   bermain: {
-    bg: colors.accentViolet[600], // #7C3AED
+    bg: colors.brandBlue[600],
     badgeBg: 'rgba(255, 255, 255, 0.18)',
     badgeBorder: 'rgba(255, 255, 255, 0.32)',
-    accentColor: colors.accentViolet[600],
+    accentColor: colors.brandBlue[600],
   },
   supportif: {
-    bg: colors.accentPeach[600], // #EA580C
+    bg: colors.brandBlue[600],
     badgeBg: 'rgba(255, 255, 255, 0.18)',
     badgeBorder: 'rgba(255, 255, 255, 0.32)',
-    accentColor: colors.accentPeach[600],
+    accentColor: colors.brandBlue[600],
   },
 };
 
@@ -94,6 +95,7 @@ export const FeatureHeroHeader: React.FC<FeatureHeroHeaderProps> = ({
   rightAction,
   style,
 }) => {
+  const insets = useSafeAreaInsets();
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
   const theme = FEATURE_THEMES[feature];
 
@@ -117,83 +119,134 @@ export const FeatureHeroHeader: React.FC<FeatureHeroHeaderProps> = ({
 
   const BadgeIcon = badge?.icon;
 
+  const hasRightAction = Boolean(rightAction || infoContent);
+
+  const renderBadge = () => {
+    if (!badge) return null;
+    return (
+      <TouchableOpacity
+        activeOpacity={badge.onPress ? 0.8 : 1}
+        onPress={badge.onPress}
+        disabled={!badge.onPress}
+        style={[
+          styles.badgePill,
+          {
+            backgroundColor: theme.badgeBg,
+            borderColor: theme.badgeBorder,
+          },
+        ]}
+        accessibilityRole={badge.onPress ? 'button' : 'text'}
+        accessibilityLabel={badge.label}
+      >
+        {BadgeIcon && (
+          <BadgeIcon
+            size={13}
+            color="#FFFFFF"
+            style={{ marginRight: 6 }}
+          />
+        )}
+        <Text style={styles.badgeText}>{badge.label}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <>
-      <View style={[styles.heroContainer, { backgroundColor: theme.bg }, style]}>
+      <View
+        style={[
+          styles.heroContainer,
+          {
+            backgroundColor: theme.bg,
+            paddingTop: insets.top + 8,
+            minHeight: insets.top + 160,
+          },
+          style,
+        ]}
+      >
         {/* Background Line-Art Pattern */}
         {renderPattern()}
 
-        {/* Top Control Bar: Back Button (Left) & Info / Action (Right) */}
-        <View style={styles.topControlRow}>
-          {onBack ? (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={onBack}
-              style={styles.whiteCircleBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Kembali ke halaman sebelumnya"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <ArrowLeft size={18} color="#0F172A" strokeWidth={2.4} />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.placeholderBox} />
-          )}
-
-          <View style={styles.rightActionsRow}>
-            {rightAction}
-
-            {infoContent && (
+        {onBack ? (
+          <>
+            {/* Top Control Bar: Back Button (Left) & Info / Action (Right) */}
+            <View style={styles.topControlRow}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => setIsInfoModalVisible(true)}
+                onPress={onBack}
                 style={styles.whiteCircleBtn}
                 accessibilityRole="button"
-                accessibilityLabel={`Informasi tentang ${title}`}
+                accessibilityLabel="Kembali ke halaman sebelumnya"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Info size={18} color={theme.accentColor} strokeWidth={2.4} />
+                <ArrowLeft size={18} color={theme.accentColor} strokeWidth={2.4} />
               </TouchableOpacity>
+
+              <View style={styles.rightActionsRow}>
+                {rightAction}
+
+                {infoContent && (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => setIsInfoModalVisible(true)}
+                    style={styles.whiteCircleBtn}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Informasi tentang ${title}`}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Info size={18} color={theme.accentColor} strokeWidth={2.4} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            {/* Content Hierarchy: Dominant Title, Subtitle, & Badge */}
+            <View style={styles.contentWrap}>
+              <Text style={styles.heroTitle} numberOfLines={2}>
+                {title}
+              </Text>
+
+              <Text style={styles.heroSubtitle} numberOfLines={2}>
+                {subtitle}
+              </Text>
+
+              {renderBadge()}
+            </View>
+          </>
+        ) : (
+          /* Tanpa back button: Ukuran tinggi sama dengan Teman Bermain, teks berada di tengah vertikal yang seimbang */
+          <View style={styles.centeredHeroBody}>
+            <View style={styles.centeredTextWrap}>
+              <Text style={styles.heroTitle} numberOfLines={2}>
+                {title}
+              </Text>
+
+              <Text style={styles.heroSubtitle} numberOfLines={2}>
+                {subtitle}
+              </Text>
+
+              {renderBadge()}
+            </View>
+
+            {hasRightAction && (
+              <View style={styles.centeredRightActionWrap}>
+                {rightAction}
+
+                {infoContent && (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => setIsInfoModalVisible(true)}
+                    style={styles.whiteCircleBtn}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Informasi tentang ${title}`}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Info size={18} color={theme.accentColor} strokeWidth={2.4} />
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
           </View>
-        </View>
-
-        {/* Content Hierarchy: Dominant Title, Subtitle, & Badge */}
-        <View style={styles.contentWrap}>
-          <Text style={styles.heroTitle} numberOfLines={2}>
-            {title}
-          </Text>
-
-          <Text style={styles.heroSubtitle} numberOfLines={2}>
-            {subtitle}
-          </Text>
-
-          {badge && (
-            <TouchableOpacity
-              activeOpacity={badge.onPress ? 0.8 : 1}
-              onPress={badge.onPress}
-              disabled={!badge.onPress}
-              style={[
-                styles.badgePill,
-                {
-                  backgroundColor: theme.badgeBg,
-                  borderColor: theme.badgeBorder,
-                },
-              ]}
-              accessibilityRole={badge.onPress ? 'button' : 'text'}
-              accessibilityLabel={badge.label}
-            >
-              {BadgeIcon && (
-                <BadgeIcon
-                  size={13}
-                  color="#FFFFFF"
-                  style={{ marginRight: 6 }}
-                />
-              )}
-              <Text style={styles.badgeText}>{badge.label}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        )}
       </View>
 
       {/* Info Modal Dialog */}
@@ -281,6 +334,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     minHeight: 42,
     marginBottom: 10,
+  },
+  /* Tanpa back button: Konten berada di tengah vertikal dengan proporsi yang seimbang */
+  centeredHeroBody: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  centeredTextWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingRight: 16,
+  },
+  centeredRightActionWrap: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   placeholderBox: {
     width: 38,

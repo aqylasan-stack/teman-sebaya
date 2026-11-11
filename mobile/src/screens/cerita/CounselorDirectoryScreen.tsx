@@ -29,6 +29,42 @@ import { colors, spacing, borderRadius } from '../../theme';
 import { useApp } from '../../state/AppContext';
 import { Counselor } from '../../types';
 
+// ============================================================================
+// CALENDAR LOCALIZATION & DATE HELPERS
+// ============================================================================
+const CALENDAR_MONTH_NAMES_ID = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+];
+const CALENDAR_MONTH_NAMES_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+];
+const CALENDAR_DAY_NAMES_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+const toDateStr = (y: number, m: number, d: number) => {
+  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+};
+
+const formatHeaderDate = (dateStr: string) => {
+  if (!dateStr) return '-';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  const dayName = CALENDAR_DAY_NAMES_SHORT[dateObj.getDay()];
+  const monthName = CALENDAR_MONTH_NAMES_SHORT[m - 1];
+  return `${dayName}, ${d} ${monthName}`;
+};
+
+const formatButtonRange = (startStr: string, endStr: string) => {
+  if (!startStr) return 'Pilih tanggal';
+  const [, sm, sd] = startStr.split('-').map(Number);
+  const startFormatted = `${sd} ${CALENDAR_MONTH_NAMES_SHORT[sm - 1]}`;
+  if (!endStr || endStr === startStr) return startFormatted;
+  const [, em, ed] = endStr.split('-').map(Number);
+  const endFormatted = `${ed} ${CALENDAR_MONTH_NAMES_SHORT[em - 1]}`;
+  return `${startFormatted} - ${endFormatted}`;
+};
+
 export const CounselorDirectoryScreen: React.FC = () => {
   const { screenParams, navigateTo, goBack, counselors, bookings } = useApp();
   const insets = useSafeAreaInsets();
@@ -61,9 +97,73 @@ export const CounselorDirectoryScreen: React.FC = () => {
   ];
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 
-  // Calendar modal date range (10 Nov - 26 Nov 2026 per screenshot)
-  const [rangeStart, setRangeStart] = useState(10);
-  const [rangeEnd, setRangeEnd] = useState(26);
+  // Calendar modal state: month view & selected date range
+  const [viewYear, setViewYear] = useState<number>(2026);
+  const [viewMonth, setViewMonth] = useState<number>(10); // 0-indexed: 10 = November
+  const [selectedStartDate, setSelectedStartDate] = useState<string>('2026-11-10');
+  const [selectedEndDate, setSelectedEndDate] = useState<string>('2026-11-26');
+  const [tempStartDate, setTempStartDate] = useState<string>('2026-11-10');
+  const [tempEndDate, setTempEndDate] = useState<string>('2026-11-26');
+  const [calendarTouchStartX, setCalendarTouchStartX] = useState<number | null>(null);
+
+  const handlePrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((prev) => prev - 1);
+    } else {
+      setViewMonth((prev) => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((prev) => prev + 1);
+    } else {
+      setViewMonth((prev) => prev + 1);
+    }
+  };
+
+  const handleDayPress = (dateStr: string) => {
+    if (!tempStartDate || (tempStartDate && tempEndDate)) {
+      setTempStartDate(dateStr);
+      setTempEndDate('');
+    } else {
+      if (dateStr < tempStartDate) {
+        setTempStartDate(dateStr);
+        setTempEndDate(tempStartDate);
+      } else {
+        setTempEndDate(dateStr);
+      }
+    }
+  };
+
+  const handleTouchStart = (e: any) => {
+    setCalendarTouchStartX(e.nativeEvent.pageX);
+  };
+
+  const handleTouchEnd = (e: any) => {
+    if (calendarTouchStartX !== null) {
+      const deltaX = e.nativeEvent.pageX - calendarTouchStartX;
+      if (deltaX < -40) {
+        handleNextMonth();
+      } else if (deltaX > 40) {
+        handlePrevMonth();
+      }
+      setCalendarTouchStartX(null);
+    }
+  };
+
+  const openCalendarModal = () => {
+    setTempStartDate(selectedStartDate);
+    setTempEndDate(selectedEndDate);
+    if (selectedStartDate) {
+      const [y, m] = selectedStartDate.split('-').map(Number);
+      setViewYear(y);
+      setViewMonth(m - 1);
+    }
+    setShowCalendarModal(true);
+  };
 
   // Date strip days
   const dateStrip = [
@@ -318,12 +418,12 @@ export const CounselorDirectoryScreen: React.FC = () => {
 
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => setShowCalendarModal(true)}
+                onPress={openCalendarModal}
                 style={styles.datePickerButton}
               >
                 <CalendarIcon size={15} color={colors.brandBlue[600]} />
                 <Text style={styles.datePickerButtonText}>
-                  Pilih tanggal  {rangeStart} Nov - {rangeEnd} Nov
+                  Pilih tanggal  {formatButtonRange(selectedStartDate, selectedEndDate)}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -442,17 +542,17 @@ export const CounselorDirectoryScreen: React.FC = () => {
                     {/* Counselor Full Name */}
                     <Text style={styles.counselorName}>{counselor.name}</Text>
 
-                    {/* Sub-chips Row: Thumbs up rating & Briefcase experience (Filled style, borderless) */}
+                    {/* Sub-chips Row: Thumbs up rating & Briefcase experience */}
                     <View style={styles.subChipsRow}>
-                      <View style={[styles.subChip, styles.subChipRating]}>
-                        <ThumbsUp size={11} color="#0284C7" />
+                      <View style={styles.subChip}>
+                        <ThumbsUp size={11.5} color="#0284C7" fill="#0284C7" />
                         <Text style={[styles.subChipText, styles.subChipRatingText]}>
-                          {counselor.positiveRatingPct || 98}% ( {counselor.reviewCount} Review )
+                          {counselor.positiveRatingPct || 98}% ({counselor.reviewCount} Review)
                         </Text>
                       </View>
 
-                      <View style={[styles.subChip, styles.subChipExp]}>
-                        <Briefcase size={11} color="#D97706" />
+                      <View style={styles.subChip}>
+                        <Briefcase size={11.5} color="#D97706" fill="#D97706" />
                         <Text style={[styles.subChipText, styles.subChipExpText]}>
                           {counselor.experience || '0 - 2 Tahun'}
                         </Text>
@@ -574,26 +674,54 @@ export const CounselorDirectoryScreen: React.FC = () => {
           onRequestClose={() => setShowCalendarModal(false)}
         >
           <View style={styles.modalCenterOverlay}>
-            <View style={styles.calendarCard}>
+            <View
+              style={styles.calendarCard}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               {/* Range header */}
               <View style={styles.calendarRangeHeader}>
                 <View style={styles.calendarRangeCol}>
                   <Text style={styles.calendarRangeLabel}>Dari</Text>
-                  <Text style={styles.calendarRangeValue}>Sel, {rangeStart} Nov</Text>
+                  <Text style={styles.calendarRangeValue}>
+                    {formatHeaderDate(tempStartDate || selectedStartDate)}
+                  </Text>
                 </View>
                 <View style={styles.calendarRangeCol}>
                   <Text style={styles.calendarRangeLabel}>Hingga</Text>
-                  <Text style={styles.calendarRangeValue}>Kam, {rangeEnd} Nov</Text>
+                  <Text style={styles.calendarRangeValue}>
+                    {tempEndDate
+                      ? formatHeaderDate(tempEndDate)
+                      : tempStartDate
+                      ? formatHeaderDate(tempStartDate)
+                      : '-'}
+                  </Text>
                 </View>
               </View>
 
               {/* Month navigation */}
               <View style={styles.calendarMonthHeader}>
-                <TouchableOpacity style={styles.calNavBtn}>
+                <TouchableOpacity
+                  style={styles.calNavBtn}
+                  activeOpacity={0.7}
+                  onPress={handlePrevMonth}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessibilityLabel="Bulan sebelumnya"
+                >
                   <ChevronLeft size={20} color={colors.textPrimary} />
                 </TouchableOpacity>
-                <Text style={styles.calendarMonthTitle}>November 2026</Text>
-                <TouchableOpacity style={styles.calNavBtn}>
+
+                <Text style={styles.calendarMonthTitle}>
+                  {CALENDAR_MONTH_NAMES_ID[viewMonth]} {viewYear}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.calNavBtn}
+                  activeOpacity={0.7}
+                  onPress={handleNextMonth}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessibilityLabel="Bulan berikutnya"
+                >
                   <ChevronRight size={20} color={colors.textPrimary} />
                 </TouchableOpacity>
               </View>
@@ -607,52 +735,81 @@ export const CounselorDirectoryScreen: React.FC = () => {
                 ))}
               </View>
 
-              {/* Calendar Grid (Days 1 to 30) */}
+              {/* Calendar Grid (Dynamic per month & year) */}
               <View style={styles.calendarGrid}>
-                {/* 6 placeholder days for previous month */}
-                {[26, 27, 28, 29, 30, 31].map((p, idx) => (
-                  <View key={`prev_${idx}`} style={styles.calDayBox}>
-                    <Text style={styles.calDayTextMuted}>{p}</Text>
-                  </View>
-                ))}
+                {(() => {
+                  const daysInViewMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+                  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+                  const leadingDaysCount = (firstDayOfWeek + 6) % 7;
+                  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+                  const leadingDays: number[] = [];
+                  for (let i = leadingDaysCount - 1; i >= 0; i--) {
+                    leadingDays.push(daysInPrevMonth - i);
+                  }
 
-                {/* Days 1 to 30 of November */}
-                {Array.from({ length: 30 }).map((_, i) => {
-                  const day = i + 1;
-                  const isInRange = day >= rangeStart && day <= rangeEnd;
-                  const isStart = day === rangeStart;
-                  const isEnd = day === rangeEnd;
+                  const prevMonthIdx = viewMonth === 0 ? 11 : viewMonth - 1;
+                  const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
 
                   return (
-                    <TouchableOpacity
-                      key={day}
-                      activeOpacity={0.7}
-                      onPress={() => {
-                        if (day < rangeStart) {
-                          setRangeStart(day);
-                        } else {
-                          setRangeEnd(day);
-                        }
-                      }}
-                      style={[
-                        styles.calDayBox,
-                        isInRange && styles.calDayBoxInRange,
-                        isStart && styles.calDayBoxStart,
-                        isEnd && styles.calDayBoxEnd,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.calDayText,
-                          isInRange && styles.calDayTextInRange,
-                          (isStart || isEnd) && styles.calDayTextEndpoint,
-                        ]}
-                      >
-                        {day}
-                      </Text>
-                    </TouchableOpacity>
+                    <>
+                      {/* Placeholder days from previous month */}
+                      {leadingDays.map((p, idx) => {
+                        const prevDateStr = toDateStr(prevYear, prevMonthIdx, p);
+                        return (
+                          <TouchableOpacity
+                            key={`prev_${idx}`}
+                            style={styles.calDayBox}
+                            activeOpacity={0.6}
+                            onPress={() => {
+                              handlePrevMonth();
+                              handleDayPress(prevDateStr);
+                            }}
+                          >
+                            <Text style={styles.calDayTextMuted}>{p}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+
+                      {/* Days of current active month */}
+                      {Array.from({ length: daysInViewMonth }).map((_, i) => {
+                        const day = i + 1;
+                        const dateStr = toDateStr(viewYear, viewMonth, day);
+
+                        const isStart = tempStartDate === dateStr;
+                        const isEnd = tempEndDate === dateStr;
+                        const isInRange =
+                          tempStartDate &&
+                          tempEndDate &&
+                          dateStr >= tempStartDate &&
+                          dateStr <= tempEndDate;
+
+                        return (
+                          <TouchableOpacity
+                            key={day}
+                            activeOpacity={0.7}
+                            onPress={() => handleDayPress(dateStr)}
+                            style={[
+                              styles.calDayBox,
+                              isInRange && styles.calDayBoxInRange,
+                              isStart && styles.calDayBoxStart,
+                              isEnd && styles.calDayBoxEnd,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.calDayText,
+                                isInRange && styles.calDayTextInRange,
+                                (isStart || isEnd) && styles.calDayTextEndpoint,
+                              ]}
+                            >
+                              {day}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </>
                   );
-                })}
+                })()}
               </View>
 
               {/* Actions row */}
@@ -667,7 +824,13 @@ export const CounselorDirectoryScreen: React.FC = () => {
 
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => setShowCalendarModal(false)}
+                  onPress={() => {
+                    if (tempStartDate) {
+                      setSelectedStartDate(tempStartDate);
+                      setSelectedEndDate(tempEndDate || tempStartDate);
+                    }
+                    setShowCalendarModal(false);
+                  }}
                   style={styles.calApplyBtn}
                 >
                   <Text style={styles.calApplyBtnText}>Terapkan</Text>
@@ -988,7 +1151,7 @@ const styles = StyleSheet.create({
   counselorCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
   },
@@ -999,7 +1162,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F2A4A',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 15,
   },
   avatarInitials: {
     fontSize: 20,
@@ -1012,23 +1175,23 @@ const styles = StyleSheet.create({
   badgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
+    gap: 8,
+    marginBottom: 8,
   },
   roleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 12,
     backgroundColor: '#EAF5FC',
   },
   roleBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#0284C7',
   },
   availabilityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
     borderRadius: 12,
   },
   badgeAvailable: {
@@ -1038,7 +1201,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
   },
   availabilityBadgeText: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '600',
   },
   badgeAvailableText: {
@@ -1048,39 +1211,36 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
   counselorName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
+    lineHeight: 22,
     color: colors.textPrimary,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subChipsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 9,
   },
   subChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
     borderRadius: 12,
+    backgroundColor: '#F1F5F9', // Neutral Slate 100 according to design system
   },
-  subChipRating: {
-    backgroundColor: '#EAF5FC',
+  subChipText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#334155', // Charcoal Slate 700 default
   },
   subChipRatingText: {
     color: '#0284C7',
   },
-  subChipExp: {
-    backgroundColor: '#FEF3C7',
-  },
   subChipExpText: {
     color: '#D97706',
-  },
-  subChipText: {
-    fontSize: 10.5,
-    fontWeight: '600',
   },
   emptyState: {
     paddingVertical: 40,
