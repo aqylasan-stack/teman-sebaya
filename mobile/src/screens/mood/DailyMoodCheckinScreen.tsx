@@ -269,26 +269,34 @@ export const DailyMoodCheckinScreen: React.FC = () => {
   // State alur 3 tahap: 1 = Mood Selection, 2 = Emotion Exploration, 3 = Affirmation
   const [stage, setStage] = useState<1 | 2 | 3>(screenParams?.initialStage || 1);
 
-  // Pilihan emosi - utamakan data hari ini jika sudah pernah diisi, atau preferensi awal onboarding
+  // Pilihan emosi - utamakan parameter yang dioper (misal dari 1-tap HomeHero), baru data hari ini
   const initialEmotionKey =
-    todayMood?.primaryEmotion ||
     screenParams?.selectedEmotion ||
+    todayMood?.primaryEmotion ||
     user?.initialEmotion ||
     'Bahagia';
 
   const [selectedEmotionKey, setSelectedEmotionKey] = useState<string>(initialEmotionKey);
   const currentConfig = EMOTION_CONFIGS[selectedEmotionKey] || EMOTION_CONFIGS.Bahagia;
 
-  // Subemosi: utamakan yang sudah dipilih pengguna, atau default ke subemosi pertama dari emosi aktif
-  const [selectedSubEmotion, setSelectedSubEmotion] = useState<string>(
-    todayMood?.secondaryEmotions?.[0] || currentConfig.subEmotions[0]
-  );
+  // Subemosi: utamakan yang valid untuk emosi aktif
+  const initialSubEmotion =
+    todayMood?.secondaryEmotions?.[0] &&
+    currentConfig.subEmotions.includes(todayMood.secondaryEmotions[0])
+      ? todayMood.secondaryEmotions[0]
+      : currentConfig.subEmotions[0];
 
-  // Cerita / momen opsional (hanya terbuka jika pengguna sudah pernah menulis catatan aktual)
+  const [selectedSubEmotion, setSelectedSubEmotion] = useState<string>(initialSubEmotion);
+
+  // Cerita / momen opsional (hanya terbuka jika pengguna sudah pernah menulis catatan aktual secara eksplisit)
+  const initialNote =
+    todayMood?.note && todayMood.note.trim() && todayMood.note !== 'Refleksi orientasi bersama Thoriq'
+      ? todayMood.note.trim()
+      : '';
   const [isStoryExpanded, setIsStoryExpanded] = useState<boolean>(
-    Boolean(todayMood?.note && todayMood.note.trim())
+    Boolean(initialNote)
   );
-  const [storyNote, setStoryNote] = useState<string>(todayMood?.note || '');
+  const [storyNote, setStoryNote] = useState<string>(initialNote);
 
   // Feedback evaluasi di tahap 3
   const [feedbackVote, setFeedbackVote] = useState<'up' | 'down' | null>(null);

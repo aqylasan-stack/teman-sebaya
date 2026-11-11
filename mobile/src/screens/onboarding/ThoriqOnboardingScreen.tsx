@@ -383,10 +383,16 @@ export const ThoriqOnboardingScreen: React.FC = () => {
 
   const handleFinishOnboarding = (skipMood = false) => {
     const cleanNick = nickname.trim() || 'Teman';
+    const nickParts = cleanNick.split(/\s+/);
+    const calculatedInitials = nickParts.length >= 2
+      ? (nickParts[0][0] + nickParts[1][0]).toUpperCase()
+      : cleanNick.slice(0, 1).toUpperCase();
+
     updateProfile({
       nickname: cleanNick,
       name: user?.name || cleanNick,
       pseudonym: cleanNick,
+      avatarInitials: calculatedInitials,
       city: city.trim(),
       interests: selectedInterests,
       age: computedAge,
@@ -399,9 +405,9 @@ export const ThoriqOnboardingScreen: React.FC = () => {
     if (!skipMood && selectedMood) {
       saveMood(
         selectedMood,
-        ['Awal Perjalanan'],
-        'Refleksi orientasi bersama Thoriq',
-        ['Orientasi']
+        [],
+        '',
+        []
       );
     } else {
       // PENTING: Pengguna melewati tahap pengisian mood saat onboarding Register!

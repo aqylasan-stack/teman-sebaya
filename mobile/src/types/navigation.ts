@@ -49,6 +49,7 @@ export type ScreenType =
   | 'community_events'
   | 'teman_supportif'
   | 'edit_profile'
+  | 'jadwal_cerita'
   | 'privacy_settings'
   | 'notification_settings'
   | 'about_app';

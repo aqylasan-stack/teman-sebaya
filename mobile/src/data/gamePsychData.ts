@@ -53,7 +53,7 @@ export interface PsychGameCategory {
 export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
   // ==========================================
   // GAME 1: BUTTERFLY EFFECT (DECISION-BASED STORY)
-  // 8 Scenarios (Sesuai Standar Kuis & Asesmen Psikologi Remaja)
+  // 7 Scenarios (Sesuai Standar Kuis & Asesmen Psikologi Remaja)
   // ==========================================
   {
     id: 'karakter',
@@ -74,7 +74,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kelasmu terpilih untuk menampilkan karya pada Festival Budaya Sekolah minggu depan. Teman-temanmu bingung memilih antara format drama konvensional atau pertunjukan multimedia interaktif. Apa langkah yang kamu ambil?',
         contextBanner: 'Skenario 1: Ide Festival Kreatif',
-        illustration: require('../../assets/games/thumbnails/thumb_butterfly.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_1.png'),
         choices: [
           {
             id: 'c1',
@@ -114,7 +114,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Dua hari menjelang festival, salah satu anggota tim tampak pendiam dan belum menyelesaikan bagian naskahnya karena sedang ada masalah keluarga. Sikapmu?',
         contextBanner: 'Skenario 2: Hambatan Tim & Empati',
-        illustration: require('../../assets/articles/article_komunikasi.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_2.png'),
         choices: [
           {
             id: 'c1',
@@ -154,7 +154,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Tepat saat gladi resik panggung, laptop proyektor mati mendadak dan sound system berdengung keras. Penonton mulai gaduh berbisik. Reaksi spontanmu?',
         contextBanner: 'Skenario 3: Krisis Tak Terduga',
-        illustration: require('../../assets/articles/article_asertif.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_3.png'),
         choices: [
           {
             id: 'c1',
@@ -194,7 +194,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Terjadi perdebatan sengit antara tim dekorasi dan tim naskah mengenai tema warna backdrop panggung. Waktu persiapan tinggal 3 jam lagi. Bagaimana kamu menengahi?',
         contextBanner: 'Skenario 4: Menengahi Beda Pendapat',
-        illustration: require('../../assets/articles/article_konflik.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_4.png'),
         choices: [
           {
             id: 'c1',
@@ -224,7 +224,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           '30 menit sebelum giliran kelasmu tampil, pemeran utama mendadak gemetar hebat dan mengaku tidak sanggup naik ke atas panggung karena demam panggung akut. Apa tindakanmu?',
         contextBanner: 'Skenario 5: Demam Panggung Sahabat',
-        illustration: require('../../assets/articles/article_regulasi_emosi.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_5.png'),
         choices: [
           {
             id: 'c1',
@@ -254,7 +254,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Di tengah pementasan, seorang teman lupa dialog krusial dan hening selama beberapa detik di hadapan ratusan pasang mata penonton. Respon spontanmu dari samping panggung?',
         contextBanner: 'Skenario 6: Ujian Improvisasi',
-        illustration: require('../../assets/games/thumbnails/thumb_efficacy.jpg'),
+        illustration: require('../../assets/games/butterfly/butterfly_soal_6.png'),
         choices: [
           {
             id: 'c1',
@@ -282,39 +282,9 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         id: 'k1_s7',
         order: 7,
         situation:
-          'Setelah pertunjukan selesai, penonton bersorak kagum, namun salah satu dewan juri memberi catatan kritis yang cukup tajam tentang alur cerita. Bagaimana caramu menerima umpan balik tersebut?',
-        contextBanner: 'Skenario 7: Menerima Masukan',
-        illustration: require('../../assets/articles/article_mengenal_diri.jpg'),
-        choices: [
-          {
-            id: 'c1',
-            text: 'Mendengarkan dengan terbuka, mencatat poin evaluasinya untuk bahan belajar karya panggung berikutnya.',
-            tag: 'Growth Mindset',
-            energyChange: 5,
-            clarityChange: 15,
-            traitScores: { openness: 15, stability: 12 },
-            feedback: 'Pola pikir bertumbuhmu membuat kritik menjadi batu loncatan yang berharga.',
-            learningPoint: 'Kritik membangun bukanlah penolakan diri, melainkan peta menuju keahlian yang lebih matang.',
-          },
-          {
-            id: 'c2',
-            text: 'Fokus merayakan kerja keras seluruh tim dulu karena semua telah berjuang maksimal melampaui rasa takut.',
-            tag: 'Apresiasi Usaha',
-            energyChange: 10,
-            clarityChange: 10,
-            traitScores: { agreeableness: 15, extraversion: 10 },
-            feedback: 'Menjaga moral tim setelah berjuang bersama adalah tanda kehangatan emosi.',
-            learningPoint: 'Apresiasi terhadap proses sama pentingnya dengan pencapaian hasil akhir.',
-          },
-        ],
-      },
-      {
-        id: 'k1_s8',
-        order: 8,
-        situation:
-          'Malam hari setelah festival berakhir, grup chat kelasmu dipenuhi curhatan haru dan evaluasi pencapaian bersama. Apa pesan penutup yang ingin kamu sampaikan kepada tim?',
-        contextBanner: 'Skenario 8: Refleksi Perjalanan',
-        illustration: require('../../assets/onboarding/onboarding_growth.jpg'),
+          'Malam hari setelah festival berakhir sukses, grup chat kelasmu dipenuhi curhatan haru dan evaluasi pencapaian bersama. Apa pesan penutup yang ingin kamu sampaikan kepada tim?',
+        contextBanner: 'Skenario 7: Refleksi Perjalanan',
+        illustration: require('../../assets/games/butterfly/butterfly_soal_7.png'),
         choices: [
           {
             id: 'c1',
@@ -341,7 +311,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
     ],
     archetypes: [
       {
-        minScore: 205,
+        minScore: 165,
         variant: 'senang',
         title: 'Sang Visioner Kolaboratif (The Collaborative Innovator)',
         subtitle: 'Eksplorasi Ide Baru & Kolaborasi Tim yang Seimbang',
@@ -362,7 +332,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         ],
       },
       {
-        minScore: 195,
+        minScore: 145,
         variant: 'harmoni',
         title: 'Sang Penjaga Harmoni (The Empathetic Harmonizer)',
         subtitle: 'Kepedulian Sosial & Tanggung Jawab Bersama',
@@ -773,7 +743,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Pukul 23.30 malam, saat matamu sudah mengantuk, ponselmu terus bergetar karena obrolan seru di grup pertemanan. Kamu merasa takut ketinggalan obrolan (FOMO). Pilihanmu?',
         contextBanner: 'Skenario 1: Menjaga Kualitas Tidur',
-        illustration: require('../../assets/articles/article_tidur_sehat.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_1.png'),
         choices: [
           {
             id: 'c1',
@@ -803,7 +773,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Seseorang membuat unggahan tanpa nama (menfess) yang menyindir teman dekatmu dengan tuduhan palsu. Grup mulai ramai membicarakannya. Apa sikapmu?',
         contextBanner: 'Skenario 2: Menyikapi Rumor Maya',
-        illustration: require('../../assets/articles/article_detoks.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_2.png'),
         choices: [
           {
             id: 'c1',
@@ -833,7 +803,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Teman-teman satu geng bermain game online mengajakmu mabar push rank semalaman sebelum hari ujian dimulai. Mereka bilang "cuma 1 ronde kok". Responmu?',
         contextBanner: 'Skenario 3: Godaan Gaming vs Prioritas',
-        illustration: require('../../assets/games/thumbnails/thumb_dilemma.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_3.png'),
         choices: [
           {
             id: 'c1',
@@ -863,7 +833,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Komentarmu yang berniat baik pada suatu postingan diserang secara agresif oleh netizen asing dengan kata-kata kasar. Jarimu gatal ingin membalas dendam. Langkahmu?',
         contextBanner: 'Skenario 4: Menghadapi Provokasi Netizen',
-        illustration: require('../../assets/articles/article_asertif.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_4.png'),
         choices: [
           {
             id: 'c1',
@@ -893,7 +863,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Seseorang meminta password akun media sosialmu dengan alasan "bukti keterbukaan dan rasa percaya dalam pertemanan". Bagaimana caramu meresponnya?',
         contextBanner: 'Skenario 5: Privasi & Keamanan Akun',
-        illustration: require('../../assets/articles/article_konflik.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_5.png'),
         choices: [
           {
             id: 'c1',
@@ -923,7 +893,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Algoritma media sosialmu menampilkan konten yang memuat tanda-tanda keputusasaan mendalam dari seseorang yang kamu kenal di sekolah. Tindakan pertamamu?',
         contextBanner: 'Skenario 6: Kewaspadaan Sosial & Kepedulian',
-        illustration: require('../../assets/articles/article_regulasi_emosi.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_6.png'),
         choices: [
           {
             id: 'c1',
@@ -953,7 +923,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Temanmu mengirim pesan "P" berkali-kali dan marah karena kamu tidak membalas chat dalam 10 menit saat kamu sedang makan malam bersama keluarga. Apa yang kamu jelaskan?',
         contextBanner: 'Skenario 7: Ekspektasi Balas Cepat',
-        illustration: require('../../assets/articles/article_komunikasi.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_7.png'),
         choices: [
           {
             id: 'c1',
@@ -983,7 +953,7 @@ export const PSYCH_GAME_CATEGORIES: PsychGameCategory[] = [
         situation:
           'Kamu menyadari screen time harianmu mencapai 7 jam dan membuat matamu lelah serta sulit fokus belajar. Komitmen digital wellbeing apa yang ingin kamu mulai hari ini?',
         contextBanner: 'Skenario 8: Komitmen Detoks Digital',
-        illustration: require('../../assets/onboarding/onboarding_mood.jpg'),
+        illustration: require('../../assets/games/digital/digital_soal_8.png'),
         choices: [
           {
             id: 'c1',

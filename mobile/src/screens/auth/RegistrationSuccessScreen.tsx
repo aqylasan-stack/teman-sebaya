@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { CheckCircle2, ArrowRight } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { Button } from '../../components/common/Button';
 import { useApp } from '../../state/AppContext';
@@ -16,9 +16,7 @@ export const RegistrationSuccessScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.iconCircle}>
-          <CheckCircle2 size={56} color={colors.brandGreen[600]} />
-        </View>
+        <Text style={styles.successEmoji}>🎉</Text>
 
         <Text style={styles.title}>Pendaftaran Berhasil!</Text>
         <Text style={styles.subtitle}>
@@ -59,14 +57,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.sm,
   },
-  iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.brandGreen[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xxl,
+  successEmoji: {
+    fontSize: 64,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
   },
   title: {
     fontSize: 22,

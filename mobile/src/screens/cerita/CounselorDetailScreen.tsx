@@ -16,7 +16,6 @@ import {
   Briefcase,
   ThumbsUp,
   Clock,
-  Sparkles,
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { useApp } from '../../state/AppContext';
@@ -43,7 +42,7 @@ export const CounselorDetailScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 16) : 8 }]}>
-        {/* Top Header Bar matching reference: Left back button, Brand text in center */}
+        {/* Top Header Bar: Tombol Kembali di kiri, Judul halaman di tengah */}
         <View style={styles.topBar}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -55,10 +54,7 @@ export const CounselorDetailScreen: React.FC = () => {
             <ChevronLeft size={28} color={colors.textPrimary} strokeWidth={2.2} />
           </TouchableOpacity>
 
-          <View style={styles.brandTitleWrap}>
-            <Sparkles size={16} color={colors.brandBlue[600]} />
-            <Text style={styles.brandTitle}>TEMAN SEBAYA</Text>
-          </View>
+          <Text style={styles.topBarTitle}>Profil Konselor</Text>
 
           <View style={styles.topBarPlaceholder} />
         </View>
@@ -211,16 +207,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
-  brandTitleWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  brandTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.brandBlue[600],
-    letterSpacing: 0.5,
+  topBarTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    letterSpacing: -0.2,
+    textAlign: 'center',
   },
   topBarPlaceholder: {
     width: 40,

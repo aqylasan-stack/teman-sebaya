@@ -442,18 +442,18 @@ export const CounselorDirectoryScreen: React.FC = () => {
                     {/* Counselor Full Name */}
                     <Text style={styles.counselorName}>{counselor.name}</Text>
 
-                    {/* Sub-chips Row: Thumbs up rating & Briefcase experience */}
+                    {/* Sub-chips Row: Thumbs up rating & Briefcase experience (Filled style, borderless) */}
                     <View style={styles.subChipsRow}>
-                      <View style={styles.subChip}>
+                      <View style={[styles.subChip, styles.subChipRating]}>
                         <ThumbsUp size={11} color="#0284C7" />
-                        <Text style={styles.subChipText}>
+                        <Text style={[styles.subChipText, styles.subChipRatingText]}>
                           {counselor.positiveRatingPct || 98}% ( {counselor.reviewCount} Review )
                         </Text>
                       </View>
 
-                      <View style={styles.subChip}>
+                      <View style={[styles.subChip, styles.subChipExp]}>
                         <Briefcase size={11} color="#D97706" />
-                        <Text style={styles.subChipText}>
+                        <Text style={[styles.subChipText, styles.subChipExpText]}>
                           {counselor.experience || '0 - 2 Tahun'}
                         </Text>
                       </View>
@@ -1063,16 +1063,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 3.5,
     borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  },
+  subChipRating: {
+    backgroundColor: '#EAF5FC',
+  },
+  subChipRatingText: {
+    color: '#0284C7',
+  },
+  subChipExp: {
+    backgroundColor: '#FEF3C7',
+  },
+  subChipExpText: {
+    color: '#D97706',
   },
   subChipText: {
     fontSize: 10.5,
     fontWeight: '600',
-    color: colors.textSecondary,
   },
   emptyState: {
     paddingVertical: 40,

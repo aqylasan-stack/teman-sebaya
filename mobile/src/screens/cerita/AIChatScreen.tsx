@@ -70,15 +70,15 @@ export const AIChatScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Quick Prompts if conversation is starting */}
-            {chatMessages.length <= 1 && (
-              <QuickPromptChips onSelectPrompt={(p) => sendAiMessage(p)} />
-            )}
-
             {/* Conversation Messages */}
             {chatMessages.map((msg) => (
               <ChatBubble key={msg.id} message={msg} />
             ))}
+
+            {/* Quick Prompts if conversation is starting */}
+            {chatMessages.length <= 1 && (
+              <QuickPromptChips onSelectPrompt={(p) => sendAiMessage(p)} />
+            )}
 
             {/* Loading / Typing State Indicator */}
             {isAiTyping && (

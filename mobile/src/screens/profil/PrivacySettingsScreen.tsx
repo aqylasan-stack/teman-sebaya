@@ -61,7 +61,9 @@ export const PrivacySettingsScreen: React.FC = () => {
             <Switch
               value={isAnonymous}
               onValueChange={handleToggleAnonymous}
-              trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+              trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#CBD5E1"
             />
           </View>
 
@@ -79,7 +81,9 @@ export const PrivacySettingsScreen: React.FC = () => {
             <Switch
               value={allowAiMood}
               onValueChange={handleToggleAiMood}
-              trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+              trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#CBD5E1"
             />
           </View>
 
@@ -97,7 +101,9 @@ export const PrivacySettingsScreen: React.FC = () => {
             <Switch
               value={isEndToEndEncrypted}
               onValueChange={setIsEndToEndEncrypted}
-              trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+              trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#CBD5E1"
             />
           </View>
         </View>

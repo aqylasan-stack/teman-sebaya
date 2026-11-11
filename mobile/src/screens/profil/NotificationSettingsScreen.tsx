@@ -81,7 +81,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Switch
             value={dailyReminder}
             onValueChange={handleToggleDailyReminder}
-            trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+            trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#CBD5E1"
           />
         </View>
 
@@ -141,7 +143,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Switch
             value={counselorReply}
             onValueChange={setCounselorReply}
-            trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+            trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#CBD5E1"
           />
         </View>
 
@@ -159,7 +163,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Switch
             value={sessionReminder}
             onValueChange={setSessionReminder}
-            trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+            trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#CBD5E1"
           />
         </View>
       </View>
@@ -184,7 +190,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Switch
             value={communityUpdates}
             onValueChange={setCommunityUpdates}
-            trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+            trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#CBD5E1"
           />
         </View>
 
@@ -202,7 +210,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Switch
             value={weeklyDigest}
             onValueChange={setWeeklyDigest}
-            trackColor={{ false: colors.borderMedium, true: colors.brandBlue[600] }}
+            trackColor={{ false: '#CBD5E1', true: colors.brandBlue[600] }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#CBD5E1"
           />
         </View>
       </View>

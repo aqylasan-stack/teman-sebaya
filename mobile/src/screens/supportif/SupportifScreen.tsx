@@ -15,7 +15,7 @@ import {
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { ContextualHeader } from '../../components/layout/ContextualHeader';
+import { FeatureHeroHeader } from '../../components/layout/FeatureHeroHeader';
 import { Button } from '../../components/common/Button';
 import { useApp } from '../../state/AppContext';
 
@@ -79,29 +79,42 @@ export const SupportifScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      header={<ContextualHeader title="Teman Supportif" onBack={goBack} />}
+      style={{ backgroundColor: colors.accentPeach[600] }}
       contentContainerStyle={styles.screenContainer}
     >
       {/* ============================================================== */}
-      {/* 1. EDITORIAL HEADER & SAFEGUARDING TRUST PLEDGE               */}
+      {/* 1. ILLUSTRATED HERO HEADER                                     */}
       {/* ============================================================== */}
-      <View style={styles.headerBlock}>
-        <Text style={styles.kicker}>JEJARING SEBAYA & KOMUNITAS</Text>
-        <Text style={styles.title}>Komunitas Sebaya & Aksi Positif</Text>
-        <Text style={styles.subtitle}>
-          Temukan ruang positif untuk belajar, berbagi cerita, dan bertumbuh bersama.
-        </Text>
-      </View>
+      <FeatureHeroHeader
+        feature="supportif"
+        title="Teman Supportif"
+        subtitle="Temukan ruang positif untuk belajar, berbagi cerita, dan bertumbuh bersama."
+        onBack={goBack}
+        infoContent={{
+          title: 'Tentang Teman Supportif',
+          description:
+            'Jejaring komunitas sebaya, forum PIK-R, dan GenRe yang memberikan wadah bertumbuh dan berinteraksi positif bagi remaja.',
+          bulletPoints: [
+            'Didampingi oleh pembina dan konselor sebaya bersertifikasi BKKBN.',
+            'Kegiatan edukatif, workshop, dan aksi kerelawanan nyata.',
+            'Ruang aman tanpa diskriminasi, saling mendukung dan inklusif.',
+          ],
+        }}
+      />
 
-      {/* Keamanan Komunitas — Terintegrasi Natural sebagai Trust Pledge */}
-      <View style={styles.trustBanner}>
-        <View style={styles.trustIconWrap}>
-          <ShieldCheck size={16} color={colors.brandGreen[600]} />
+      {/* ============================================================== */}
+      {/* 2. BODY CONTENT CANVAS                                         */}
+      {/* ============================================================== */}
+      <View style={styles.bodyContent}>
+        {/* Keamanan Komunitas — Terintegrasi Natural sebagai Trust Pledge */}
+        <View style={styles.trustBanner}>
+          <View style={styles.trustIconWrap}>
+            <ShieldCheck size={16} color={colors.brandGreen[600]} />
+          </View>
+          <Text style={styles.trustText}>
+            Semua kelompok didampingi oleh Pembina & Konselor Sebaya bersertifikasi BKKBN. Ruang aman tanpa diskriminasi.
+          </Text>
         </View>
-        <Text style={styles.trustText}>
-          Semua kelompok didampingi oleh Pembina & Konselor Sebaya bersertifikasi BKKBN. Ruang aman tanpa diskriminasi.
-        </Text>
-      </View>
 
       {/* ============================================================== */}
       {/* 2. DOKUMENTASI KEGIATAN REMAJA (EDITORIAL PHOTO GALLERY)      */}
@@ -321,6 +334,7 @@ export const SupportifScreen: React.FC = () => {
           })}
         </View>
       </View>
+      </View>
     </ScreenContainer>
   );
 };
@@ -328,9 +342,13 @@ export const SupportifScreen: React.FC = () => {
 const styles = StyleSheet.create({
   screenContainer: {
     paddingHorizontal: 0,
-    paddingTop: spacing.xs,
+    paddingTop: 0,
     paddingBottom: 64,
     backgroundColor: colors.canvas,
+  },
+  bodyContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
 
   /* ============================================================== */

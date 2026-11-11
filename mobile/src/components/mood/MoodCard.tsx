@@ -3,20 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {
   Smile,
   ArrowRight,
-  Sparkles,
   Clock,
-  CheckCircle2,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
-import { Card } from '../common/Card';
-import { Badge } from '../common/Badge';
-import { Button } from '../common/Button';
+import { colors, spacing, borderRadius } from '../../theme';
 import { useApp } from '../../state/AppContext';
 import { PrimaryEmotion } from '../../types';
 
 export const MoodCard: React.FC = () => {
-  const { dailyMoodStatus, todayMood, navigateTo, user } = useApp();
+  const { dailyMoodStatus, todayMood, navigateTo, switchTab } = useApp();
 
   // Helper aset emoji sesuai emosi utama
   const getEmotionImage = (emotion: PrimaryEmotion) => {
@@ -75,8 +71,8 @@ export const MoodCard: React.FC = () => {
   };
 
   /* -------------------------------------------------------------
-   * KONDISI 1: MOOD CHECK-IN COMPLETED
-   * Pengguna sudah menyelesaikan dan menyimpan mood hari ini secara riil
+   * KONDISI B: PENGGUNA SUDAH CHECK-IN
+   * Menampilkan data emosi aktual yang dipilih pengguna
    * ------------------------------------------------------------- */
   if (dailyMoodStatus === 'completed' && todayMood && todayMood.primaryEmotion) {
     const theme = getEmotionTheme(todayMood.primaryEmotion);
@@ -86,7 +82,7 @@ export const MoodCard: React.FC = () => {
         : null;
 
     return (
-      <Card variant="surface" style={styles.card}>
+      <View style={[styles.card, styles.completedCard]}>
         {/* Status Header: Menunjukkan status mood hari ini sudah tercatat */}
         <View style={styles.headerRow}>
           <View style={styles.titleWrap}>
@@ -94,8 +90,8 @@ export const MoodCard: React.FC = () => {
             <Text style={styles.headerTitle}>Mood Hari Ini Tercatat</Text>
           </View>
           <View style={styles.timeBadgeWrap}>
-            <Clock size={12} color={colors.textMuted} style={{ marginRight: 3 }} />
-            <Text style={styles.timeText}>{todayMood.timeString}</Text>
+            <Clock size={12} color="#64748B" style={{ marginRight: 4 }} />
+            <Text style={styles.timeText}>{todayMood.timeString || 'Hari Ini'}</Text>
           </View>
         </View>
 
@@ -123,135 +119,69 @@ export const MoodCard: React.FC = () => {
               ) : null}
             </View>
 
-              {todayMood.note && todayMood.note.trim() ? (
-                <Text style={styles.emotionNoteText} numberOfLines={2}>
-                  "{todayMood.note.trim()}"
-                </Text>
-              ) : null}
+            {todayMood.note && todayMood.note.trim() ? (
+              <Text style={styles.emotionNoteText} numberOfLines={2}>
+                "{todayMood.note.trim()}"
+              </Text>
+            ) : null}
           </View>
         </View>
 
-        {/* Action Row: Akses melihat afirmasi/detail & statistik */}
+        {/* Action Row: Akses melihat detail refleksi */}
         <View style={styles.completedActionsRow}>
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.85}
             onPress={() =>
               navigateTo('daily_mood_checkin', { initialStage: 3, viewOnly: true })
             }
-            style={styles.affirmationButton}
+            style={styles.detailButton}
+            accessibilityRole="button"
+            accessibilityLabel="Lihat Detail Refleksi"
           >
-            <Sparkles size={14} color={colors.surface} />
-            <Text style={styles.affirmationButtonText}>Lihat Detail & Afirmasi</Text>
+            <Sparkles size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.detailButtonText}>Lihat Detail Refleksi</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigateTo('mood_stats')}
-            style={styles.statsButton}
-          >
-            <Text style={styles.statsButtonText}>Statistik</Text>
-            <ArrowRight size={13} color={colors.brandBlue[600]} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Perbarui Catatan Link */}
-        <View style={styles.updateRow}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() =>
               navigateTo('daily_mood_checkin', { initialStage: 1 })
             }
             style={styles.updateLink}
+            accessibilityRole="button"
+            accessibilityLabel="Perbarui suasana hati"
           >
-            <RotateCcw size={12} color={colors.textMuted} style={{ marginRight: 4 }} />
-            <Text style={styles.updateLinkText}>Perbarui suasana hati jika berubah</Text>
+            <RotateCcw size={12} color="#64748B" style={{ marginRight: 4 }} />
+            <Text style={styles.updateLinkText}>Perbarui</Text>
           </TouchableOpacity>
         </View>
-      </Card>
+      </View>
     );
   }
 
   /* -------------------------------------------------------------
-   * KONDISI 2: MOOD CHECK-IN SKIPPED
-   * Pengguna melewati proses Daily Mood Check-in
-   * ------------------------------------------------------------- */
-  if (dailyMoodStatus === 'skipped') {
-    const firstName = user?.nickname || (user?.name ? user.name.split(' ')[0] : 'Teman');
-
-    return (
-      <Card variant="tintAmber" style={[styles.card, styles.skippedCard]}>
-        {/* Header Status */}
-        <View style={styles.headerRow}>
-          <View style={styles.titleWrap}>
-            <View style={styles.indicatorDotAmber} />
-            <Text style={[styles.headerTitle, { color: colors.accentAmber[600] }]}>
-              Check-in Belum Selesai
-            </Text>
-          </View>
-          <Badge label="Dilewati" variant="amber" />
-        </View>
-
-        {/* Mascot & Sapaan Personal Row */}
-        <View style={styles.skippedContentRow}>
-          <View style={styles.mascotAvatarWrap}>
-            <Image
-              source={require('../../../assets/mascot/mascot_waving_clean.png')}
-              style={styles.mascotThumb}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.skippedTextWrap}>
-            <Text style={styles.skippedGreetingTitle}>
-              Hai {firstName}! Thoriq tetap di sini 👋
-            </Text>
-            <Text style={styles.skippedPromptText}>
-              Belum ada catatan mood yang tersimpan karena kamu melewati tahap check-in. Luangkan 1 menit jika hatimu sudah siap untuk mulai mencatat kabarmu.
-            </Text>
-          </View>
-        </View>
-
-        {/* CTA: Akses untuk memulai check-in */}
-        <Button
-          title="Mulai Catat Mood"
-          variant="primary"
-          size="md"
-          fullWidth
-          iconRight={<ArrowRight size={16} color={colors.surface} />}
-          onPress={() => navigateTo('daily_mood_checkin')}
-          style={styles.ctaButton}
-        />
-      </Card>
-    );
-  }
-
-  /* -------------------------------------------------------------
-   * KONDISI 3: MOOD CHECK-IN NOT STARTED
-   * Pengguna belum memulai check-in hari ini
+   * KONDISI A & C: PENGGUNA BELUM / MELEWATI CHECK-IN
+   * Pendekatan visual Soft Blue sesuai identitas aplikasi Teman Sebaya
    * ------------------------------------------------------------- */
   return (
-    <Card variant="tintBlue" style={styles.card}>
-      <View style={styles.headerRow}>
-        <View style={styles.titleWrap}>
-          <Smile size={18} color={colors.brandBlue[600]} />
-          <Text style={[styles.headerTitle, { color: colors.brandBlue[700] }]}>
-            Daily Mood Check-in
-          </Text>
+    <View style={[styles.card, styles.softBlueCard]}>
+      {/* Top Meta Label */}
+      <View style={styles.cardTopRow}>
+        <View style={styles.tagPill}>
+          <Smile size={13} color="#2563EB" style={{ marginRight: 5 }} />
+          <Text style={styles.tagText}>Teman Mood</Text>
         </View>
-        <Badge label="Belum Diisi" variant="blue" />
       </View>
 
-      <Text style={styles.notStartedHeading}>
-        Belum ada catatan mood hari ini
+      {/* Main Heading & Description */}
+      <Text style={styles.headingTitle}>Bagaimana perasaanmu hari ini?</Text>
+      <Text style={styles.headingDesc}>
+        Luangkan sedikit waktu untuk mengenali apa yang sedang kamu rasakan.
       </Text>
 
-      <Text style={styles.notStartedDesc}>
-        Kenali dan sadari emosimu satu hari dalam satu waktu. Setiap perasaanmu berharga dan layak didengarkan.
-      </Text>
-
-      {/* 4 Emojis Quick Preview Row (Bahagia, Sedih, Marah, Biasa Saja) */}
+      {/* 4 Emojis Friendly Preview (Bahagia, Tenang, Sedih, Marah) */}
       <View style={styles.emojiPreviewRow}>
-        <View style={styles.previewEmojiItem}>
+        <View style={styles.emojiItem}>
           <Image
             source={require('../../../assets/emojis/emoji_bahagia.png')}
             style={styles.miniEmojiImage}
@@ -259,8 +189,15 @@ export const MoodCard: React.FC = () => {
           />
           <Text style={styles.miniEmojiLabel}>Bahagia</Text>
         </View>
-
-        <View style={styles.previewEmojiItem}>
+        <View style={styles.emojiItem}>
+          <Image
+            source={require('../../../assets/emojis/emoji_biasa.png')}
+            style={styles.miniEmojiImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.miniEmojiLabel}>Tenang</Text>
+        </View>
+        <View style={styles.emojiItem}>
           <Image
             source={require('../../../assets/emojis/emoji_sedih.png')}
             style={styles.miniEmojiImage}
@@ -268,8 +205,7 @@ export const MoodCard: React.FC = () => {
           />
           <Text style={styles.miniEmojiLabel}>Sedih</Text>
         </View>
-
-        <View style={styles.previewEmojiItem}>
+        <View style={styles.emojiItem}>
           <Image
             source={require('../../../assets/emojis/emoji_marah.png')}
             style={styles.miniEmojiImage}
@@ -277,97 +213,176 @@ export const MoodCard: React.FC = () => {
           />
           <Text style={styles.miniEmojiLabel}>Marah</Text>
         </View>
-
-        <View style={styles.previewEmojiItem}>
-          <Image
-            source={require('../../../assets/emojis/emoji_biasa.png')}
-            style={styles.miniEmojiImage}
-            resizeMode="contain"
-          />
-          <Text style={styles.miniEmojiLabel}>Biasa Saja</Text>
-        </View>
       </View>
 
-      {/* CTA Button: Memulai Daily Mood Check-in */}
-      <Button
-        title="Mulai Catat Mood"
-        variant="primary"
-        size="md"
-        fullWidth
-        iconRight={<ArrowRight size={16} color={colors.surface} />}
-        onPress={() => navigateTo('daily_mood_checkin')}
+      {/* CTA Button: Check-in Mood */}
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => switchTab('mood')}
         style={styles.ctaButton}
-      />
-    </Card>
+        accessibilityRole="button"
+        accessibilityLabel="Check-in Mood"
+      >
+        <Text style={styles.ctaButtonText}>Check-in Mood</Text>
+        <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    padding: spacing.md,
-    marginBottom: spacing.xs,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
+  softBlueCard: {
+    backgroundColor: '#EFF6FF', // Soft Blue background (Design System 2.2)
+    borderColor: '#BFDBFE',     // Brand Blue 200
+  },
+  completedCard: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+  },
+
+  /* Uncompleted State */
+  cardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  tagPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DBEAFE',
+    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    borderRadius: 12,
+  },
+  tagText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#1D4ED8',
+  },
+  headingTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#0F172A',
+    letterSpacing: -0.2,
+    marginBottom: 4,
+  },
+  headingDesc: {
+    fontSize: 12.5,
+    color: '#475569',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  emojiPreviewRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  emojiItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  miniEmojiImage: {
+    width: 32,
+    height: 32,
+    marginBottom: 3,
+  },
+  miniEmojiLabel: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2563EB',
+    height: 44,
+    borderRadius: 14,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  ctaButtonText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+  },
+
+  /* Completed State */
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: 10,
   },
   titleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
   },
   indicatorDotGreen: {
     width: 8,
     height: 8,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.feedback.successText,
-  },
-  indicatorDotAmber: {
-    width: 8,
-    height: 8,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.accentAmber[500],
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 6,
   },
   headerTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#047857',
   },
   timeBadgeWrap: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   timeText: {
     fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#64748B',
   },
-
-  /* Completed State Styles */
   loggedCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.md,
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 10,
   },
   emojiHalo: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.surface,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
+    marginRight: 10,
   },
   loggedEmojiImage: {
-    width: 38,
-    height: 38,
+    width: 34,
+    height: 34,
   },
   emotionInfo: {
     flex: 1,
@@ -376,7 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   emotionCategoryName: {
     fontSize: 15,
@@ -385,152 +400,49 @@ const styles = StyleSheet.create({
   subEmotionPill: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: borderRadius.full,
+    borderRadius: 6,
   },
   subEmotionPillText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   emotionNoteText: {
     fontSize: 12,
-    color: colors.textSecondary,
     fontStyle: 'italic',
+    color: '#475569',
     lineHeight: 16,
+    marginTop: 2,
   },
   completedActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 2,
   },
-  affirmationButton: {
+  detailButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.brandBlue[600],
-    paddingVertical: 10,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    gap: 6,
+    backgroundColor: '#2563EB',
+    height: 40,
+    borderRadius: 12,
   },
-  affirmationButtonText: {
-    fontSize: 12,
+  detailButtonText: {
+    fontSize: 12.5,
     fontWeight: '700',
-    color: colors.surface,
-  },
-  statsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.brandBlue[50],
-    paddingVertical: 10,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: colors.brandBlue[100],
-  },
-  statsButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.brandBlue[600],
-  },
-  updateRow: {
-    alignItems: 'center',
-    marginTop: spacing.sm,
+    color: '#FFFFFF',
   },
   updateLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   updateLinkText: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-
-  /* Skipped State Styles */
-  skippedCard: {
-    borderColor: colors.accentAmber[100],
-  },
-  skippedContentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.md,
-  },
-  mascotAvatarWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.brandBlue[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  mascotThumb: {
-    width: 44,
-    height: 44,
-  },
-  skippedTextWrap: {
-    flex: 1,
-  },
-  skippedGreetingTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 2,
-  },
-  skippedPromptText: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    fontSize: 11.5,
-    lineHeight: 16,
-  },
-
-  /* Not Started State Styles */
-  notStartedHeading: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 2,
-  },
-  notStartedDesc: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    lineHeight: 18,
-    marginBottom: spacing.md,
-  },
-  emojiPreviewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-    marginBottom: spacing.md,
-  },
-  previewEmojiItem: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  miniEmojiImage: {
-    width: 32,
-    height: 32,
-  },
-  miniEmojiLabel: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  ctaButton: {
-    marginTop: 2,
+    color: '#64748B',
   },
 });

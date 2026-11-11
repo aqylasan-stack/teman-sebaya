@@ -24,21 +24,37 @@ import { useApp } from '../../state/AppContext';
 export const EditProfileScreen: React.FC = () => {
   const { user, updateProfile, goBack } = useApp();
 
-  const initialPseudonym = (user?.pseudonym || user?.nickname || user?.name || 'Anya Sebaya')
+  const initialPseudonym = (user?.pseudonym || user?.nickname || user?.name || '')
     .replace(/\s*\(Anonim\)/gi, '')
     .trim();
 
   const [pseudonym, setPseudonym] = useState(initialPseudonym);
   const [pseudonymError, setPseudonymError] = useState<string | null>(null);
 
-  const [school, setSchool] = useState(user?.schoolOrOrg || 'SMAN 1 Karawang');
-  const [interests, setInterests] = useState<string[]>(
-    user?.interests || ['Manajemen Stres', 'Komunikasi Sehat']
-  );
+  const [school, setSchool] = useState(user?.schoolOrOrg || '');
+  const [interests, setInterests] = useState<string[]>(user?.interests || []);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(user?.avatarUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  const avatarInitials = React.useMemo(() => {
+    const nameToUse = pseudonym || user?.nickname || user?.pseudonym || user?.name || '';
+    if (nameToUse && nameToUse.trim()) {
+      const parts = nameToUse.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0][0].toUpperCase();
+    }
+    if (user?.avatarInitials && user.avatarInitials !== 'G') {
+      return user.avatarInitials.toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 1).toUpperCase();
+    }
+    return 'TS';
+  }, [pseudonym, user]);
 
   const interestOptions = [
     'Manajemen Stres',
@@ -114,10 +130,16 @@ export const EditProfileScreen: React.FC = () => {
 
     setPseudonymError(null);
 
+    const parts = cleanPseudonym.split(/\s+/);
+    const updatedInitials = parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : parts[0][0].toUpperCase();
+
     updateProfile({
       name: cleanPseudonym,
       nickname: cleanPseudonym,
       pseudonym: cleanPseudonym,
+      avatarInitials: updatedInitials,
       schoolOrOrg: school.trim(),
       interests,
       avatarUrl: avatarUrl,
@@ -144,21 +166,15 @@ export const EditProfileScreen: React.FC = () => {
             accessibilityRole="button"
           >
             <View style={styles.avatarCircle}>
-              {avatarUrl ? (
+              {avatarUrl && !imageError ? (
                 <Image
                   source={{ uri: avatarUrl }}
-                  style={styles.avatarImg}
-                  resizeMode="cover"
-                />
-              ) : !imageError ? (
-                <Image
-                  source={require('../../../assets/branding/mascot_avatar.png')}
                   style={styles.avatarImg}
                   resizeMode="cover"
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <Text style={styles.avatarText}>{user?.avatarInitials || 'AS'}</Text>
+                <Text style={styles.avatarText}>{avatarInitials}</Text>
               )}
             </View>
 

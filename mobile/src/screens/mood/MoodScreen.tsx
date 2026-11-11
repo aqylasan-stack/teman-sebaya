@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Plus, ArrowRight, Smile, X, ChevronRight } from 'lucide-react-native';
+import { ArrowRight, Smile, X, ChevronRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { GlobalHeader } from '../../components/layout/GlobalHeader';
+import { FeatureHeroHeader } from '../../components/layout/FeatureHeroHeader';
 import { MoodWeeklyChart } from '../../components/mood/MoodWeeklyChart';
 import { Modal } from '../../components/common/Modal';
 import { useApp } from '../../state/AppContext';
@@ -130,30 +130,32 @@ export const MoodScreen: React.FC = () => {
   });
 
   return (
-    <ScreenContainer header={<GlobalHeader />} withBottomNav>
-      {/* 1. Header Layar: Sederhana & Terarah */}
-      <View style={styles.header}>
-        <View style={styles.headerTextWrap}>
-          <Text style={styles.title}>Teman Mood</Text>
-          <Text style={styles.subtitle}>
-            Ruang hening untuk mengenali dan merawat perasaanmu.
-          </Text>
-        </View>
+    <ScreenContainer
+      style={{ backgroundColor: colors.brandGreen[600] }}
+      contentContainerStyle={styles.containerContent}
+      withBottomNav
+    >
+      {/* 1. Illustrated Hero Header */}
+      <FeatureHeroHeader
+        feature="mood"
+        title="Teman Mood"
+        subtitle="Ruang hening untuk mengenali dan merawat perasaanmu."
+        infoContent={{
+          title: 'Tentang Teman Mood',
+          description:
+            'Teman Mood membantumu mengenali, mengekspresikan, dan merawat dinamika emosi harian secara aman dan jujur.',
+          bulletPoints: [
+            'Pencatatan 4 emosi utama: Bahagia, Biasa Saja, Sedih, dan Marah.',
+            'Refleksi afirmasi adaptif berbasis psikologi positif.',
+            'Visualisasi tren mingguan untuk melatih kesadaran diri.',
+          ],
+        }}
+      />
 
-        {!isCheckedInToday && (
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.actionBtnPrimary}
-            onPress={() => navigateTo('daily_mood_checkin')}
-          >
-            <Plus size={15} color="#FFFFFF" />
-            <Text style={styles.actionBtnPrimaryText}>Catat Mood</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* 2. Mood Hari Ini: Visual Emphasis dengan Soft Tinted Background & Emoji Besar Standalone */}
-      {isCheckedInToday && todayMood && todayTheme ? (
+      {/* 2. Body Content Canvas */}
+      <View style={styles.bodyContent}>
+        {/* Mood Hari Ini: Visual Emphasis dengan Soft Tinted Background & Emoji Besar Standalone */}
+        {isCheckedInToday && todayMood && todayTheme ? (
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => setSelectedEntry(todayMood)}
@@ -339,6 +341,7 @@ export const MoodScreen: React.FC = () => {
           </View>
         )}
       </View>
+      </View>
 
       {/* 5. Modal Detail Catatan Refleksi yang Dapat Diklik */}
       {selectedEntry && (
@@ -440,6 +443,16 @@ export const MoodScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  containerContent: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 110,
+    backgroundColor: '#F8FAFC',
+  },
+  bodyContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

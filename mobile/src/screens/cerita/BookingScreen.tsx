@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { Calendar, Clock, MessageSquare, Phone, Video, CheckCircle2, ArrowRight } from 'lucide-react-native';
+import { Calendar, Clock, MessageSquare, Phone, Video, ArrowRight } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
 import { ContextualHeader } from '../../components/layout/ContextualHeader';
@@ -189,11 +189,9 @@ export const BookingScreen: React.FC = () => {
           />
         </View>
       ) : (
-        /* Success Confirmation View */
+        /* Success Confirmation View (Emoji langsung tanpa glow circle) */
         <View style={styles.successContainer}>
-          <View style={styles.successIconCircle}>
-            <CheckCircle2 size={54} color={colors.brandGreen[600]} />
-          </View>
+          <Text style={styles.successEmoji}>✅</Text>
           <Text style={styles.successTitle}>Sesi Konseling Berhasil Dijadwalkan!</Text>
           <Text style={styles.successSubtitle}>
             Jadwalmu bersama {counselor.name} telah dikonfirmasi untuk hari{' '}
@@ -342,13 +340,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     gap: spacing.md,
   },
-  successIconCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.brandGreen[50],
-    alignItems: 'center',
-    justifyContent: 'center',
+  successEmoji: {
+    fontSize: 56,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
   },
   successTitle: {
     fontSize: 19,

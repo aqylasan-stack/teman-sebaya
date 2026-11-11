@@ -96,6 +96,7 @@ interface RegisteredAccount {
   profile: UserProfile;
   moodEntries: MoodEntry[];
   moodCheckinSkippedDate: string | null;
+  bookings?: BookingSession[];
 }
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
@@ -120,6 +121,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       },
       moodEntries: initialMoodEntries,
       moodCheckinSkippedDate: null,
+      bookings: [initialBooking],
     },
     {
       email: 'anya.sebaya@gmail.com',
@@ -132,6 +134,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       },
       moodEntries: initialMoodEntries,
       moodCheckinSkippedDate: null,
+      bookings: [],
     },
   ]);
 
@@ -150,7 +153,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     },
   ]);
   const [counselors] = useState<Counselor[]>(counselorsList);
-  const [bookings, setBookings] = useState<BookingSession[]>([initialBooking]);
+  const [bookings, setBookings] = useState<BookingSession[]>([]);
 
   // Learning
   const [articles, setArticles] = useState<Article[]>(educationalArticles);
@@ -251,10 +254,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const userProfile: UserProfile = existing
       ? existing.profile
-      : {
+      : cleanEmail.includes('anya')
+      ? {
           ...initialUser,
           email: cleanEmail,
           isOnboarded: true,
+        }
+      : {
+          id: `usr_${Date.now()}`,
+          name: '',
+          nickname: cleanEmail.split('@')[0],
+          pseudonym: cleanEmail.split('@')[0],
+          email: cleanEmail,
+          avatarInitials: cleanEmail.slice(0, 2).toUpperCase(),
+          joinedDate: 'Nov 2026',
+          isAnonymous: true,
+          schoolOrOrg: '',
+          interests: [],
+          activeStreakDays: 0,
+          moodEntriesCount: 0,
+          challengesCompleted: 0,
+          allowAiMoodAccess: false,
+          dailyReminderEnabled: true,
+          dailyReminderTime: '20:00 WIB',
+          isOnboarded: true,
+          provider: 'email',
         };
 
     const userMoods: MoodEntry[] = existing
@@ -265,10 +289,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const userSkippedDate = existing ? existing.moodCheckinSkippedDate : null;
 
+    const userBookings: BookingSession[] = existing?.bookings
+      ? existing.bookings
+      : cleanEmail.includes('anya.sebaya@teman.id')
+      ? [initialBooking]
+      : [];
+
     setIsAuthenticated(true);
     setUser(userProfile);
     setMoodEntries(userMoods);
     setMoodCheckinSkippedDate(userSkippedDate);
+    setBookings(userBookings);
 
     // KETENTUAN PENTING:
     // Login TIDAK BOLEH mengulang onboarding untuk pengguna lama.
@@ -295,6 +326,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setUser(existing.profile);
       setMoodEntries(existing.moodEntries || []);
       setMoodCheckinSkippedDate(existing.moodCheckinSkippedDate || null);
+      setBookings(existing.bookings || []);
 
       setCurrentScreen('daily_mood_checkin');
       setCurrentTab('beranda');
@@ -311,13 +343,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       pseudonym: name ? name.split(' ')[0] : 'Teman Baru',
       email: email,
       avatarInitials: name
-        ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-        : 'G',
+        ? (name.split(' ').length >= 2
+            ? name.split(' ')[0][0] + name.split(' ')[1][0]
+            : name.slice(0, 1)
+          ).toUpperCase()
+        : email ? email.slice(0, 1).toUpperCase() : 'T',
       joinedDate: 'Nov 2026',
       isAnonymous: true,
-      schoolOrOrg: 'PIK-R Binaan',
-      interests: ['Kelola Stres', 'Emosi'],
-      activeStreakDays: 1,
+      schoolOrOrg: '',
+      interests: [],
+      activeStreakDays: 0,
       moodEntriesCount: 0,
       challengesCompleted: 0,
       allowAiMoodAccess: false,
@@ -334,6 +369,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         profile: newGoogleUser,
         moodEntries: [],
         moodCheckinSkippedDate: null,
+        bookings: [],
       },
     ]);
 
@@ -341,6 +377,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setUser(newGoogleUser);
     setMoodEntries([]);
     setMoodCheckinSkippedDate(null);
+    setBookings([]);
 
     // Bawa ke onboarding (Step 1 Age Verification jika nama sudah didapat dari Google)
     // Jangan meminta pengguna mengisi nama dua kali!
@@ -364,9 +401,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       avatarInitials: cleanEmail ? cleanEmail.slice(0, 2).toUpperCase() : 'TB',
       joinedDate: 'Nov 2026',
       isAnonymous: true,
-      schoolOrOrg: 'PIK-R Binaan',
-      interests: ['Kelola Stres', 'Emosi'],
-      activeStreakDays: 1,
+      schoolOrOrg: '',
+      interests: [],
+      activeStreakDays: 0,
       moodEntriesCount: 0,
       challengesCompleted: 0,
       allowAiMoodAccess: false,
@@ -384,14 +421,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         profile: newUser,
         moodEntries: [],
         moodCheckinSkippedDate: null,
+        bookings: [],
       },
     ]);
 
     setIsAuthenticated(true);
     setUser(newUser);
-    // PENTING: Pengguna baru yang mendaftar TIDAK memiliki catatan mood sebelumnya!
+    // PENTING: Pengguna baru yang mendaftar TIDAK memiliki catatan mood atau jadwal sesi sebelumnya!
     setMoodEntries([]);
     setMoodCheckinSkippedDate(null);
+    setBookings([]);
 
     // KETENTUAN PENTING:
     // Register harus menyelesaikan onboarding sebelum masuk Beranda.
@@ -406,6 +445,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setMoodEntries([]);
     setMoodCheckinSkippedDate(null);
+    setBookings([]);
     setIsLogoutDialogOpen(false);
     setCurrentScreen('login');
     setScreenStack(['login']);
@@ -414,7 +454,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = (partial: Partial<UserProfile>) => {
     setUser((prev) => {
       if (!prev) return null;
-      const updated = { ...prev, ...partial };
+      let updated = { ...prev, ...partial };
+
+      // Sinkronisasi avatarInitials otomatis jika nama/nama samaran diperbarui atau avatarInitials saat ini masih default 'G'
+      if (!partial.avatarInitials || updated.avatarInitials === 'G') {
+        const nameToUse =
+          partial.nickname ||
+          partial.pseudonym ||
+          partial.name ||
+          updated.nickname ||
+          updated.pseudonym ||
+          updated.name;
+        if (nameToUse && nameToUse.trim()) {
+          const parts = nameToUse.trim().split(/\s+/);
+          const initials = parts.length >= 2
+            ? (parts[0][0] + parts[1][0]).toUpperCase()
+            : parts[0][0].toUpperCase();
+          updated.avatarInitials = initials;
+        }
+      }
 
       // Simpan perubahan profil agar tersimpan persisten di registeredAccounts
       setRegisteredAccounts((accs) =>
@@ -449,8 +507,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   };
 
-  // Actual today's mood entry based on user's local date
-  const todayMood = moodEntries.find((entry) => isToday(entry.timestamp)) || null;
+  // Actual today's mood entry based on user's local date (bersihkan catatan otomatis/dummy)
+  const rawTodayMood = moodEntries.find((entry) => isToday(entry.timestamp)) || null;
+  const todayMood = useMemo(() => {
+    if (!rawTodayMood) return null;
+    if (rawTodayMood.note === 'Refleksi orientasi bersama Thoriq') {
+      return { ...rawTodayMood, note: '' };
+    }
+    return rawTodayMood;
+  }, [rawTodayMood]);
 
   const skipMoodCheckinToday = () => {
     const todayKey = getTodayDateKey();
@@ -623,7 +688,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       id: `bk_${Date.now()}`,
       ...bookingData,
     };
-    setBookings((prev) => [newBooking, ...prev]);
+    setBookings((prev) => {
+      const updated = [newBooking, ...prev];
+      if (user?.email) {
+        setRegisteredAccounts((accs) =>
+          accs.map((a) =>
+            a.email.toLowerCase() === user.email.toLowerCase()
+              ? { ...a, bookings: updated }
+              : a
+          )
+        );
+      }
+      return updated;
+    });
   };
 
   // Learning Actions

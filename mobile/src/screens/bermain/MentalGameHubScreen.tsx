@@ -5,11 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView,
-  StatusBar,
 } from 'react-native';
-import { ArrowLeft, Clock, Play } from 'lucide-react-native';
+import { Clock, Play } from 'lucide-react-native';
+import { colors } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
+import { FeatureHeroHeader } from '../../components/layout/FeatureHeroHeader';
 import {
   GAMES_CATALOG,
   GameItem,
@@ -32,36 +32,34 @@ export const MentalGameHubScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" />
+    <ScreenContainer
+      style={{ backgroundColor: colors.accentViolet[600] }}
+      contentContainerStyle={styles.containerContent}
+    >
+      {/* ============================================================== */}
+      {/* 1. ILLUSTRATED HERO HEADER                                     */}
+      {/* ============================================================== */}
+      <FeatureHeroHeader
+        feature="bermain"
+        title="Teman Bermain"
+        subtitle="Belajar tidak selalu harus serius. Yuk, kenali dirimu lewat permainan."
+        onBack={goBack}
+        infoContent={{
+          title: 'Tentang Teman Bermain',
+          description:
+            'Media gamifikasi psikologis yang mengajakmu bereksplorasi dan belajar mengenali diri lewat simulasi naratif interaktif.',
+          bulletPoints: [
+            'Keputusan Butterfly Effect: Sadari dampak setiap pilihan kecilmu.',
+            'Laboratorium Emosi: Belajar mengenali berbagai spektrum perasaan.',
+            'Dilema Moral: Latih kemampuan empati dan pertimbangan etis.',
+          ],
+        }}
+      />
 
       {/* ============================================================== */}
-      {/* 1. TOP HEADER (Brief F01: Header "Teman Bermain" + Copy)        */}
+      {/* 2. BODY CONTENT: THREE OFFICIAL GAMES                         */}
       {/* ============================================================== */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={goBack}
-          style={styles.backButton}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-          accessibilityLabel="Kembali ke Beranda"
-        >
-          <ArrowLeft size={24} color="#0F172A" strokeWidth={2.4} />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Teman Bermain</Text>
-        <Text style={styles.headerSubtitle}>
-          Belajar tidak selalu harus serius. Yuk, kenali dirimu lewat permainan.
-        </Text>
-      </View>
-
-      {/* ============================================================== */}
-      {/* 2. THREE OFFICIAL GAMES (Brief F01: Butterfly, Feelings, Dilemma)*/}
-      {/* ============================================================== */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      >
+      <View style={styles.bodyContent}>
         {GAMES_CATALOG.map((game) => (
           <TouchableOpacity
             key={game.id}
@@ -102,8 +100,8 @@ export const MentalGameHubScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
         ))}
-      </ScrollView>
-    </View>
+      </View>
+    </ScreenContainer>
   );
 };
 
@@ -112,45 +110,15 @@ export const MentalGameHubScreen: React.FC = () => {
 // ============================================================================
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
+  containerContent: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 40,
     backgroundColor: '#F8FAFC', // Slate 50
   },
-
-  /* Header Section */
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-    marginTop: 4,
-  },
-
-  /* List Section */
-  listContent: {
+  bodyContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingTop: 18,
     gap: 14,
   },
   gameCard: {

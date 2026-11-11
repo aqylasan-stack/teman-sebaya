@@ -10,7 +10,7 @@ import {
 import { Search, BookOpen, Bookmark, Sparkles } from 'lucide-react-native';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { GlobalHeader } from '../../components/layout/GlobalHeader';
+import { FeatureHeroHeader } from '../../components/layout/FeatureHeroHeader';
 import { ArticleCard } from '../../components/learning/ArticleCard';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
@@ -83,7 +83,8 @@ export const BelajarScreen: React.FC = () => {
 
   return (
     <ScreenContainer
-      header={<GlobalHeader />}
+      style={{ backgroundColor: colors.accentAmber[600] }}
+      contentContainerStyle={styles.containerContent}
       withBottomNav
       floatingOverlay={
         <FloatingToast
@@ -93,16 +94,27 @@ export const BelajarScreen: React.FC = () => {
         />
       }
     >
-      {/* 1. Header Editorial Bersih */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Teman Belajar</Text>
-        <Text style={styles.subtitle}>
-          Ruang bacaan psikoedukasi, kesehatan mental, dan literasi hidup remaja.
-        </Text>
-      </View>
+      {/* 1. Illustrated Hero Header */}
+      <FeatureHeroHeader
+        feature="belajar"
+        title="Teman Belajar"
+        subtitle="Ruang bacaan psikoedukasi, kesehatan mental, dan literasi hidup remaja."
+        infoContent={{
+          title: 'Tentang Teman Belajar',
+          description:
+            'Koleksi materi psikoedukasi terkurasi yang disusun khusus untuk mendampingi fase transisi dan kesehatan mental remaja.',
+          bulletPoints: [
+            '9 topik literasi: Emosi, Digital Wellbeing, Relasi, Life Skills, dll.',
+            'Artikel ringkas 2–4 menit dengan bahasa empatik dan aplikatif.',
+            'Fitur simpan bacaan favorit untuk dibaca kembali kapan saja.',
+          ],
+        }}
+      />
 
-      {/* 2. Editorial Search Bar (Pill Shape Minimalis) */}
-      <View style={styles.searchBar}>
+      {/* 2. Body Content Canvas */}
+      <View style={styles.bodyContent}>
+        {/* 2. Editorial Search Bar (Pill Shape Minimalis) */}
+        <View style={styles.searchBar}>
         <Search size={18} color={colors.textMuted} />
         <TextInput
           style={styles.searchInput}
@@ -127,6 +139,7 @@ export const BelajarScreen: React.FC = () => {
           <BookOpen
             size={15}
             color={activeMainTab === 'all' ? colors.brandBlue[600] : colors.textMuted}
+            fill={activeMainTab === 'all' ? colors.brandBlue[600] : 'transparent'}
           />
           <Text
             style={[
@@ -253,11 +266,22 @@ export const BelajarScreen: React.FC = () => {
           </View>
         )}
       </View>
+      </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  containerContent: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 110,
+    backgroundColor: '#F8FAFC',
+  },
+  bodyContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
   header: {
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,

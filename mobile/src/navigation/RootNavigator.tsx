@@ -45,6 +45,7 @@ import { MentalGamePlayScreen } from '../screens/bermain/MentalGamePlayScreen';
 import { MentalGameResultScreen } from '../screens/bermain/MentalGameResultScreen';
 import { SupportifScreen } from '../screens/supportif/SupportifScreen';
 import { EditProfileScreen } from '../screens/profil/EditProfileScreen';
+import { JadwalCeritaScreen } from '../screens/profil/JadwalCeritaScreen';
 import { PrivacySettingsScreen } from '../screens/profil/PrivacySettingsScreen';
 import { NotificationSettingsScreen } from '../screens/profil/NotificationSettingsScreen';
 import { AboutAppScreen } from '../screens/profil/AboutAppScreen';
@@ -171,6 +172,8 @@ export const RootNavigator: React.FC = () => {
         return <SupportifScreen />;
       case 'edit_profile':
         return <EditProfileScreen />;
+      case 'jadwal_cerita':
+        return <JadwalCeritaScreen />;
       case 'privacy_settings':
         return <PrivacySettingsScreen />;
       case 'notification_settings':

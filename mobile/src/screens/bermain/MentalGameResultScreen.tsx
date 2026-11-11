@@ -22,7 +22,6 @@ import {
 } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { ContextualHeader } from '../../components/layout/ContextualHeader';
 import {
   PSYCH_GAME_CATEGORIES,
   PsychGameCategory,
@@ -147,18 +146,18 @@ const RESULT_THEMES: Record<'senang' | 'harmoni' | 'sedih', ResultThemeTokens> =
     shadow: '#2563EB',
   },
   harmoni: {
-    primary: '#059669',      // Brand Green 600 (Matches "Hebat! Keseimbangan terjaga!")
-    primaryDark: '#047857',  // Brand Green 700
-    primaryLight: '#ECFDF5', // Brand Green 50
-    primaryBorder: '#A7F3D0',// Brand Green 200
-    shadow: '#059669',
+    primary: '#2563EB',      // Unified Brand Blue 600
+    primaryDark: '#1D4ED8',  // Brand Blue 700
+    primaryLight: '#EFF6FF', // Brand Blue 50
+    primaryBorder: '#BFDBFE',// Brand Blue 200
+    shadow: '#2563EB',
   },
   sedih: {
-    primary: '#4F46E5',      // Indigo 600
-    primaryDark: '#4338CA',  // Indigo 700
-    primaryLight: '#EEF2FF', // Indigo 50
-    primaryBorder: '#C7D2FE',// Indigo 200
-    shadow: '#4F46E5',
+    primary: '#2563EB',      // Unified Brand Blue 600
+    primaryDark: '#1D4ED8',  // Brand Blue 700
+    primaryLight: '#EFF6FF', // Brand Blue 50
+    primaryBorder: '#BFDBFE',// Brand Blue 200
+    shadow: '#2563EB',
   },
 };
 
@@ -242,13 +241,24 @@ export const MentalGameResultScreen: React.FC = () => {
       ? screenParams.bannerValue
       : defaultStatusValue;
 
-  // Hero emblem source (solid, opaque, character-driven)
-  const heroSource =
-    badgeVariant === 'senang'
-      ? require('../../../assets/games/badges/crest_senang.png')
-      : badgeVariant === 'sedih'
-      ? require('../../../assets/games/badges/crest_sedih.png')
-      : require('../../../assets/games/badges/crest_harmoni.png');
+  // Dynamic mascot avatar based on reflection outcome:
+  // - "oke bangeet" / Optimal (senang) -> 2 thumbs up
+  // - "b aja" / Adaptif (harmoni) -> 1 thumb up
+  // - Bertumbuh / Reflektif (sedih) -> thinking pose
+  const isOptimal =
+    bannerValue === 'Optimal' ||
+    bannerValue === 'Sangat Baik' ||
+    badgeVariant === 'senang';
+  const isReflectiveGrowth =
+    bannerValue === 'Bertumbuh' ||
+    bannerValue === 'Perlu Dukungan' ||
+    badgeVariant === 'sedih';
+
+  const avatarCharacterSource = isOptimal
+    ? require('../../../assets/games/avatar/avatar_result_two_thumbs.jpg')
+    : isReflectiveGrowth
+    ? require('../../../assets/games/avatar/avatar_result_thinking.png')
+    : require('../../../assets/games/avatar/avatar_result_one_thumb.jpg');
 
   // Completion Header text
   const headerBannerText =
@@ -295,15 +305,7 @@ export const MentalGameResultScreen: React.FC = () => {
   };
 
   return (
-    <ScreenContainer
-      scrollable={false}
-      header={
-        <ContextualHeader
-          title="Hasil Refleksi"
-          onBack={handleReturnToTemanBermain}
-        />
-      }
-    >
+    <ScreenContainer scrollable={false}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -327,19 +329,37 @@ export const MentalGameResultScreen: React.FC = () => {
             {/* B. CELEBRATION HERO BANNER WITH SOLID 3D MASCOT EMBLEM */}
             <View style={styles.celebrationHero}>
               <View style={styles.bannerHeroContainer}>
-                <Image
-                  source={heroSource}
-                  style={styles.bannerImage}
-                  resizeMode="contain"
-                  accessibilityLabel={
-                    badgeVariant === 'senang'
-                      ? 'Lencana Ceria Merayakan Hasil Refleksi'
-                      : badgeVariant === 'sedih'
-                      ? 'Lencana Reflektif Memotivasi Bertumbuh'
-                      : 'Lencana Harmoni Keseimbangan Refleksi'
-                  }
-                />
-                <View style={styles.bannerTextOverlay}>
+                {/* Circular Character Frame */}
+                <View
+                  style={[
+                    styles.avatarCircleFrame,
+                    { borderColor: currentTheme.primary },
+                  ]}
+                >
+                  <Image
+                    source={avatarCharacterSource}
+                    style={styles.bannerCharacterImage}
+                    resizeMode="cover"
+                    accessibilityLabel={
+                      isOptimal
+                        ? 'Karakter dua jempol merayakan hasil optimal'
+                        : isReflectiveGrowth
+                        ? 'Karakter reflektif memotivasi bertumbuh'
+                        : 'Karakter satu jempol apresiasi hasil adaptif'
+                    }
+                  />
+                </View>
+
+                {/* Overlapping Badge Pill at Bottom */}
+                <View
+                  style={[
+                    styles.bannerTextOverlay,
+                    {
+                      backgroundColor: currentTheme.primary,
+                      borderColor: currentTheme.primaryDark,
+                    },
+                  ]}
+                >
                   <Text style={styles.bannerLabelText} numberOfLines={1}>
                     {bannerLabel}
                   </Text>
@@ -378,7 +398,7 @@ export const MentalGameResultScreen: React.FC = () => {
                 {learningContent.narrative}
               </Text>
 
-              <View style={[styles.takeawaysBox, { borderColor: currentTheme.primaryBorder }]}>
+              <View style={styles.takeawaysBox}>
                 <Text style={[styles.takeawaysTitle, { color: currentTheme.primaryDark }]}>
                   Poin Pembelajaran:
                 </Text>
@@ -553,7 +573,7 @@ export const MentalGameResultScreen: React.FC = () => {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
     backgroundColor: '#F8FAFC', // Slate 50 Canvas (Design System 2.3)
   },
@@ -563,8 +583,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E2E8F0', // Border light (Design System 2.3)
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -581,10 +599,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerBannerSedih: {
-    backgroundColor: '#4F46E5', // Indigo 600
+    backgroundColor: '#2563EB', // Unified Brand Blue
   },
   headerBannerHarmoni: {
-    backgroundColor: '#059669', // Brand Green 600
+    backgroundColor: '#2563EB', // Unified Brand Blue
   },
   headerBannerText: {
     fontSize: 15.5,
@@ -616,33 +634,58 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
-  bannerImage: {
+  avatarCircleFrame: {
+    width: 176,
+    height: 176,
+    borderRadius: 88,
+    borderWidth: 4.5,
+    backgroundColor: '#509BDC',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  bannerCharacterImage: {
     width: '100%',
     height: '100%',
   },
   bannerTextOverlay: {
     position: 'absolute',
-    top: '63%',
-    left: '16%',
-    right: '16%',
-    height: '24%',
+    bottom: 2,
+    alignSelf: 'center',
+    minWidth: 154,
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    borderRadius: 16,
+    borderWidth: 2.5,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
   bannerLabelText: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    letterSpacing: 0.4,
+    marginBottom: 1,
+    textAlign: 'center',
     opacity: 0.95,
   },
   bannerScoreText: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 24,
+    lineHeight: 23,
     letterSpacing: 0.3,
+    textAlign: 'center',
   },
 
   /* C. Capaian Refleksi (Simplified, Unboxed, Direct Typography) */
@@ -685,8 +728,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#F8FAFC', // Slate 50 Neutral Canvas
     borderRadius: 18,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0', // Border Light (Design System 2.3)
     padding: spacing.md,
     marginTop: 14,
     marginBottom: 12,
@@ -711,9 +752,12 @@ const styles = StyleSheet.create({
   takeawaysBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EFF6FF',
+    padding: 14,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   takeawaysTitle: {
     fontSize: 11.5,
@@ -743,11 +787,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginBottom: spacing.md,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   statBarItem: {
     flex: 1,
@@ -822,9 +869,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: spacing.md,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     marginBottom: spacing.md,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   choicesReviewTitle: {
     fontSize: 14,

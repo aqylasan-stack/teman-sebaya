@@ -1,45 +1,56 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import {
   MessageCircle,
   Smile,
   BookOpen,
   Gamepad2,
   Users,
-  Compass,
-  Calendar,
-  ChevronRight,
   Sparkles,
+  Clock,
   ArrowRight,
+  ChevronRight,
 } from 'lucide-react-native';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
-import { GlobalHeader } from '../../components/layout/GlobalHeader';
-import { MoodCard } from '../../components/mood/MoodCard';
-import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
+import { HomeHero } from '../../components/layout/HomeHero';
 import { useApp } from '../../state/AppContext';
+import { Article } from '../../types';
+
+// Map cover images for educational articles
+const articleCovers: Record<string, any> = {
+  article_overthinking: require('../../../assets/articles/article_overthinking.jpg'),
+  article_burnout: require('../../../assets/articles/article_burnout.jpg'),
+  article_konflik: require('../../../assets/articles/article_konflik.jpg'),
+  article_asertif: require('../../../assets/articles/article_asertif.jpg'),
+  article_detoks: require('../../../assets/articles/article_detoks.jpg'),
+  article_mengenal_diri: require('../../../assets/articles/article_mengenal_diri.jpg'),
+  article_regulasi_emosi: require('../../../assets/articles/article_regulasi_emosi.jpg'),
+  article_komunikasi: require('../../../assets/articles/article_komunikasi.jpg'),
+  article_tidur_sehat: require('../../../assets/articles/article_tidur_sehat.jpg'),
+};
 
 export const HomeScreen: React.FC = () => {
   const {
     user,
     switchTab,
     navigateTo,
-    openCrisisModal,
-    bookings,
     articles,
-    dailyMoodStatus,
   } = useApp();
 
-  const nextBooking = bookings.length > 0 ? bookings[0] : null;
-
-  // 6 Fitur Utama persis sesuai Tabel Page 15 BRIEF TEMAN SEBAYA
+  // 6 Main Feature Shortcuts (Strictly matching BRIEF TEMAN SEBAYA Table Page 15)
   const featureShortcuts = [
     {
       id: 'mood',
       title: 'Teman Mood',
       label: 'Kenali Emosimu',
-      subtitle: 'Catat perasaanmu setiap hari',
+      description: 'Catat perasaanmu setiap hari.',
       icon: Smile,
       color: colors.brandGreen[600],
       bgColor: colors.brandGreen[50],
@@ -49,7 +60,7 @@ export const HomeScreen: React.FC = () => {
       id: 'cerita',
       title: 'Teman Cerita',
       label: 'Ruang Ceritamu',
-      subtitle: 'Temukan layanan pendampingan',
+      description: 'Temukan layanan pendampingan.',
       icon: MessageCircle,
       color: colors.brandBlue[600],
       bgColor: colors.brandBlue[50],
@@ -59,7 +70,7 @@ export const HomeScreen: React.FC = () => {
       id: 'belajar',
       title: 'Teman Belajar',
       label: 'Tambah Wawasan',
-      subtitle: 'Pelajari hal baru tentang dirimu',
+      description: 'Pelajari hal baru tentang dirimu.',
       icon: BookOpen,
       color: colors.accentAmber[600],
       bgColor: colors.accentAmber[50],
@@ -69,7 +80,7 @@ export const HomeScreen: React.FC = () => {
       id: 'bermain',
       title: 'Teman Bermain',
       label: 'Belajar Sambil Main',
-      subtitle: 'Jelajahi permainan edukatif',
+      description: 'Jelajahi permainan edukatif.',
       icon: Gamepad2,
       color: colors.accentViolet[600],
       bgColor: colors.accentViolet[50],
@@ -79,7 +90,7 @@ export const HomeScreen: React.FC = () => {
       id: 'supportif',
       title: 'Teman Supportif',
       label: 'Temukan Komunitas',
-      subtitle: 'Kenali komunitas positif',
+      description: 'Kenali komunitas positif.',
       icon: Users,
       color: colors.accentPeach[600],
       bgColor: colors.accentPeach[50],
@@ -89,416 +100,304 @@ export const HomeScreen: React.FC = () => {
       id: 'akses',
       title: 'Teman Akses',
       label: 'Teman Digitalmu',
-      subtitle: 'Mulai percakapan dengan AI',
+      description: 'Mulai percakapan dengan AI.',
       icon: Sparkles,
       color: colors.brandBlue[600],
       bgColor: colors.brandBlue[50],
-      action: () => navigateTo('teman_akses'),
+      action: () => navigateTo('ai_chat'),
     },
   ];
 
+  // Recommended Content: Prioritize based on user interests if available
+  const userInterests = user?.interests || [];
+  const recommendedArticles = React.useMemo(() => {
+    if (userInterests.length > 0) {
+      const matched = articles.filter((a) =>
+        userInterests.some((interest) =>
+          a.category.toLowerCase().includes(interest.toLowerCase()) ||
+          a.title.toLowerCase().includes(interest.toLowerCase())
+        )
+      );
+      if (matched.length >= 2) return matched.slice(0, 2);
+    }
+    return articles.slice(0, 2);
+  }, [articles, userInterests]);
+
   return (
-    <ScreenContainer header={<GlobalHeader />} withBottomNav>
-      {/* Greeting Banner (Screen B01 BRIEF TEMAN SEBAYA) */}
-      <View style={styles.greetingSection}>
-        <Text style={styles.greetingTitle}>
-          Halo, {user?.nickname || (user?.name ? user.name.split(' ')[0] : 'Sobat Sebaya')}!
-        </Text>
-        <Text style={styles.greetingSubtitle}>
-          {dailyMoodStatus === 'completed'
-            ? 'Kabar hatimu hari ini sudah tercatat. Semoga harimu berjalan dengan tenang dan bermakna.'
-            : dailyMoodStatus === 'skipped'
-            ? 'Thoriq selalu siap mendengarkan kapan pun kamu ingin bercerita.'
-            : 'Apa kabar kamu hari ini? Yuk luangkan waktu sejenak untuk mengecek kabarmu.'}
-        </Text>
-      </View>
+    <ScreenContainer
+      style={{ backgroundColor: colors.brandBlue[600] }}
+      contentContainerStyle={styles.containerContent}
+      withBottomNav
+    >
+      {/* ================================================================ */}
+      {/* 1. PERSONAL GREETING HERO SECTION                                */}
+      {/* ================================================================ */}
+      <HomeHero />
 
-      {/* Daily Mood Check-in Card */}
-      <MoodCard />
-
-      {/* Psychological Testing Banner aligned with Teman Bermain */}
-      <Card
-        onPress={() => navigateTo('teman_bermain')}
-        style={styles.testBannerCard}
-      >
-        <Image
-          source={require('../../../assets/tests/personality_cover.jpg')}
-          style={styles.testBannerImage}
-          resizeMode="cover"
-        />
-        <View style={styles.testBannerContent}>
-          <View style={styles.testBannerBadgeRow}>
-            <Badge label="Teman Bermain" variant="blue" />
-            <Text style={styles.testDurationText}>4 Menit</Text>
+      {/* ================================================================ */}
+      {/* 2. BODY CONTENT (Canvas Surface)                                 */}
+      {/* ================================================================ */}
+      <View style={styles.bodyContent}>
+        {/* Feature Shortcuts (2-Column Balanced Grid for 6 Core Modules) */}
+        <View style={styles.sectionWrap}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeaderTitle}>Eksplorasi Teman Sebaya</Text>
           </View>
-          <Text style={styles.testBannerTitle}>Butterfly Effect</Text>
-          <Text style={styles.testBannerDesc}>
-            Setiap pilihan memiliki cerita. Lihat bagaimana keputusan kecil dapat membawa hasil yang berbeda.
-          </Text>
-        </View>
-      </Card>
 
-      {/* Feature Grid Header */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Eksplorasi Teman Sebaya</Text>
-        <Text style={styles.sectionMeta}>6 Modul Pendampingan</Text>
-      </View>
-
-      {/* 6 Feature Shortcuts Grid */}
-      <View style={styles.grid}>
-        {featureShortcuts.map((feat) => {
-          const Icon = feat.icon;
-          return (
-            <TouchableOpacity
-              key={feat.id}
-              activeOpacity={0.7}
-              onPress={feat.action}
-              style={styles.gridItem}
-            >
-              <View style={[styles.gridIconWrap, { backgroundColor: feat.bgColor }]}>
-                <Icon size={22} color={feat.color} />
-              </View>
-              <Text style={styles.gridItemTitle}>{feat.title}</Text>
-              <Text style={styles.gridItemLabel}>{feat.label}</Text>
-              <Text style={styles.gridItemSub} numberOfLines={2}>
-                {feat.subtitle}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Upcoming Session Card (Section 5 BRIEF TEMAN SEBAYA) */}
-      <View style={styles.upcomingSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Jadwal Ceritamu Berikutnya</Text>
-          {nextBooking ? (
-            <Badge label="Terkonfirmasi" variant="green" />
-          ) : (
-            <Text style={styles.emptySessionText}>Belum ada sesi terjadwal</Text>
-          )}
-        </View>
-        {nextBooking ? (
-          <Card variant="tintBlue" style={styles.bookingCard}>
-            <View style={styles.bookingHeader}>
-              <View style={styles.bookingIcon}>
-                <Calendar size={18} color={colors.brandBlue[600]} />
-              </View>
-              <View style={styles.bookingDetails}>
-                <Text style={styles.bookingCounselor}>{nextBooking.counselorName}</Text>
-                <Text style={styles.bookingRole}>{nextBooking.counselorRole}</Text>
-              </View>
-            </View>
-            <View style={styles.bookingTimeRow}>
-              <Text style={styles.bookingTime}>
-                {nextBooking.date} · {nextBooking.timeSlot}
-              </Text>
+        <View style={styles.featureGrid}>
+          {featureShortcuts.map((feat) => {
+            const IconComponent = feat.icon;
+            return (
               <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => switchTab('cerita')}
-                style={styles.roomButton}
+                key={feat.id}
+                activeOpacity={0.8}
+                onPress={feat.action}
+                style={styles.featureCard}
+                accessibilityRole="button"
+                accessibilityLabel={`Buka ${feat.title}: ${feat.label}`}
               >
-                <Text style={styles.roomButtonText}>Lihat Jadwal</Text>
-                <ChevronRight size={14} color={colors.surface} />
+                <View style={styles.featureCardTop}>
+                  <View style={[styles.featureIconWrap, { backgroundColor: feat.bgColor }]}>
+                    <IconComponent size={20} color={feat.color} />
+                  </View>
+                </View>
+
+                <View style={styles.featureCardBody}>
+                  <Text style={styles.featureCardTitle} numberOfLines={1}>
+                    {feat.title}
+                  </Text>
+                  <Text style={styles.featureCardLabel} numberOfLines={1}>
+                    {feat.label}
+                  </Text>
+                  <Text style={styles.featureCardDesc} numberOfLines={2}>
+                    {feat.description}
+                  </Text>
+                </View>
               </TouchableOpacity>
-            </View>
-          </Card>
-        ) : null}
+            );
+          })}
+        </View>
       </View>
 
-      {/* Recommended Content Section (Section 4 BRIEF TEMAN SEBAYA) */}
-      <View style={styles.recommendedSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Pilihan untuk Kamu</Text>
+      {/* ================================================================ */}
+      {/* 3. RECOMMENDED CONTENT ("Pilihan untuk Kamu")                     */}
+      {/* ================================================================ */}
+      <View style={styles.sectionWrap}>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeaderTitle}>Pilihan untuk Kamu</Text>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => switchTab('belajar')}
+            style={styles.seeAllBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Lihat semua konten di Teman Belajar"
           >
             <Text style={styles.seeAllText}>Lihat Semua</Text>
+            <ChevronRight size={14} color="#2563EB" />
           </TouchableOpacity>
         </View>
 
-        {articles.slice(0, 2).map((art) => (
-          <Card
-            key={art.id}
-            onPress={() => navigateTo('article_detail', { articleId: art.id })}
-            style={styles.articleCard}
-          >
-            <View style={styles.articleHeader}>
-              <Badge label={art.category} variant="blue" />
-              <Text style={styles.readingTime}>{art.readingMinutes} mnt baca</Text>
-            </View>
-            <Text style={styles.articleTitle}>{art.title}</Text>
-            <Text style={styles.articleSummary} numberOfLines={2}>
-              {art.summary}
-            </Text>
-          </Card>
-        ))}
-      </View>
+        <View style={styles.recommendedList}>
+          {recommendedArticles.map((art) => {
+            const coverSource = art.imageKey
+              ? articleCovers[art.imageKey] || articleCovers.article_burnout
+              : articleCovers.article_burnout;
 
-      {/* Community Event Banner with Real Photo */}
-      <Card
-        onPress={() => navigateTo('community_events')}
-        style={styles.communityBanner}
-      >
-        <Image
-          source={require('../../../assets/community/genre_workshop.jpg')}
-          style={styles.communityBannerImage}
-          resizeMode="cover"
-        />
-        <View style={styles.bannerRow}>
-          <View style={styles.bannerIcon}>
-            <Sparkles size={20} color={colors.accentAmber[600]} />
-          </View>
-          <View style={styles.bannerInfo}>
-            <Text style={styles.bannerTitle}>Kabar Komunitas Teman Supportif</Text>
-            <Text style={styles.bannerDesc}>
-              Workshop Regulasi Emosi Forum GenRe Karawang (15 Nov 2026).
-            </Text>
-          </View>
-          <ChevronRight size={18} color={colors.accentAmber[600]} />
+            return (
+              <TouchableOpacity
+                key={art.id}
+                activeOpacity={0.88}
+                onPress={() => navigateTo('article_detail', { articleId: art.id })}
+                style={styles.articleCard}
+                accessibilityRole="button"
+                accessibilityLabel={`Baca artikel: ${art.title}`}
+              >
+                <Image
+                  source={coverSource}
+                  style={styles.articleCover}
+                  resizeMode="cover"
+                />
+
+                <View style={styles.articleContentCol}>
+                  <View style={styles.articleCategoryPill}>
+                    <Text style={styles.articleCategoryText} numberOfLines={1}>
+                      {art.category}
+                    </Text>
+                  </View>
+
+                  <Text style={styles.articleTitle} numberOfLines={2}>
+                    {art.title}
+                  </Text>
+
+                  <View style={styles.articleMetaRow}>
+                    <Clock size={11} color="#64748B" style={{ marginRight: 4 }} />
+                    <Text style={styles.articleMetaText}>{art.readingMinutes} mnt baca</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      </Card>
+      </View>
+      </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  greetingSection: {
-    marginTop: spacing.xs,
-    marginBottom: spacing.md,
+  containerContent: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 110, // Generous clearance above floating bottom navigation bar
+    backgroundColor: '#F8FAFC',
   },
-  greetingTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 4,
+  bodyContent: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
   },
-  greetingSubtitle: {
-    ...typography.bodyRegular,
-    color: colors.textSecondary,
-    lineHeight: 20,
+  sectionWrap: {
+    marginBottom: 22,
   },
-  sectionHeader: {
+
+  /* Section Header */
+  sectionHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing.layout.sectionGap,
-    marginBottom: spacing.sm,
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
-  sectionTitle: {
-    fontSize: 15,
+  sectionHeaderTitle: {
+    fontSize: 15.5,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#0F172A',
+    letterSpacing: -0.2,
   },
-  sectionMeta: {
-    ...typography.caption,
-    color: colors.textMuted,
+  seeAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingLeft: 8,
   },
   seeAllText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: colors.brandBlue[600],
+    fontWeight: '700',
+    color: '#2563EB',
+    marginRight: 2,
   },
-  grid: {
+
+  /* Feature Grid (2-Columns) */
+  featureGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
     justifyContent: 'space-between',
+    gap: 12,
   },
-  gridItem: {
-    width: '48.5%',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
+  featureCard: {
+    width: '48.2%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: colors.borderLight,
-    padding: spacing.md,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    minHeight: 130,
+    justifyContent: 'space-between',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  gridIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
+  featureCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  featureIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.xs,
   },
-  gridItemTitle: {
-    fontSize: 13,
+  featureCardBody: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  featureCardTitle: {
+    fontSize: 14,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#0F172A',
     marginBottom: 2,
   },
-  gridItemLabel: {
+  featureCardLabel: {
     fontSize: 11.5,
-    fontWeight: '700',
-    color: colors.brandBlue[600],
-    marginBottom: 2,
+    fontWeight: '600',
+    color: '#2563EB',
+    marginBottom: 3,
   },
-  gridItemSub: {
+  featureCardDesc: {
     fontSize: 11,
-    color: colors.textMuted,
+    color: '#64748B',
     lineHeight: 15,
   },
-  upcomingSection: {
-    marginTop: 0,
-  },
-  emptySessionText: {
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-  bookingCard: {
-    padding: spacing.md,
-  },
-  bookingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  bookingIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.brandBlue[100],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bookingDetails: {
-    flex: 1,
-  },
-  bookingCounselor: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  bookingRole: {
-    fontSize: 11,
-    color: colors.textSecondary,
-  },
-  bookingTimeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.brandBlue[200],
-    paddingTop: spacing.xs,
-  },
-  bookingTime: {
-    fontSize: 11.5,
-    fontWeight: '500',
-    color: colors.brandBlue[700],
-  },
-  roomButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.brandBlue[600],
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: borderRadius.md,
-    gap: 2,
-  },
-  roomButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.surface,
-  },
-  recommendedSection: {
-    marginTop: 0,
+
+  /* Recommended Content */
+  recommendedList: {
+    gap: 10,
   },
   articleCard: {
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  articleHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  readingTime: {
-    fontSize: 11,
-    color: colors.textMuted,
+  articleCover: {
+    width: 82,
+    height: 82,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+  },
+  articleContentCol: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: 'center',
+  },
+  articleCategoryPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  articleCategoryText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#1D4ED8',
   },
   articleTitle: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: '#0F172A',
+    lineHeight: 18,
     marginBottom: 4,
   },
-  articleSummary: {
-    fontSize: 11.5,
-    color: colors.textSecondary,
-    lineHeight: 16,
-  },
-  testBannerCard: {
-    padding: 0,
-    overflow: 'hidden',
-    marginTop: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  testBannerImage: {
-    width: '100%',
-    height: 120,
-  },
-  testBannerContent: {
-    padding: spacing.md,
-  },
-  testBannerBadgeRow: {
+  articleMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
   },
-  testDurationText: {
+  articleMetaText: {
     fontSize: 11,
-    color: colors.textMuted,
-  },
-  testBannerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 2,
-  },
-  testBannerDesc: {
-    fontSize: 11.5,
-    color: colors.textSecondary,
-    lineHeight: 16,
-  },
-  communityBanner: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg,
-    padding: 0,
-    overflow: 'hidden',
-  },
-  communityBannerImage: {
-    width: '100%',
-    height: 110,
-  },
-  bannerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  bannerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bannerInfo: {
-    flex: 1,
-  },
-  bannerTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  bannerDesc: {
-    fontSize: 11,
-    color: colors.textSecondary,
+    color: '#64748B',
+    fontWeight: '500',
   },
 });
-

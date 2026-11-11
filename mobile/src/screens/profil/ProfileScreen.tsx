@@ -20,10 +20,12 @@ import {
   ChevronRight,
   Flame,
   Award,
+  Calendar,
 } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { colors, spacing, borderRadius } from '../../theme';
 import { ScreenContainer } from '../../components/layout/ScreenContainer';
+import { ProfilePattern } from '../../components/layout/patterns/FeatureHeroPatterns';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../state/AppContext';
 
@@ -36,17 +38,42 @@ export const ProfileScreen: React.FC = () => {
     articles,
     openLogoutDialog,
     openCrisisModal,
+    bookings,
   } = useApp();
 
   const [imageError, setImageError] = useState(false);
 
   const savedCount = articles.filter((a) => a.isSaved).length;
+  const upcomingBookingsCount = bookings.filter((b) => b.status === 'Menunggu').length;
 
   const displayName =
-    (user?.nickname || user?.pseudonym || user?.name || 'Anya Sebaya')
+    (user?.nickname || user?.pseudonym || user?.name || 'Teman Sebaya')
       .replace(/\s*\(Anonim\)/gi, '')
       .trim();
-  const roleOrSchool = user?.schoolOrOrg || 'SMAN 1 Karawang';
+  const roleOrSchool = user?.schoolOrOrg || '';
+
+  const avatarInitials = React.useMemo(() => {
+    const nameToUse =
+      user?.nickname ||
+      user?.pseudonym ||
+      user?.name ||
+      (displayName && displayName !== 'Teman Sebaya' ? displayName : '');
+
+    if (nameToUse && nameToUse.trim()) {
+      const parts = nameToUse.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0][0].toUpperCase();
+    }
+    if (user?.avatarInitials && user.avatarInitials !== 'G') {
+      return user.avatarInitials.toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 1).toUpperCase();
+    }
+    return 'TS';
+  }, [user, displayName]);
 
   // Custom filled icons with high-contrast white glyphs for composite shapes
   const FilledShieldCheck = ({ size = 18, color = colors.brandBlue[600] }: { size?: number; color?: string }) => (
@@ -105,6 +132,16 @@ export const ProfileScreen: React.FC = () => {
       subtitle: 'Nama samaran, info sekolah, dan minat',
       icon: User,
       action: () => navigateTo('edit_profile'),
+    },
+    {
+      id: 'jadwal_cerita',
+      title: 'Jadwal Cerita',
+      subtitle:
+        upcomingBookingsCount > 0
+          ? `${upcomingBookingsCount} sesi konseling aktif`
+          : 'Belum ada sesi terjadwal',
+      icon: Calendar,
+      action: () => navigateTo('jadwal_cerita'),
     },
     {
       id: 'saved_content',
@@ -243,9 +280,12 @@ export const ProfileScreen: React.FC = () => {
       contentContainerStyle={styles.scrollContent}
     >
       {/* ============================================================== */}
-      {/* 1. CENTERED PROFILE HEADER (Baby Blue #B8DDF5)                 */}
+      {/* 1. CENTERED PROFILE HEADER (Brand Blue with Line-Art Pattern)  */}
       {/* ============================================================== */}
       <View style={styles.headerArea}>
+        {/* Line-Art Outline Pattern */}
+        <ProfilePattern opacity={0.18} />
+
         {/* Centered Identity Layout: Foto -> Nama -> Sekolah/Komunitas */}
         <View style={styles.centeredIdentityContainer}>
           {/* Avatar Utama Proporsional */}
@@ -256,22 +296,16 @@ export const ProfileScreen: React.FC = () => {
             accessibilityLabel="Ubah Foto Profil"
             accessibilityRole="button"
           >
-            {user?.avatarUrl ? (
+            {user?.avatarUrl && !imageError ? (
               <Image
                 source={{ uri: user.avatarUrl }}
-                style={styles.avatarImg}
-                resizeMode="cover"
-              />
-            ) : !imageError ? (
-              <Image
-                source={require('../../../assets/branding/mascot_avatar.png')}
                 style={styles.avatarImg}
                 resizeMode="cover"
                 onError={() => setImageError(true)}
               />
             ) : (
               <Text style={styles.avatarInitials}>
-                {user?.avatarInitials || 'AS'}
+                {avatarInitials}
               </Text>
             )}
           </TouchableOpacity>
@@ -282,9 +316,11 @@ export const ProfileScreen: React.FC = () => {
           </Text>
 
           {/* Informasi Sekolah / Komunitas */}
-          <Text style={styles.profileRole} numberOfLines={1}>
-            {roleOrSchool}
-          </Text>
+          {roleOrSchool ? (
+            <Text style={styles.profileRole} numberOfLines={1}>
+              {roleOrSchool}
+            </Text>
+          ) : null}
         </View>
 
         {/* ============================================================== */}
@@ -301,7 +337,7 @@ export const ProfileScreen: React.FC = () => {
                 strokeWidth={2.0}
               />
               <Text style={styles.statNumber}>
-                {user?.activeStreakDays ?? 1}
+                {user?.activeStreakDays ?? 0}
               </Text>
             </View>
             <Text style={styles.statLabel}>Hari Beruntun</Text>
@@ -337,7 +373,7 @@ export const ProfileScreen: React.FC = () => {
                 strokeWidth={2.0}
               />
               <Text style={styles.statNumber}>
-                {user?.challengesCompleted ?? 5}
+                {user?.challengesCompleted ?? 0}
               </Text>
             </View>
             <Text style={styles.statLabel}>Tantangan</Text>
@@ -386,58 +422,61 @@ export const ProfileScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   screenBg: {
-    backgroundColor: colors.babyBlue,
+    backgroundColor: colors.brandBlue[600],
   },
   scrollContent: {
     paddingHorizontal: 0,
     paddingTop: 0,
     paddingBottom: 0,
-    backgroundColor: colors.babyBlue,
+    backgroundColor: colors.brandBlue[600],
   },
 
   /* ============================================================== */
   /* PROFILE HEADER STYLES (CENTERED VERTICAL LAYOUT)               */
   /* ============================================================== */
   headerArea: {
-    backgroundColor: colors.babyBlue,
+    backgroundColor: colors.brandBlue[600],
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 12 : 16,
-    paddingBottom: 24,
+    paddingTop: Platform.OS === 'ios' ? 14 : 18,
+    paddingBottom: 28,
     alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
   },
   centeredIdentityContainer: {
     alignItems: 'center',
     width: '100%',
+    zIndex: 2,
   },
   avatarCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
     backgroundColor: '#FFFFFF',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: 'rgba(255, 255, 255, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   avatarImg: {
     width: '100%',
     height: '100%',
   },
   avatarInitials: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.brandBlue[700],
+    fontSize: 26,
+    fontWeight: '800',
+    color: colors.brandBlue[600],
   },
   profileName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.textPrimary,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
     letterSpacing: -0.2,
     marginTop: 10,
     textAlign: 'center',
@@ -445,7 +484,7 @@ const styles = StyleSheet.create({
   profileRole: {
     fontSize: 13,
     fontWeight: '500',
-    color: colors.textSecondary,
+    color: 'rgba(255, 255, 255, 0.92)',
     marginTop: 3,
     textAlign: 'center',
   },
@@ -454,22 +493,23 @@ const styles = StyleSheet.create({
   /* STATS BAR (BALANCED HORIZONTAL GROUP)                          */
   /* ============================================================== */
   statsBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    borderRadius: 16,
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 13,
     paddingHorizontal: 8,
-    marginTop: 16,
+    marginTop: 18,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderColor: 'rgba(255, 255, 255, 0.6)',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 2,
   },
   statItem: {
     flex: 1,
@@ -482,13 +522,13 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   statNumber: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 15.5,
+    fontWeight: '800',
     color: colors.textPrimary,
   },
   statLabel: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.textMuted,
     marginTop: 2,
     textAlign: 'center',
@@ -504,11 +544,11 @@ const styles = StyleSheet.create({
   /* ============================================================== */
   sheetContainer: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -10,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -8,
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 18,
   },
   menuGroup: {
     marginBottom: 16,

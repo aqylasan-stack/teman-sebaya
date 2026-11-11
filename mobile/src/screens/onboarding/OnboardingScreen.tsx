@@ -8,10 +8,10 @@ import {
   Animated,
   Easing,
   StatusBar,
-  Image,
   Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { Smile, MessageCircle, BookOpen } from 'lucide-react-native';
 import { useApp } from '../../state/AppContext';
 
 const { width, height } = Dimensions.get('window');
@@ -25,7 +25,7 @@ export const OnboardingScreen: React.FC = () => {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // Real onboarding illustration assets tailored to Teman Sebaya
+  // Slides Onboarding Teman Sebaya
   // Warna konsisten sesuai Brand Blue (#2563EB) & Soft Sky (#EFF6FF) dari Design System
   const slides = [
     {
@@ -35,7 +35,7 @@ export const OnboardingScreen: React.FC = () => {
         'Luangkan waktu sejenak untuk memahami apa yang sedang kamu rasakan hari ini.',
       themeColor: '#2563EB', // Brand Blue konsisten sesuai FigCraft & Design System
       skyColor: '#EFF6FF', // Soft Sky Blue selaras dengan Brand Identity Teman Sebaya
-      image: require('../../../assets/onboarding/onboarding_mood.jpg'),
+      icon: 'Smile' as const,
     },
     {
       id: 'cerita',
@@ -44,7 +44,7 @@ export const OnboardingScreen: React.FC = () => {
         'Konselor sebaya dan tenaga profesional siap mendengarkan tanpa menghakimi.',
       themeColor: '#2563EB', // Brand Blue konsisten
       skyColor: '#EFF6FF', // Soft Sky Blue
-      image: require('../../../assets/onboarding/onboarding_counseling.jpg'),
+      icon: 'MessageCircle' as const,
     },
     {
       id: 'belajar',
@@ -53,7 +53,7 @@ export const OnboardingScreen: React.FC = () => {
         'Kumpulan artikel psikoedukasi, simulasi interaktif, dan komunitas remaja positif.',
       themeColor: '#2563EB', // Brand Blue konsisten
       skyColor: '#EFF6FF', // Soft Sky Blue
-      image: require('../../../assets/onboarding/onboarding_growth.jpg'),
+      icon: 'BookOpen' as const,
     },
   ];
 
@@ -142,7 +142,7 @@ export const OnboardingScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Real Storybook Illustration Artwork (No abstract floating bubbles) */}
+        {/* Clean Vector Icon (Foto 3D telah dihapus) */}
         <Animated.View
           style={[
             styles.illustrationWrapper,
@@ -152,11 +152,17 @@ export const OnboardingScreen: React.FC = () => {
             },
           ]}
         >
-          <Image
-            source={current.image}
-            style={styles.illustrationImage}
-            resizeMode="cover"
-          />
+          <View style={styles.iconCircle}>
+            {current.icon === 'Smile' && (
+              <Smile size={64} color="#2563EB" strokeWidth={1.8} />
+            )}
+            {current.icon === 'MessageCircle' && (
+              <MessageCircle size={64} color="#2563EB" strokeWidth={1.8} />
+            )}
+            {current.icon === 'BookOpen' && (
+              <BookOpen size={64} color="#2563EB" strokeWidth={1.8} />
+            )}
+          </View>
         </Animated.View>
 
         {/* Shallow Horizontal Elliptical Curve Boundary to Bottom Canvas */}
@@ -242,10 +248,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  /* Top Section (~53% height + 18px vertical shift) */
+  /* Top Section (~48% height) */
   topArea: {
     width: width,
-    height: Math.round(height * 0.53) + 18, // Geser ilustrasi beserta lengkungan bawahnya 18px ke bawah
+    height: Math.round(height * 0.48),
     position: 'relative',
     overflow: 'hidden',
   },
@@ -275,15 +281,27 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
 
-  /* Storybook Illustration Image Artwork */
+  /* Clean Vector Icon Presentation */
   illustrationWrapper: {
-    width: '100%',
-    height: '100%',
-    marginTop: 24, // Geser objek ilustrasi sedikit ke bawah mengikuti komposisi baru
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 36,
   },
-  illustrationImage: {
-    width: '100%',
-    height: '100%',
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#DBEAFE',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
 
   /* Shallow Elliptical Curve Divider (Bentuk Elips Horizontal Dipertahankan) */

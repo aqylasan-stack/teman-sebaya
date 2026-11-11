@@ -54,5 +54,6 @@ export interface BookingSession {
   mode: 'Chat' | 'Audio' | 'Video';
   status: 'Menunggu' | 'Selesai' | 'Dibatalkan';
   notes?: string;
+  topic?: string;
 }
 

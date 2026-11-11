@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
-  SafeAreaView,
   Platform,
   Image,
 } from 'react-native';
@@ -18,9 +17,52 @@ import {
   PsychGameScene,
 } from '../../data/gamePsychData';
 import { useApp } from '../../state/AppContext';
+import {
+  ButterflyEffectPattern,
+  NameThatFeelingPattern,
+  DigitalDilemmaPattern,
+} from '../../components/gameplay/GameplayPatterns';
+
+// Token konfigurasi tema gameplay resmi per kategori
+const GAME_THEMES: Record<
+  string,
+  {
+    name: string;
+    color: string;
+    darkColor: string;
+    softBg: string;
+    badgeBorder: string;
+    textColor: string;
+  }
+> = {
+  karakter: {
+    name: 'Butterfly Effect',
+    color: '#7C3AED', // accentViolet[600]
+    darkColor: '#6D28D9',
+    softBg: '#F5F3FF',
+    badgeBorder: '#DDD6FE',
+    textColor: '#5B21B6',
+  },
+  resiliensi: {
+    name: 'Name That Feeling',
+    color: '#059669', // brandGreen[600]
+    darkColor: '#047857',
+    softBg: '#ECFDF5',
+    badgeBorder: '#A7F3D0',
+    textColor: '#065F46',
+  },
+  relasi: {
+    name: 'Digital Dilemma',
+    color: '#2563EB', // brandBlue[600]
+    darkColor: '#1D4ED8',
+    softBg: '#EFF6FF',
+    badgeBorder: '#BFDBFE',
+    textColor: '#1E40AF',
+  },
+};
 
 // ============================================================================
-// MAIN COMPONENT: GAMEPLAY SCREEN (100% MATCH REFERENCE 3)
+// MAIN COMPONENT: GAMEPLAY SCREEN (IMMERSIVE LAYERED DESIGN)
 // ============================================================================
 
 export const MentalGamePlayScreen: React.FC = () => {
@@ -31,6 +73,8 @@ export const MentalGamePlayScreen: React.FC = () => {
   const category: PsychGameCategory =
     PSYCH_GAME_CATEGORIES.find((c) => c.id === categoryId) ||
     PSYCH_GAME_CATEGORIES[0];
+
+  const theme = GAME_THEMES[category.id] || GAME_THEMES.karakter;
 
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
@@ -126,11 +170,11 @@ export const MentalGamePlayScreen: React.FC = () => {
           ? newTotalScore >= 175
           : category.id === 'relasi'
           ? newTotalScore >= 180
-          : newTotalScore >= 195;
+          : newTotalScore >= 160;
 
       const isBalanced =
         !isGood &&
-        newTotalScore >= (category.id === 'resiliensi' ? 140 : 150);
+        newTotalScore >= (category.id === 'resiliensi' ? 140 : 135);
 
       const statusValue = isGood
         ? 'Optimal'
@@ -167,234 +211,331 @@ export const MentalGamePlayScreen: React.FC = () => {
   const progressPercent =
     ((currentSceneIdx + 1) / category.scenes.length) * 100;
 
+  // Render pola ilustrasi line-art sesuai game yang sedang aktif
+  const renderPattern = () => {
+    switch (category.id) {
+      case 'karakter':
+        return <ButterflyEffectPattern opacity={0.18} />;
+      case 'resiliensi':
+        return <NameThatFeelingPattern opacity={0.18} />;
+      case 'relasi':
+        return <DigitalDilemmaPattern opacity={0.18} />;
+      default:
+        return <ButterflyEffectPattern opacity={0.18} />;
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.screen, { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 8) : 0 }]}>
-        <StatusBar barStyle="dark-content" />
-
-        {/* ============================================================== */}
-        {/* 1. THIN PROGRESS LINE (Reference 3: Very top edge)             */}
-        {/* ============================================================== */}
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-        </View>
-
-        {/* ============================================================== */}
-        {/* 2. TOP BAR (Reference 3: Centered Counter + Right Close 'X')    */}
-        {/* ============================================================== */}
-        <View style={styles.topBar}>
-          <View style={styles.topBarSideEmpty} />
-
-          <Text style={styles.counterText}>
-            {currentSceneIdx + 1}/{category.scenes.length}
-          </Text>
-
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={handleExitGame}
-            style={styles.closeBtn}
-            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
-            accessibilityRole="button"
-            accessibilityLabel="Keluar dari permainan"
-          >
-            <X size={24} color="#0F172A" strokeWidth={2.4} />
-          </TouchableOpacity>
-        </View>
+    <View style={styles.screen}>
+      <StatusBar barStyle="light-content" />
 
       {/* ============================================================== */}
-      {/* 3. SCENARIO CONTEXT, ARTWORK & QUESTION STATEMENT             */}
+      {/* 1. DOMINANT HERO BACKGROUND WITH CONTEXTUAL LINE-ART PATTERN   */}
+      {/* ============================================================== */}
+      <View style={[styles.heroBackgroundArea, { backgroundColor: theme.color }]}>
+        {renderPattern()}
+      </View>
+
+      {/* ============================================================== */}
+      {/* 2. TOP CONTROL BAR (On Patterned Background)                   */}
+      {/* ============================================================== */}
+      <View
+        style={[
+          styles.topControlBar,
+          { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 12) : insets.top + 6 },
+        ]}
+      >
+        <View style={styles.counterPill}>
+          <Text style={styles.counterText}>
+            {category.title} · {currentSceneIdx + 1}/{category.scenes.length}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleExitGame}
+          style={styles.closeCircleBtn}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Keluar dari permainan"
+        >
+          <X size={18} color="#0F172A" strokeWidth={2.4} />
+        </TouchableOpacity>
+      </View>
+
+      {/* ============================================================== */}
+      {/* 3. SCROLL CONTENT: LAYERED MAIN CONTENT PANEL                  */}
       {/* ============================================================== */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* A. Context Badge (Scenario Tag) */}
-        <View style={styles.contextBadgeRow}>
-          <View style={styles.contextBadge}>
-            <Text style={styles.contextBadgeText}>
-              {currentScene.contextBanner || `${category.badgeLabel} · Skenario ${currentSceneIdx + 1}`}
-            </Text>
-          </View>
-        </View>
-
-        {/* B. Scenario Dedicated 3D Artwork */}
-        {currentScene.illustration && (
-          <View style={styles.illustrationWrapper}>
-            <Image
-              source={currentScene.illustration}
-              style={styles.illustrationImage}
-              resizeMode="cover"
+        {/* ============================================================ */}
+        {/* MAIN CONTENT PANEL (SOLID, OPAQUE, LAYERED OVER BACKGROUND)  */}
+        {/* ============================================================ */}
+        <View style={styles.mainContentPanel}>
+          {/* A. Progress Line at top of panel */}
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${progressPercent}%`, backgroundColor: theme.color },
+              ]}
             />
           </View>
-        )}
 
-        {/* C. Split Question Hierarchy (Narrative vs Focal Prompt) */}
-        <View style={styles.questionBlock}>
-          {sceneText.narrative ? (
-            <Text style={styles.situationNarrative}>
-              {sceneText.narrative}
-            </Text>
-          ) : null}
-
-          <Text style={styles.promptQuestion}>
-            {sceneText.prompt}
-          </Text>
-        </View>
-
-        {/* ============================================================== */}
-        {/* 4. CHOICE CARDS WITH CLEAR LETTER BADGES (A, B, C)            */}
-        {/* ============================================================== */}
-        <View style={styles.pillList}>
-          {currentScene.choices.map((choice, idx) => {
-            const isSelected = selectedChoiceIdx === idx;
-            const letter = String.fromCharCode(65 + idx); // A, B, C
-            return (
-              <TouchableOpacity
-                key={choice.id}
-                activeOpacity={0.85}
-                onPress={() => handleSelectChoice(idx)}
-                style={[
-                  styles.choiceCard,
-                  isSelected && styles.choiceCardSelected,
-                ]}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: isSelected }}
+          {/* B. Scenario Kicker Badge */}
+          <View style={styles.contextBadgeRow}>
+            <View
+              style={[
+                styles.contextBadge,
+                {
+                  backgroundColor: theme.softBg,
+                  borderColor: theme.badgeBorder,
+                },
+              ]}
+            >
+              <Text
+                style={[styles.contextBadgeText, { color: theme.textColor }]}
+                numberOfLines={1}
               >
-                <View
+                {currentScene.contextBanner ||
+                  `${category.badgeLabel} · Skenario ${currentSceneIdx + 1}`}
+              </Text>
+            </View>
+          </View>
+
+          {/* C. Dedicated 3D Scenario Artwork */}
+          {currentScene.illustration && (
+            <View style={styles.illustrationWrapper}>
+              <Image
+                source={currentScene.illustration}
+                style={styles.illustrationImage}
+                resizeMode="cover"
+              />
+            </View>
+          )}
+
+          {/* D. Question Narrative vs Focal Prompt */}
+          <View style={styles.questionBlock}>
+            {sceneText.narrative ? (
+              <Text style={styles.situationNarrative}>
+                {sceneText.narrative}
+              </Text>
+            ) : null}
+
+            <Text style={styles.promptQuestion}>
+              {sceneText.prompt}
+            </Text>
+          </View>
+
+          {/* E. Choices Options List */}
+          <View style={styles.pillList}>
+            {currentScene.choices.map((choice, idx) => {
+              const isSelected = selectedChoiceIdx === idx;
+              const letter = String.fromCharCode(65 + idx);
+              return (
+                <TouchableOpacity
+                  key={choice.id}
+                  activeOpacity={0.85}
+                  onPress={() => handleSelectChoice(idx)}
                   style={[
-                    styles.choiceLetterBadge,
-                    isSelected && styles.choiceLetterBadgeSelected,
+                    styles.choiceCard,
+                    isSelected && {
+                      backgroundColor: theme.softBg,
+                      borderColor: theme.color,
+                      borderWidth: 2,
+                      shadowColor: theme.color,
+                      shadowOpacity: 0.12,
+                    },
                   ]}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected }}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.choiceLetterText,
-                      isSelected && styles.choiceLetterTextSelected,
+                      styles.choiceLetterBadge,
+                      isSelected && {
+                        backgroundColor: theme.color,
+                        borderColor: theme.color,
+                      },
                     ]}
                   >
-                    {letter}
-                  </Text>
-                </View>
+                    <Text
+                      style={[
+                        styles.choiceLetterText,
+                        isSelected && styles.choiceLetterTextSelected,
+                      ]}
+                    >
+                      {letter}
+                    </Text>
+                  </View>
 
-                <Text
-                  style={[
-                    styles.choiceText,
-                    isSelected && styles.choiceTextSelected,
-                  ]}
-                >
-                  {choice.text}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <Text
+                    style={[
+                      styles.choiceText,
+                      isSelected && {
+                        fontWeight: '700',
+                        color: theme.textColor,
+                      },
+                    ]}
+                  >
+                    {choice.text}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* ============================================================ */}
+        {/* 4. BOTTOM NAVIGATION CONTROLS (Previous '<' & Next '>')     */}
+        {/* ============================================================ */}
+        <View style={styles.bottomNavRow}>
+          {/* Previous Button '<' */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={handlePreviousScene}
+            disabled={currentSceneIdx === 0}
+            style={[
+              styles.navSquareBtn,
+              currentSceneIdx === 0 && styles.navSquareBtnDisabled,
+            ]}
+            accessibilityLabel="Pertanyaan sebelumnya"
+          >
+            <ChevronLeft
+              size={20}
+              color={currentSceneIdx === 0 ? '#94A3B8' : '#0F172A'}
+              strokeWidth={2.4}
+            />
+          </TouchableOpacity>
+
+          {/* Next Button '>' */}
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={handleNextScene}
+            disabled={selectedChoiceIdx === null}
+            style={[
+              styles.navSquareBtn,
+              selectedChoiceIdx === null && styles.navSquareBtnDisabled,
+              selectedChoiceIdx !== null && {
+                backgroundColor: theme.color,
+                borderColor: theme.color,
+                shadowColor: theme.color,
+                shadowOpacity: 0.25,
+                shadowRadius: 8,
+                elevation: 4,
+              },
+            ]}
+            accessibilityLabel={
+              isLastScene ? 'Lihat Hasil Refleksi' : 'Lanjut ke pertanyaan berikutnya'
+            }
+          >
+            <ChevronRight
+              size={20}
+              color={selectedChoiceIdx === null ? '#94A3B8' : '#FFFFFF'}
+              strokeWidth={2.4}
+            />
+          </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* ============================================================== */}
-      {/* 5. BOTTOM NAVIGATION BUTTONS (Reference 3: '<' and '>')        */}
-      {/* ============================================================== */}
-      <View style={styles.bottomNavRow}>
-        {/* Previous Button '<' */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={handlePreviousScene}
-          disabled={currentSceneIdx === 0}
-          style={[
-            styles.navSquareBtn,
-            currentSceneIdx === 0 && styles.navSquareBtnDisabled,
-          ]}
-          accessibilityLabel="Pertanyaan sebelumnya"
-        >
-          <ChevronLeft
-            size={20}
-            color={currentSceneIdx === 0 ? '#CBD5E1' : '#0F172A'}
-            strokeWidth={2.4}
-          />
-        </TouchableOpacity>
-
-        {/* Next Button '>' */}
-        <TouchableOpacity
-          activeOpacity={0.88}
-          onPress={handleNextScene}
-          disabled={selectedChoiceIdx === null}
-          style={[
-            styles.navSquareBtn,
-            selectedChoiceIdx === null && styles.navSquareBtnDisabled,
-            selectedChoiceIdx !== null && styles.navSquareBtnActive,
-          ]}
-          accessibilityLabel="Lanjut ke pertanyaan berikutnya"
-        >
-          <ChevronRight
-            size={20}
-            color={selectedChoiceIdx === null ? '#CBD5E1' : '#FFFFFF'}
-            strokeWidth={2.4}
-          />
-        </TouchableOpacity>
-      </View>
     </View>
-  </SafeAreaView>
   );
 };
 
 // ============================================================================
-// STYLESHEET (100% Faithful to Reference 3)
+// STYLESHEET (IMMERSIVE LAYERED COMPOSITION)
 // ============================================================================
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC', // Slate 50 canvas below
+    position: 'relative',
   },
 
-  /* Top Progress Line */
-  progressTrack: {
-    width: '100%',
-    height: 3,
-    backgroundColor: '#E2E8F0',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#2563EB',
+  /* Dominant Colored Hero Area with Curved Bottom Edge */
+  heroBackgroundArea: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 320,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
   },
 
-  /* Top Bar */
-  topBar: {
+  /* Top Control Bar */
+  topControlBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingHorizontal: 20,
     paddingBottom: 10,
-    backgroundColor: '#FFFFFF',
-    zIndex: 20,
+    zIndex: 10,
   },
-  topBarSideEmpty: {
-    width: 44,
-    height: 44,
+  counterPill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   counterText: {
-    fontSize: 15,
+    fontSize: 12.5,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
-  closeBtn: {
-    width: 44,
-    height: 44,
+  closeCircleBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 30,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
-  /* Content */
+  /* Scroll Content */
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
-    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 32,
+  },
+
+  /* Main Content Panel: Solid, Fully Opaque, Layered Over Hero Background */
+  mainContentPanel: {
+    marginHorizontal: 16,
+    backgroundColor: '#FFFFFF', // Solid, 100% opaque white
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+
+  /* Top Progress Track inside Main Panel */
+  progressTrack: {
+    width: '100%',
+    height: 5,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 2.5,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2.5,
   },
 
   /* Context Badge (Scenario Category & Order) */
@@ -404,35 +545,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contextBadge: {
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 999,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   contextBadgeText: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#2563EB',
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
 
   /* Dedicated Scenario Artwork */
   illustrationWrapper: {
     width: '100%',
     height: 155,
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   illustrationImage: {
     width: '100%',
@@ -447,74 +580,70 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   situationNarrative: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '400',
     color: '#475569', // Slate 600
     textAlign: 'center',
-    lineHeight: 21,
+    lineHeight: 20,
     marginBottom: 6,
   },
   promptQuestion: {
-    fontSize: 16.5,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: '#0F172A', // Slate 900 Focal Point
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 23,
     letterSpacing: -0.2,
   },
 
-  /* Choices (Clean Cards with Letter Badges) */
+  /* Choices Options List */
   pillList: {
     width: '100%',
-    gap: 10,
+    gap: 12,
   },
   choiceCard: {
     width: '100%',
-    minHeight: 52,
+    minHeight: 56,
     borderRadius: 16,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
     backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1', // Defined border (Slate 300)
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
-  choiceCardSelected: {
-    borderColor: '#2563EB',
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1.8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   choiceLetterBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#F1F5F9',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  choiceLetterBadgeSelected: {
-    backgroundColor: '#2563EB',
-  },
   choiceLetterText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#475569',
   },
   choiceLetterTextSelected: {
     color: '#FFFFFF',
+    fontWeight: '800',
   },
   choiceText: {
     flex: 1,
     fontSize: 13.5,
     fontWeight: '500',
-    color: '#1E293B',
-    lineHeight: 19,
-  },
-  choiceTextSelected: {
-    fontWeight: '600',
-    color: '#1D4ED8',
+    color: '#0F172A',
+    lineHeight: 20,
   },
 
   /* Bottom Navigation Buttons (Square '<' and '>') */
@@ -523,26 +652,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-    paddingTop: 12,
-    paddingBottom: 32,
-    backgroundColor: '#FFFFFF',
+    paddingTop: 18,
+    paddingBottom: 24,
   },
   navSquareBtn: {
     width: 48,
     height: 48,
     borderRadius: 14,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
     backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   navSquareBtnDisabled: {
-    borderColor: '#F1F5F9',
-    backgroundColor: '#F8FAFC',
-  },
-  navSquareBtnActive: {
-    backgroundColor: '#2563EB',
-    borderColor: '#2563EB',
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+    opacity: 0.5,
   },
 });
+
